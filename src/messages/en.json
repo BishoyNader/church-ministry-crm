@@ -1,0 +1,23 @@
+{
+  "home": {
+    "badge": "Church Ministry CRM",
+    "title": "A calmer way to run ministries, outreach, and member care.",
+    "description": "This starter app gives your team a modern foundation for managing volunteers, events, and communication from a single workspace.",
+    "primaryAction": "Explore features",
+    "secondaryAction": "Read Next.js docs"
+  },
+  "features": {
+    "volunteerCoordination": {
+      "title": "Volunteer coordination",
+      "description": "Keep teams, schedules, and service assignments organized in one place."
+    },
+    "memberEngagement": {
+      "title": "Member engagement",
+      "description": "Track follow-ups, attendance, and ministry milestones with fewer manual steps."
+    },
+    "simpleReporting": {
+      "title": "Simple reporting",
+      "description": "Share key insights across leaders without juggling spreadsheets and emails."
+    }
+  }
+}
