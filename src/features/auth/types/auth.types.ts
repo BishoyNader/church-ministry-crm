@@ -5,6 +5,8 @@ export type LoginFormValues = {
 };
 
 export type SignupFormValues = {
+  churchNameAr: string;
+  churchNameEn?: string;
   fullNameAr: string;
   fullNameEn?: string;
   email: string;

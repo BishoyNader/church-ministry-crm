@@ -3,6 +3,7 @@
 import { loginSchema, signupSchema, forgotPasswordSchema } from "../schemas/auth.schema";
 import type { ForgotPasswordFormValues, LoginFormValues, SignupFormValues } from "../types/auth.types";
 import { sendPasswordReset, signInWithEmail, signOut as signOutService, signUpWithEmail } from "../services/auth.service";
+import { getTranslations } from "next-intl/server";
 import { ZodError } from "zod";
 
 export type AuthActionResult = {
@@ -31,6 +32,14 @@ export async function loginAction(values: LoginFormValues, locale: string): Prom
   const result = await signInWithEmail(values.email, values.password);
 
   if (!result.success) {
+    if (result.error === "ACCOUNT_INACTIVE" || result.error === "PROFILE_NOT_FOUND") {
+      const t = await getTranslations({ locale, namespace: "auth" });
+      const message =
+        result.error === "ACCOUNT_INACTIVE"
+          ? t("login.accountInactive")
+          : t("login.profileNotFound");
+      return { success: false, message };
+    }
     return { success: false, message: result.error ?? "Unable to sign in." };
   }
 
@@ -57,7 +66,14 @@ export async function signupAction(values: SignupFormValues, locale: string): Pr
     throw error;
   }
 
-  const result = await signUpWithEmail(values.fullNameAr, values.fullNameEn, values.email, values.password);
+  const result = await signUpWithEmail(
+    values.churchNameAr,
+    values.churchNameEn,
+    values.fullNameAr,
+    values.fullNameEn,
+    values.email,
+    values.password,
+  );
 
   if (!result.success) {
     return { success: false, message: result.error ?? "Unable to create account." };
