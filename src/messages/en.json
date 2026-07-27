@@ -19,5 +19,52 @@
       "title": "Simple reporting",
       "description": "Share key insights across leaders without juggling spreadsheets and emails."
     }
+  },
+  "auth": {
+    "loading": "Processing…",
+    "generalError": "Something went wrong. Please try again.",
+    "login": {
+      "title": "Welcome back",
+      "description": "Sign in to access your ministry workspace.",
+      "emailLabel": "Email address",
+      "passwordLabel": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don’t have an account?",
+      "createAccount": "Create one"
+    },
+    "signup": {
+      "title": "Create an account",
+      "description": "Start using the CRM with an email and password.",
+      "successMessage": "Account created successfully. Please check your inbox to confirm your email.",
+      "fullNameAr": "Arabic name",
+      "fullNameEn": "English name (optional)",
+      "email": "Email address",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "forgotPassword": {
+      "title": "Reset your password",
+      "description": "Enter your email and we’ll send a reset link.",
+      "email": "Email address",
+      "submit": "Send reset link",
+      "sent": "Password reset email sent. Check your inbox.",
+      "remembered": "Remembered your password?",
+      "login": "Sign in"
+    },
+    "resetPassword": {
+      "title": "Create a new password",
+      "description": "Enter your new password to finish resetting your account.",
+      "password": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Update password",
+      "success": "Your password has been updated successfully.",
+      "noToken": "The reset link appears to be invalid. Please request a new link.",
+      "generalError": "Unable to complete password reset."
+    }
   }
 }

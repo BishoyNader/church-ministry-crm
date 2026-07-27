@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, Moon, Sun, Church, Users, CalendarDays, BarChart3, Settings, Bell } from "lucide-react";
+import { Menu, Moon, Sun, Church, Users, CalendarDays, BarChart3, Settings, Bell, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
   { label: "Dashboard", href: "#", icon: BarChart3 },
@@ -14,7 +16,22 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signOut();
+    setIsSigningOut(false);
+
+    if (!error) {
+      const locale = pathname.startsWith("/ar") ? "ar" : "en";
+      router.push(`/${locale}/login`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
@@ -81,6 +98,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 >
                   {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+                </Button>
+                <Button variant="ghost" size="icon" aria-label="Sign out" onClick={handleSignOut} disabled={isSigningOut}>
+                  <LogOut className="size-4" />
                 </Button>
               </div>
             </div>
