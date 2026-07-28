@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export function SignupForm({
     const result = await action(values, locale);
 
     if (!result.success) {
-      setFormError(result.message ?? t("auth.generalError"));
+      setFormError(result.message ?? t("generalError"));
       setIsLoading(false);
       return;
     }
@@ -58,6 +59,27 @@ export function SignupForm({
       ) : null}
 
       <div className="space-y-4">
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+          {t("signup.churchNameAr")}
+          <input
+            type="text"
+            autoComplete="organization"
+            {...register("churchNameAr")}
+            className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+          />
+          {errors.churchNameAr ? <p className="mt-1 text-xs text-destructive">{errors.churchNameAr.message}</p> : null}
+        </label>
+
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
+          {t("signup.churchNameEn")}
+          <input
+            type="text"
+            autoComplete="organization"
+            {...register("churchNameEn")}
+            className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+          />
+        </label>
+
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
           {t("signup.fullNameAr")}
           <input
@@ -114,11 +136,11 @@ export function SignupForm({
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? t("auth.loading") : t("signup.submit")}
+        {isLoading ? t("loading") : t("signup.submit")}
       </Button>
 
       <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-        {t("signup.haveAccount")} <a href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("signup.signIn")}</a>
+        {t("signup.haveAccount")} <Link href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("signup.signIn")}</Link>
       </p>
     </form>
   );

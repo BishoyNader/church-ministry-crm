@@ -5,7 +5,7 @@ import { Menu, Moon, Sun, Church, Users, CalendarDays, BarChart3, Settings, Bell
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { logoutAction } from "@/features/auth/actions/auth.actions";
 
 const navItems = [
   { label: "Dashboard", href: "#", icon: BarChart3 },
@@ -23,13 +23,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signOut();
+    const locale = pathname.startsWith("/ar") ? "ar" : "en";
+    const result = await logoutAction(locale);
     setIsSigningOut(false);
 
-    if (!error) {
-      const locale = pathname.startsWith("/ar") ? "ar" : "en";
-      router.push(`/${locale}/login`);
+    if (result.success && result.redirectTo) {
+      router.push(result.redirectTo);
     }
   };
 

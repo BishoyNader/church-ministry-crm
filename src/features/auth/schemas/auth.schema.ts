@@ -8,6 +8,8 @@ export const loginSchema = z.object({
 
 export const signupSchema = z
   .object({
+    churchNameAr: z.string().min(2, { message: "اسم الكنيسة مطلوب" }),
+    churchNameEn: z.string().optional(),
     fullNameAr: z.string().min(2, { message: "الاسم العربي مطلوب" }),
     fullNameEn: z.string().optional(),
     email: z.string().email({ message: "Invalid email address" }),

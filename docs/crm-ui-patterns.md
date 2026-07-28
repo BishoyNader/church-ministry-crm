@@ -1,212 +1,320 @@
-# CRM UI Patterns
+# Church Ministry CRM — UI & UX Patterns
 
-## Dashboard Pattern
+## Design Goals
 
-Every dashboard page should contain:
+The application should feel:
 
-* Page title
-* Breadcrumb
-* KPI cards
-* Quick actions
-* Recent activity section
-* Responsive layout
+* Modern
+* Clean
+* Professional
+* Mobile-first
+* Fast
+* Accessible
 
-Example:
+The UI should resemble modern SaaS products.
+
+Examples:
+
+* Linear
+* Notion
+* Vercel
+* Stripe Dashboard
+* Supabase Dashboard
+
+---
+
+# Layout Pattern
+
+Application Shell:
 
 Header
-├── Title
-├── Breadcrumb
-└── Actions
+Sidebar
+Content Area
 
-Content
-├── KPI Cards
-├── Charts
-├── Recent Activity
-└── Quick Actions
+Desktop:
 
----
+Sidebar visible
 
-## List Page Pattern
+Mobile:
 
-Used for:
-
-* Users
-* Children
-* Stages
-* Attendance
-* Events
-
-Layout:
-
-Page Header
-├── Title
-├── Search
-└── Create Button
-
-Filters Bar
-├── Filters
-├── Status Filter
-└── Export Button
-
-Table
-├── Loading State
-├── Empty State
-└── Pagination
+Collapsible drawer menu
 
 ---
 
-## Form Page Pattern
+# Spacing System
 
-Used for:
+Use Tailwind spacing consistently.
 
-* Create User
-* Edit User
-* Create Child
-* Edit Child
+Preferred spacing:
+
+gap-2
+gap-4
+gap-6
+gap-8
+
+Avoid random spacing values.
+
+---
+
+# Card Pattern
+
+Use cards for:
+
+* Statistics
+* Forms
+* Details
+* Dashboards
 
 Structure:
 
+Card
+CardHeader
+CardContent
+CardFooter
+
+---
+
+# Page Pattern
+
+Every page should follow:
+
 Page Header
-├── Title
-└── Back Button
 
-Form
-├── Sections
-├── Validation Messages
-├── Save Button
-└── Cancel Button
+Title
+Description
+Actions
 
-Requirements:
+Main Content
 
-* React Hook Form
-* Zod Validation
-* Loading State
-* Success Feedback
-* Error Feedback
+Cards
+Tables
+Forms
 
----
+Example:
 
-## Details Page Pattern
+Users
 
-Used for:
+Title
+Description
+Create User Button
 
-* Child Profile
-* User Profile
-* Event Details
-
-Layout:
-
-Header
-├── Title
-├── Actions
-└── Status Badge
-
-Tabs
-├── Overview
-├── History
-├── Notes
-└── Activity
+User Table
 
 ---
 
-## Modal Pattern
+# Form Pattern
 
-Used for:
+Form Layout:
 
+Card
+Form Fields
+Actions
+
+Rules:
+
+* Labels above fields
+* Required fields clearly marked
+* Validation messages below fields
+
+Buttons:
+
+Primary Action
+Secondary Action
+
+---
+
+# Table Pattern
+
+All management modules should use tables.
+
+Features:
+
+* Search
+* Pagination
+* Sorting
+* Empty State
+
+Columns should be concise.
+
+Avoid overcrowded tables.
+
+---
+
+# Dialog Pattern
+
+Use dialogs for:
+
+* Create
+* Edit
 * Delete Confirmation
-* Quick Edit
-* Small Forms
 
-Requirements:
-
-* Clear title
-* Description
-* Cancel button
-* Primary action button
+Avoid navigation to separate pages when a modal is sufficient.
 
 ---
 
-## Empty State Pattern
+# Destructive Actions
 
-Every empty state should include:
+Delete actions must:
 
-* Icon
-* Title
-* Description
+1. Require confirmation.
+2. Use destructive styling.
+3. Explain consequences.
+
+---
+
+# Dashboard Pattern
+
+Dashboard pages should contain:
+
+Statistics Cards
+
+Recent Activity
+
+Quick Actions
+
+Charts
+
+Recent Records
+
+---
+
+# Responsive Rules
+
+Mobile First
+
+Breakpoints:
+
+sm
+md
+lg
+xl
+
+Never design desktop first.
+
+All pages must work on:
+
+* Phones
+* Tablets
+* Laptops
+* Desktop monitors
+
+---
+
+# Accessibility
+
+All forms require:
+
+* Labels
+* Keyboard navigation
+* Focus states
+
+Avoid icon-only actions without tooltips.
+
+---
+
+# Colors
+
+Use theme tokens.
+
+Support:
+
+* Light Mode
+* Dark Mode
+
+Never hardcode colors if theme tokens exist.
+
+---
+
+# Empty States
+
+Every list page must support:
+
+No Data State
+
+Include:
+
+* Message
+* Explanation
 * Action Button
 
 Example:
 
-"No children found"
+"No stages found"
 
-Create Child Button
-
----
-
-## Loading Pattern
-
-Use Skeleton components.
-
-Never show blank pages while loading.
+"Create your first stage to get started."
 
 ---
 
-## Error Pattern
+# Loading States
 
-Display:
+Use skeleton loaders.
 
-* Error title
-* Error description
-* Retry button
+Avoid spinner-only pages.
 
 ---
 
-## Navigation Pattern
+# Permission-Based UI
 
-Sidebar:
+Hide actions the user cannot perform.
 
-* Dashboard
-* Children
-* Attendance
-* Stages
-* Users
-* Events
-* Reports
-* Settings
+Examples:
 
-Support:
+Create Button
 
-* Collapsed state
-* Mobile drawer
-* Permission-based visibility
+Edit Button
 
----
+Delete Button
 
-## Notification Pattern
+Export Button
 
-Use Sonner Toasts.
+Use:
 
-Success:
+PermissionGuard
 
-* User created
-* Child updated
-* Attendance saved
-
-Error:
-
-* Validation failed
-* Network error
-* Permission denied
+Do not show unavailable actions.
 
 ---
 
-## RTL Pattern
+# CRM Module Standards
 
-All pages must support:
+Every CRUD module should contain:
 
-Arabic RTL
+List Page
 
-English LTR
+Create Form
 
-No custom RTL hacks.
-Use logical CSS properties whenever possible.
+Edit Form
+
+View Details
+
+Delete Action
+
+Search
+
+Pagination
+
+Permission Checks
+
+React Query Integration
+
+Zod Validation
+
+Examples:
+
+Users
+
+Stages
+
+Children
+
+Attendance
+
+Events
+
+Documents
+
+Notifications
+
+Reports
+
+All modules should follow the same UX structure and interaction patterns.

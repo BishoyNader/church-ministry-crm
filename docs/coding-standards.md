@@ -1,88 +1,284 @@
-# Coding Standards
+# Church Ministry CRM — Coding Standards
 
-## Architecture
+## Project Overview
 
-Use Feature-Based Architecture.
+Church Ministry CRM is a multi-tenant church management platform built using:
 
-Structure:
+* Next.js 16 (App Router)
+* TypeScript (Strict Mode)
+* Supabase
+* React Query
+* Zustand
+* Next Intl
+* Shadcn/UI
+* Tailwind CSS v4
+* Zod
 
-src/
-├── features/
-├── components/
-├── lib/
-├── services/
-├── providers/
-├── hooks/
-└── types/
-
-Business logic belongs inside features.
+All code must follow these standards.
 
 ---
 
-## Feature Structure
+# Architecture Rules
 
-Every feature must contain:
+## Feature-Based Structure
 
-feature-name/
-├── actions/
-├── components/
-├── hooks/
-├── schemas/
-├── services/
-├── types/
-└── utils/
+All business logic must live inside feature modules.
 
 Example:
 
-features/users/
-features/children/
-features/stages/
+src/features/users
+src/features/stages
+src/features/children
+src/features/attendance
+
+Each feature should contain:
+
+components/
+hooks/
+services/
+types/
+schemas/
+utils/
+
+Avoid placing business logic in pages.
 
 ---
 
-## TypeScript
+## Shared Components
 
-Requirements:
+Reusable UI components belong in:
 
-* Strict typing
-* No any
-* Explicit return types
-* Reusable interfaces
+src/components/ui
 
-Avoid:
+Reusable layout components belong in:
 
-any
-unknown abuse
-type assertions when unnecessary
+src/components/layout
+
+Reusable application-wide components belong in:
+
+src/components/shared
 
 ---
 
-## Components
+## Service Layer
 
-Rules:
+All Supabase access must be isolated inside services.
 
-* Single responsibility
-* Reusable
-* Small and focused
+Example:
 
-Avoid:
+src/features/stages/services/stage.service.ts
 
-500+ line components
+Do not call Supabase directly inside pages or UI components.
 
-Split large components.
+Incorrect:
+
+const { data } = await supabase
+.from("stages")
+.select("*")
+
+inside a component.
+
+Correct:
+
+const stages = await stageService.getStages()
+
+---
+
+## React Query
+
+All server data should be managed through React Query.
+
+Use:
+
+* useQuery
+* useMutation
+* query invalidation
+
+Avoid manual loading state management whenever possible.
 
 ---
 
 ## State Management
 
-Use:
+Use Zustand only for:
 
-* React Query for server state
-* Zustand for client state
+* UI state
+* Filters
+* Sidebar state
+* Theme state
+* Wizard state
+
+Do not store server data in Zustand.
+
+Server data belongs in React Query.
+
+---
+
+# Database Rules
+
+## Single Source of Truth
+
+Never invent tables.
+
+Never invent columns.
+
+Never invent relationships.
+
+Always inspect:
+
+supabase/migrations/
+
+before generating code.
+
+---
+
+## Multi-Tenant Rules
+
+Every business entity must be scoped by church_id.
+
+Examples:
+
+stages
+children
+attendance
+events
+documents
+
+Queries must always respect tenant boundaries.
+
+---
+
+## RBAC Rules
+
+Permissions must come from:
+
+permissions.code
+
+Never hardcode permission strings.
+
+Always use:
+
+src/features/rbac/constants/permissions.ts
+
+Example:
+
+PERMISSION_CODES.USERS_READ
+
+instead of:
+
+"users.read"
+
+---
+
+## Role Checks
+
+Always use RBAC helpers.
+
+Example:
+
+PermissionGuard
+
+or
+
+checkUserPermission()
+
+Never duplicate permission logic.
+
+---
+
+# TypeScript Rules
+
+## Strict Mode
 
 Avoid:
 
-Deep prop drilling
+any
+
+Use explicit types.
+
+Create types inside:
+
+types/
+
+Example:
+
+stage.types.ts
+user.types.ts
+
+---
+
+## Reuse Types
+
+Before creating a type:
+
+1. Search existing types.
+2. Extend existing types when possible.
+
+Avoid duplicate interfaces.
+
+---
+
+## Naming
+
+Types:
+
+Stage
+User
+Permission
+
+Inputs:
+
+CreateStageInput
+UpdateStageInput
+
+Schemas:
+
+createStageSchema
+updateStageSchema
+
+Services:
+
+stageService
+
+Hooks:
+
+useStages
+
+Components:
+
+StageForm
+StageTable
+
+---
+
+# Validation
+
+Use Zod only.
+
+Do not use:
+
+* Yup
+* Joi
+* Custom validation
+
+Validation files belong in:
+
+schemas/
+
+Example:
+
+stage.schema.ts
+
+---
+
+# UI Rules
+
+Use:
+
+* Shadcn/UI components
+* Tailwind utilities
+
+Do not introduce new UI libraries.
 
 ---
 
@@ -91,151 +287,115 @@ Deep prop drilling
 Use:
 
 * React Hook Form
-* Zod
+* Zod Resolver
 
-Every form must:
+Pattern:
 
-* Validate inputs
-* Handle loading state
-* Handle errors
+Form
+Schema
+Mutation
 
 ---
 
-## API & Database
+## Tables
 
-Never call Supabase directly from UI components.
+Use reusable table components.
+
+Support:
+
+* Empty state
+* Loading state
+* Error state
+
+---
+
+## Loading States
+
+Never leave blank screens.
 
 Use:
 
-services/
-
-Example:
-
-UserForm
-↓
-UserService
-↓
-Supabase
+* Skeletons
+* Loading indicators
 
 ---
 
-## Authentication
+## Error Handling
 
-All auth logic belongs in:
+Show user-friendly messages.
 
-features/auth
-
-Never duplicate auth logic.
+Do not expose raw database errors.
 
 ---
 
-## Authorization
+# Internationalization
 
-All permission checks belong in:
+All user-facing text must support:
 
-features/rbac
-
-Never hardcode permissions.
-
-Bad:
-
-if (role === "admin")
-
-Good:
-
-hasPermission("users.create")
-
----
-
-## Localization
-
-Every user-facing string must be translated.
+* English
+* Arabic
 
 Use:
 
 messages/en.json
 messages/ar.json
 
-Never hardcode UI text.
+Do not hardcode display text.
 
 ---
 
-## Styling
+# Security
 
-Use:
+Never expose:
 
-* Tailwind CSS
-* shadcn/ui
+* Service Role Keys
+* Secrets
+* Internal credentials
 
-Avoid:
+Use environment variables.
 
-Inline styles
+Always assume users can manipulate the browser.
 
----
-
-## Imports
-
-Use path aliases.
-
-Prefer:
-
-@/features/users
-
-Instead of:
-
-../../../users
+Server-side validation is required.
 
 ---
 
-## Logging
+# Development Workflow
 
-Use centralized logging utilities.
+Branch Strategy:
 
-Never leave console.log in production code.
+feature/*
 
----
+→ merge into staging
 
-## Error Handling
+staging
 
-Every async operation must:
+→ testing
 
-* Catch errors
-* Return typed results
-* Display user-friendly messages
+staging → main
 
----
+via Pull Request
 
-## Security
+Never commit directly to main.
 
-Never trust client-side permissions.
-
-Enforce permissions:
-
-* UI
-* Server Actions
-* RLS Policies
-
-All three layers must validate access.
+Never develop directly on main.
 
 ---
 
-## Testing Readiness
+# AI Assistant Rules
 
-Code should be written so that:
+Before generating code:
 
-* Services are testable
-* Hooks are testable
-* Components are testable
+1. Inspect existing files.
+2. Reuse existing architecture.
+3. Reuse existing services.
+4. Reuse existing types.
+5. Reuse existing UI components.
 
-Avoid tightly coupled code.
+Never create duplicate patterns.
 
----
+If information is missing:
 
-## Build Requirements
+Ask for clarification instead of inventing structures.
 
-Before every commit:
-
-npm run lint
-npm run build
-
-Both must pass successfully.
+Never invent tables, columns, APIs, or business rules.

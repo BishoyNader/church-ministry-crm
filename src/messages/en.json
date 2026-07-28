@@ -31,13 +31,17 @@
       "rememberMe": "Remember me",
       "forgotPassword": "Forgot password?",
       "submit": "Sign in",
-      "noAccount": "Don’t have an account?",
+      "accountInactive": "Your account has been deactivated. Please contact an administrator.",
+      "profileNotFound": "Your account could not be found. Please contact an administrator.",
+      "noAccount": "Don\u2019t have an account?",
       "createAccount": "Create one"
     },
     "signup": {
       "title": "Create an account",
       "description": "Start using the CRM with an email and password.",
       "successMessage": "Account created successfully. Please check your inbox to confirm your email.",
+      "churchNameAr": "Church name (Arabic)",
+      "churchNameEn": "Church name (English, optional)",
       "fullNameAr": "Arabic name",
       "fullNameEn": "English name (optional)",
       "email": "Email address",
@@ -49,7 +53,7 @@
     },
     "forgotPassword": {
       "title": "Reset your password",
-      "description": "Enter your email and we’ll send a reset link.",
+      "description": "Enter your email and we\u2019ll send a reset link.",
       "email": "Email address",
       "submit": "Send reset link",
       "sent": "Password reset email sent. Check your inbox.",
@@ -65,6 +69,74 @@
       "success": "Your password has been updated successfully.",
       "noToken": "The reset link appears to be invalid. Please request a new link.",
       "generalError": "Unable to complete password reset."
+    }
+  },
+  "users": {
+    "title": "User Management",
+    "description": "Manage church members, roles, and stage assignments.",
+    "createUser": "Add User",
+    "searchPlaceholder": "Search by name or email…",
+    "search": "Search",
+    "emptyState": "No users found.",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "roles": "Roles",
+      "status": "Status",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "form": {
+      "createTitle": "Add User",
+      "editTitle": "Edit User",
+      "description": "Fill in the user details below.",
+      "email": "Email address",
+      "password": "Password",
+      "fullNameAr": "Arabic name",
+      "fullNameEn": "English name",
+      "phone": "Phone",
+      "locale": "Preferred language",
+      "active": "Active account",
+      "roles": "Roles",
+      "stages": "Stage assignments",
+      "create": "Create user",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "processing": "Processing…"
+    },
+    "roles": {
+      "title": "Manage Roles",
+      "description": "Assign roles for {name}.",
+      "save": "Save roles",
+      "cancel": "Cancel",
+      "processing": "Saving…"
+    },
+    "stages": {
+      "title": "Manage Stage Assignments",
+      "description": "Assign stages for {name}.",
+      "empty": "No active stages available.",
+      "save": "Save assignments",
+      "cancel": "Cancel",
+      "processing": "Saving…"
+    },
+    "deactivate": {
+      "title": "Deactivate User",
+      "description": "Are you sure you want to deactivate {name}? They will lose access to the system.",
+      "confirm": "Deactivate",
+      "cancel": "Cancel",
+      "processing": "Deactivating…"
+    },
+    "actions": {
+      "edit": "Edit user"
     }
   }
 }

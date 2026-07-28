@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ export function LoginForm({
     const result = await action(values, locale);
 
     if (!result.success) {
-      setFormError(result.message ?? t("auth.generalError"));
+      setFormError(result.message ?? t("generalError"));
       setIsLoading(false);
       return;
     }
@@ -87,17 +88,17 @@ export function LoginForm({
           <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" {...register("remember")} />
           {t("login.rememberMe")}
         </label>
-        <a href={`/${locale}/forgot-password`} className="font-medium text-primary hover:underline">
+        <Link href={`/${locale}/forgot-password`} className="font-medium text-primary hover:underline">
           {t("login.forgotPassword")}
-        </a>
+        </Link>
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? t("auth.loading") : t("login.submit")}
+        {isLoading ? t("loading") : t("login.submit")}
       </Button>
 
       <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-        {t("login.noAccount")} <a href={`/${locale}/signup`} className="font-semibold text-primary hover:underline">{t("login.createAccount")}</a>
+        {t("login.noAccount")} <Link href={`/${locale}/signup`} className="font-semibold text-primary hover:underline">{t("login.createAccount")}</Link>
       </p>
     </form>
   );
