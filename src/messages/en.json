@@ -138,5 +138,87 @@
     "actions": {
       "edit": "Edit user"
     }
+  },
+  "stages": {
+    "title": "Stage Management",
+    "description": "Manage ministry groups, stages, and user assignments.",
+    "addMinistry": "Add Ministry",
+    "emptyState": {
+      "title": "No ministries found",
+      "description": "Start by creating a ministry to organize your stages."
+    },
+    "ministry": {
+      "stagesCount": "{count} stages",
+      "noStages": "No stages in this ministry.",
+      "addStage": "Add stage",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "form": {
+        "createTitle": "Add Ministry",
+        "editTitle": "Edit Ministry",
+        "description": "Fill in the ministry details below.",
+        "nameAr": "Arabic name",
+        "nameEn": "English name",
+        "descriptionAr": "Description (Arabic)",
+        "descriptionEn": "Description (English)",
+        "sortOrder": "Sort order",
+        "save": "Save",
+        "cancel": "Cancel",
+        "processing": "Processing…"
+      },
+      "delete": {
+        "title": "Deactivate Ministry",
+        "description": "Are you sure you want to deactivate {name}? All stages under it will also be deactivated.",
+        "confirm": "Deactivate",
+        "cancel": "Cancel",
+        "processing": "Deactivating…"
+      }
+    },
+    "stage": {
+      "createFormTitle": "Add Stage",
+      "editFormTitle": "Edit Stage",
+      "description": "Fill in the stage details below.",
+      "assignUsers": "Assign users",
+      "deactivate": "Deactivate",
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "age": "Age"
+      },
+      "childrenCount": "{count} children",
+      "usersCount": "{count} users",
+      "form": {
+        "createFormTitle": "Add Stage",
+        "editTitle": "Edit Stage",
+        "description": "Fill in the stage details below.",
+        "nameAr": "Arabic name",
+        "nameEn": "English name",
+        "descriptionAr": "Description (Arabic)",
+        "descriptionEn": "Description (English)",
+        "ageMin": "Min age",
+        "ageMax": "Max age",
+        "sortOrder": "Sort order",
+        "save": "Save",
+        "cancel": "Cancel",
+        "processing": "Processing…"
+      },
+      "delete": {
+        "title": "Deactivate Stage",
+        "description": "Are you sure you want to deactivate {name}?",
+        "confirm": "Deactivate",
+        "cancel": "Cancel",
+        "processing": "Deactivating…"
+      }
+    },
+    "assignment": {
+      "title": "Assign Users",
+      "description": "Select users who should have access to stage {name}.",
+      "empty": "No active users available.",
+      "save": "Save assignments",
+      "cancel": "Cancel",
+      "processing": "Saving…"
+    }
   }
 }
