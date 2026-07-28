@@ -138,5 +138,87 @@
     "actions": {
       "edit": "تعديل المستخدم"
     }
+  },
+  "stages": {
+    "title": "إدارة المراحل",
+    "description": "إدارة المجموعات والمراحل والتعيينات.",
+    "addMinistry": "إضافة مجموعة",
+    "emptyState": {
+      "title": "لم يتم العثور على مجموعات",
+      "description": "ابدأ بإنشاء مجموعة لإدارة المراحل."
+    },
+    "ministry": {
+      "stagesCount": "{count} مراحل",
+      "noStages": "لا توجد مراحل في هذه المجموعة.",
+      "addStage": "إضافة مرحلة",
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "form": {
+        "createTitle": "إضافة مجموعة",
+        "editTitle": "تعديل المجموعة",
+        "description": "املأ بيانات المجموعة أدناه.",
+        "nameAr": "الاسم العربي",
+        "nameEn": "الاسم الإنجليزي",
+        "descriptionAr": "الوصف (عربي)",
+        "descriptionEn": "الوصف (إنجليزي)",
+        "sortOrder": "ترتيب العرض",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "processing": "جارٍ الحفظ…"
+      },
+      "delete": {
+        "title": "تعطيل المجموعة",
+        "description": "هل أنت متأكد من تعطيل {name}؟ سيتم تعطيل جميع المراحل التابعة لها.",
+        "confirm": "تعطيل",
+        "cancel": "إلغاء",
+        "processing": "جارٍ التعطيل…"
+      }
+    },
+    "stage": {
+      "createFormTitle": "إضافة مرحلة",
+      "editFormTitle": "تعديل مرحلة",
+      "description": "املأ بيانات المرحلة أدناه.",
+      "assignUsers": "تعيين المستخدمين",
+      "deactivate": "تعطيل",
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط",
+        "age": "العمر"
+      },
+      "childrenCount": "{count} أطفال",
+      "usersCount": "{count} مستخدمين",
+      "form": {
+        "createFormTitle": "إضافة مرحلة",
+        "editTitle": "تعديل مرحلة",
+        "description": "املأ بيانات المرحلة أدناه.",
+        "nameAr": "الاسم العربي",
+        "nameEn": "الاسم الإنجليزي",
+        "descriptionAr": "الوصف (عربي)",
+        "descriptionEn": "الوصف (إنجليزي)",
+        "ageMin": "العمر الأدنى",
+        "ageMax": "العمر الأقصى",
+        "sortOrder": "ترتيب العرض",
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "processing": "جارٍ الحفظ…"
+      },
+      "delete": {
+        "title": "تعطيل المرحلة",
+        "description": "هل أنت متأكد من تعطيل {name}؟",
+        "confirm": "تعطيل",
+        "cancel": "إلغاء",
+        "processing": "جارٍ التعطيل…"
+      }
+    },
+    "assignment": {
+      "title": "تعيين المستخدمين",
+      "description": "اختر المستخدمين المسموح لهم بالوصول إلى مرحلة {name}.",
+      "empty": "لا يوجد مستخدمون نشطون.",
+      "save": "حفظ التعيينات",
+      "cancel": "إلغاء",
+      "processing": "جارٍ الحفظ…"
+    }
   }
 }

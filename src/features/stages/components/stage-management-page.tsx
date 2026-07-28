@@ -1,0 +1,165 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PermissionGuard } from "@/features/rbac";
+import { useMinistryList } from "../hooks/use-ministries";
+import { useStageList } from "../hooks/use-stages";
+import { MinistryCard } from "./ministry-card";
+import { StageEmptyState } from "./stage-empty-state";
+import { MinistryFormDialog } from "./ministry-form-dialog";
+import { StageFormDialog } from "./stage-form-dialog";
+import { MinistryDeleteDialog } from "./ministry-delete-dialog";
+import { StageDeleteDialog } from "./stage-delete-dialog";
+import { StageUserAssignmentDialog } from "./stage-user-assignment-dialog";
+import type { MinistryListItem, StageListItem } from "../types/stage.types";
+
+export function StageManagementPage() {
+  const t = useTranslations("stages");
+
+  const [createMinistryOpen, setCreateMinistryOpen] = useState(false);
+  const [editMinistry, setEditMinistry] = useState<MinistryListItem | null>(null);
+  const [deleteMinistry, setDeleteMinistry] = useState<MinistryListItem | null>(null);
+
+  const [createStageMinistryId, setCreateStageMinistryId] = useState<string | null>(null);
+  const [editStage, setEditStage] = useState<StageListItem | null>(null);
+  const [deleteStage, setDeleteStage] = useState<StageListItem | null>(null);
+  const [assignUsersStage, setAssignUsersStage] = useState<StageListItem | null>(null);
+
+  const ministriesQuery = useMinistryList();
+  const stagesQuery = useStageList();
+
+  const ministries = ministriesQuery.data?.data ?? [];
+  const allStages = stagesQuery.data?.data ?? [];
+
+  const stagesByMinistry = new Map<string, StageListItem[]>();
+  for (const stage of allStages) {
+    const existing = stagesByMinistry.get(stage.ministry_id) ?? [];
+    existing.push(stage);
+    stagesByMinistry.set(stage.ministry_id, existing);
+  }
+
+  const isLoading = ministriesQuery.isLoading || stagesQuery.isLoading;
+
+  return (
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {t("title")}
+          </h1>
+          <p className="text-sm text-muted-foreground">{t("description")}</p>
+        </div>
+        <PermissionGuard permission="stages.create">
+          <Button onClick={() => setCreateMinistryOpen(true)}>
+            <Plus className="size-4" />
+            {t("addMinistry")}
+          </Button>
+        </PermissionGuard>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="rounded-xl border bg-card p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-4 w-4" />
+                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : ministries.length === 0 ? (
+        <StageEmptyState />
+      ) : (
+        <div className="space-y-4">
+          {ministries.map((ministry) => (
+            <MinistryCard
+              key={ministry.id}
+              ministry={ministry}
+              stages={stagesByMinistry.get(ministry.id) ?? []}
+              onEditMinistry={setEditMinistry}
+              onDeactivateMinistry={setDeleteMinistry}
+              onCreateStage={(ministryId) => setCreateStageMinistryId(ministryId)}
+              onEditStage={setEditStage}
+              onDeactivateStage={setDeleteStage}
+              onAssignUsers={setAssignUsersStage}
+            />
+          ))}
+        </div>
+      )}
+
+      {createMinistryOpen && (
+        <MinistryFormDialog
+          open={createMinistryOpen}
+          onOpenChange={setCreateMinistryOpen}
+        />
+      )}
+
+      {editMinistry && (
+        <MinistryFormDialog
+          open={!!editMinistry}
+          onOpenChange={(open) => {
+            if (!open) setEditMinistry(null);
+          }}
+          ministry={editMinistry}
+        />
+      )}
+
+      {deleteMinistry && (
+        <MinistryDeleteDialog
+          open={!!deleteMinistry}
+          onOpenChange={(open) => {
+            if (!open) setDeleteMinistry(null);
+          }}
+          ministry={deleteMinistry}
+        />
+      )}
+
+      {createStageMinistryId && (
+        <StageFormDialog
+          open={!!createStageMinistryId}
+          onOpenChange={(open) => {
+            if (!open) setCreateStageMinistryId(null);
+          }}
+          ministryId={createStageMinistryId}
+        />
+      )}
+
+      {editStage && (
+        <StageFormDialog
+          open={!!editStage}
+          onOpenChange={(open) => {
+            if (!open) setEditStage(null);
+          }}
+          ministryId={editStage.ministry_id}
+          stage={editStage}
+        />
+      )}
+
+      {deleteStage && (
+        <StageDeleteDialog
+          open={!!deleteStage}
+          onOpenChange={(open) => {
+            if (!open) setDeleteStage(null);
+          }}
+          stage={deleteStage}
+        />
+      )}
+
+      {assignUsersStage && (
+        <StageUserAssignmentDialog
+          open={!!assignUsersStage}
+          onOpenChange={(open) => {
+            if (!open) setAssignUsersStage(null);
+          }}
+          stage={assignUsersStage}
+        />
+      )}
+    </section>
+  );
+}
