@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { forgotPasswordSchema } from "../schemas/auth.schema";
@@ -35,7 +36,7 @@ export function ForgotPasswordForm({
     const result = await action(values, locale);
 
     if (!result.success) {
-      setFormState({ error: result.message ?? t("auth.generalError") });
+      setFormState({ error: result.message ?? t("generalError") });
     } else {
       setFormState({ message: result.message ?? t("forgotPassword.sent") });
     }
@@ -68,11 +69,11 @@ export function ForgotPasswordForm({
       </label>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? t("auth.loading") : t("forgotPassword.submit")}
+        {isLoading ? t("loading") : t("forgotPassword.submit")}
       </Button>
 
       <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-        {t("forgotPassword.remembered")} <a href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("forgotPassword.login")}</a>
+        {t("forgotPassword.remembered")} <Link href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("forgotPassword.login")}</Link>
       </p>
     </form>
   );

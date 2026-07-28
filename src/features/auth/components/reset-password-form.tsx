@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { resetPasswordSchema } from "../schemas/auth.schema";
@@ -96,11 +97,11 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
       </label>
 
       <Button type="submit" className="w-full" disabled={isLoading || !initialized}>
-        {isLoading ? t("auth.loading") : t("resetPassword.submit")}
+        {isLoading ? t("loading") : t("resetPassword.submit")}
       </Button>
 
       <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-        <a href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("resetPassword.login")}</a>
+        <Link href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("resetPassword.login")}</Link>
       </p>
     </form>
   );

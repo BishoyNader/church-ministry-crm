@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,7 @@ export function SignupForm({
     const result = await action(values, locale);
 
     if (!result.success) {
-      setFormError(result.message ?? t("auth.generalError"));
+      setFormError(result.message ?? t("generalError"));
       setIsLoading(false);
       return;
     }
@@ -135,11 +136,11 @@ export function SignupForm({
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? t("auth.loading") : t("signup.submit")}
+        {isLoading ? t("loading") : t("signup.submit")}
       </Button>
 
       <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-        {t("signup.haveAccount")} <a href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("signup.signIn")}</a>
+        {t("signup.haveAccount")} <Link href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("signup.signIn")}</Link>
       </p>
     </form>
   );
