@@ -20,6 +20,9 @@ import { listUsersAction } from "../actions/child.actions";
 import { ChildEmptyState } from "./child-empty-state";
 import { FollowupFormDialog } from "./followup-form-dialog";
 import { FollowupStatusDialog } from "./followup-status-dialog";
+import { ErrorState } from "@/components/feedback/error-state";
+import { PageHeader } from "@/components/layout/page-header";
+import { SectionCard } from "@/components/layout/section-card";
 import type { FollowupListItem } from "../types/child.types";
 
 const STATUS_OPTIONS = ["scheduled", "in_progress", "completed", "cancelled"] as const;
@@ -127,24 +130,20 @@ export function FollowupListPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("followups.title")}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {t("followups.description")}
-          </p>
-        </div>
-        <PermissionGuard permission="followups.create">
-          <Button onClick={handleOpenCreate}>
-            <Plus className="size-4" />
-            {t("followups.addFollowup")}
-          </Button>
-        </PermissionGuard>
-      </div>
+      <PageHeader
+        title={t("followups.title")}
+        description={t("followups.description")}
+        actions={
+          <PermissionGuard permission="followups.create">
+            <Button onClick={handleOpenCreate}>
+              <Plus className="size-4" />
+              {t("followups.addFollowup")}
+            </Button>
+          </PermissionGuard>
+        }
+      />
 
-      <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <SectionCard className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
           <Input
             placeholder={t("followups.searchPlaceholder")}
@@ -205,27 +204,22 @@ export function FollowupListPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </SectionCard>
 
       {error ? (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-6 py-8 text-center">
-          <p className="text-lg font-medium text-destructive">
-            {t("followups.loadError")}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">{error.message}</p>
-        </div>
+        <ErrorState title={t("followups.loadError")} message={error.message} />
       ) : isLoading ? (
-        <div className="rounded-xl border bg-card shadow-sm">
+        <SectionCard>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 py-3">{t("followups.child")}</th>
                   <th className="px-4 py-3">{t("followups.type")}</th>
                   <th className="px-4 py-3">{t("followups.status")}</th>
                   <th className="px-4 py-3">{t("followups.scheduledAt")}</th>
                   <th className="px-4 py-3">{t("followups.assignedTo")}</th>
-                  <th className="px-4 py-3 text-right">{t("followups.actions")}</th>
+                  <th className="px-4 py-3 text-end">{t("followups.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -236,30 +230,30 @@ export function FollowupListPage() {
                     <td className="px-4 py-3"><Skeleton className="h-5 w-20" /></td>
                     <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
                     <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-8 w-20 ml-auto" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-8 w-20 ms-auto" /></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </div>
+        </SectionCard>
       ) : followups.length === 0 ? (
         <ChildEmptyState
           title={t("followups.noFollowups")}
           description=""
         />
       ) : (
-        <div className="rounded-xl border bg-card shadow-sm">
+        <SectionCard>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/50 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 py-3">{t("followups.child")}</th>
                   <th className="px-4 py-3">{t("followups.type")}</th>
                   <th className="px-4 py-3">{t("followups.status")}</th>
                   <th className="px-4 py-3">{t("followups.scheduledAt")}</th>
                   <th className="px-4 py-3">{t("followups.assignedTo")}</th>
-                  <th className="px-4 py-3 text-right">{t("followups.actions")}</th>
+                  <th className="px-4 py-3 text-end">{t("followups.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -295,7 +289,7 @@ export function FollowupListPage() {
                     <td className="px-4 py-3 text-muted-foreground">
                       {followup.assignedToNameAr ?? "\u2014"}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-end">
                       <div className="flex items-center justify-end gap-1">
                         <PermissionGuard permission="followups.update">
                           <Button
@@ -334,7 +328,7 @@ export function FollowupListPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </SectionCard>
       )}
 
       <FollowupFormDialog

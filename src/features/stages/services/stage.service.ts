@@ -237,7 +237,7 @@ export async function deactivateMinistry(
       if ((count ?? 0) > 0) {
         return {
           data: null,
-          error: "Cannot deactivate ministry because it has stages with active children.",
+          error: "Cannot deactivate ministry because it has stages with active beneficiaries.",
         };
       }
     }
@@ -479,7 +479,7 @@ export async function deactivateStage(
     if ((count ?? 0) > 0) {
       return {
         data: null,
-        error: "Cannot deactivate stage because it has active children.",
+        error: "Cannot deactivate stage because it has active beneficiaries.",
       };
     }
 

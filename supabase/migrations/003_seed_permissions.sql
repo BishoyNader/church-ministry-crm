@@ -27,11 +27,11 @@ INSERT INTO permissions (code, name_ar, name_en, module) VALUES
   ('stages.delete', 'حذف مرحلة', 'Delete Stage', 'stages'),
 
   -- Children
-  ('children.read', 'عرض الأطفال', 'View Children', 'children'),
-  ('children.create', 'إضافة طفل', 'Create Child', 'children'),
-  ('children.update', 'تعديل طفل', 'Update Child', 'children'),
-  ('children.delete', 'حذف طفل', 'Delete Child', 'children'),
-  ('children.export', 'تصدير بيانات الأطفال', 'Export Children', 'children'),
+  ('children.read', 'عرض المخدومين', 'View Beneficiaries', 'children'),
+  ('children.create', 'إضافة مخدوم', 'Create Beneficiary', 'children'),
+  ('children.update', 'تعديل مخدوم', 'Update Beneficiary', 'children'),
+  ('children.delete', 'حذف مخدوم', 'Delete Beneficiary', 'children'),
+  ('children.export', 'تصدير بيانات المخدومين', 'Export Beneficiaries', 'children'),
 
   -- Attendance
   ('attendance.read', 'عرض الحضور', 'View Attendance', 'attendance'),

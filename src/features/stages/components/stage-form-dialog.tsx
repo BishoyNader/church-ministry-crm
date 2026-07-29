@@ -26,7 +26,7 @@ import type {
 } from "../schemas/stage.schema";
 import { useCreateStage, useUpdateStage } from "../hooks/use-stages";
 import type { StageListItem } from "../types/stage.types";
-import { FormField } from "./form-field";
+import { FormField } from "@/components/ui/form-field";
 
 type StageFormDialogProps = {
   open: boolean;

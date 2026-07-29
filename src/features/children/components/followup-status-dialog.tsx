@@ -26,7 +26,7 @@ import { updateFollowupSchema } from "../schemas/child.schema";
 import type { UpdateFollowupFormValues } from "../schemas/child.schema";
 import { useUpdateFollowup } from "../hooks/use-followups";
 import type { FollowupListItem } from "../types/child.types";
-import { FormField } from "@/features/stages/components/form-field";
+import { FormField } from "@/components/ui/form-field";
 
 const FOLLOWUP_STATUSES = [
   "scheduled",

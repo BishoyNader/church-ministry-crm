@@ -36,7 +36,7 @@ import { useCreateFollowup, useUpdateFollowup } from "../hooks/use-followups";
 import { useChildList, useChildStages } from "../hooks/use-children";
 import { listUsersAction } from "../actions/child.actions";
 import type { FollowupListItem } from "../types/child.types";
-import { FormField } from "@/features/stages/components/form-field";
+import { FormField } from "@/components/ui/form-field";
 
 const FOLLOWUP_TYPES = [
   "phone_call",

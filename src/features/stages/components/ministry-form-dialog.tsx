@@ -26,7 +26,7 @@ import type {
 } from "../schemas/stage.schema";
 import { useCreateMinistry, useUpdateMinistry } from "../hooks/use-ministries";
 import type { MinistryListItem } from "../types/stage.types";
-import { FormField } from "./form-field";
+import { FormField } from "@/components/ui/form-field";
 
 type MinistryFormDialogProps = {
   open: boolean;

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/page-header";
+import { SectionCard } from "@/components/layout/section-card";
 import { PermissionGuard } from "@/features/rbac";
 import { useMinistryList } from "../hooks/use-ministries";
 import { useStageList } from "../hooks/use-stages";
@@ -46,31 +48,29 @@ export function StageManagementPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <PermissionGuard permission="stages.create">
-          <Button onClick={() => setCreateMinistryOpen(true)}>
-            <Plus className="size-4" />
-            {t("addMinistry")}
-          </Button>
-        </PermissionGuard>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <PermissionGuard permission="stages.create">
+            <Button onClick={() => setCreateMinistryOpen(true)}>
+              <Plus className="size-4" />
+              {t("addMinistry")}
+            </Button>
+          </PermissionGuard>
+        }
+      />
 
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i} className="rounded-xl border bg-card p-4 shadow-sm">
+            <SectionCard key={i} className="p-4">
               <div className="flex items-center gap-3">
                 <Skeleton className="h-4 w-4" />
                 <Skeleton className="h-5 w-40" />
                 <Skeleton className="h-5 w-16" />
               </div>
-            </div>
+            </SectionCard>
           ))}
         </div>
       ) : ministries.length === 0 ? (

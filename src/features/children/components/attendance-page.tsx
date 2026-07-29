@@ -11,6 +11,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/layout/page-header";
 import { PermissionGuard } from "@/features/rbac";
 import { useChildList, useChildMinistries, useChildStages } from "../hooks/use-children";
 import { useAttendanceList, useBatchAttendance } from "../hooks/use-attendance";
@@ -106,14 +107,10 @@ export function AttendancePage() {
 
   return (
     <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {tAttendance("title")}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {tAttendance("description")}
-        </p>
-      </div>
+      <PageHeader
+        title={tAttendance("title")}
+        description={tAttendance("description")}
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1 space-y-1.5">

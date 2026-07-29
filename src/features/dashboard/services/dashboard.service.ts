@@ -8,6 +8,8 @@ import type {
   FollowupStatusCount,
   PipelineStageCount,
   StageAnalyticsItem,
+  ScheduledFollowupItem,
+  RecentChildItem,
 } from "../types/dashboard.types";
 
 type ServiceResult<T> = { data: T | null; error: string | null };
@@ -71,12 +73,12 @@ export async function getDashboardData(
       await Promise.all([
         supabase
           .from("children")
-          .select("status, pipeline_stage, created_at, stage_id")
+          .select("id, name, status, pipeline_stage, created_at, stage_id")
           .eq("church_id", churchId)
           .is("deleted_at", null),
         supabase
           .from("followups")
-          .select("status, scheduled_at, updated_at, stage_id")
+          .select("id, child_id, status, scheduled_at, updated_at, stage_id")
           .eq("church_id", churchId),
         supabase
           .from("attendance")
@@ -329,6 +331,40 @@ export async function getDashboardData(
       };
     });
 
+    // ── Next followups due ──
+    const childNameMap = new Map(children.map((c) => [c.id, c.name ?? ""]));
+    const nowDate = new Date();
+    const nextFollowupsDue: ScheduledFollowupItem[] = followups
+      .filter((f) => OPEN_STATUSES.has(f.status) && f.scheduled_at != null)
+      .map((f) => ({
+        id: f.id,
+        childId: f.child_id ?? "",
+        childName: childNameMap.get(f.child_id ?? "") ?? "",
+        scheduledAt: f.scheduled_at ?? "",
+        status: f.status,
+      }))
+      .sort((a, b) => {
+        const aDiff = new Date(a.scheduledAt).getTime() - nowDate.getTime();
+        const bDiff = new Date(b.scheduledAt).getTime() - nowDate.getTime();
+        return aDiff - bDiff;
+      })
+      .slice(0, 5);
+
+    // ── Recent children ──
+    const recentChildren: RecentChildItem[] = activeChildren
+      .filter((c) => c.name)
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      )
+      .slice(0, 5)
+      .map((c) => ({
+        id: c.id,
+        name: c.name ?? "",
+        pipelineStage: c.pipeline_stage ?? "",
+        createdAt: c.created_at,
+      }));
+
     return {
       data: {
         kpis,
@@ -338,6 +374,8 @@ export async function getDashboardData(
         followupAnalytics,
         pipelineAnalytics,
         stageAnalytics,
+        nextFollowupsDue,
+        recentChildren,
       },
       error: null,
     };
