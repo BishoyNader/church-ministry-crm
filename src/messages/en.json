@@ -453,5 +453,61 @@
       "statusDialogTitle": "Change Status",
       "statusDialogDescription": "Update the follow-up status and add any notes."
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "An overview of your ministry metrics and analytics.",
+    "activeChildren": {
+      "label": "Active Children"
+    },
+    "newChildren": {
+      "label": "New This Month"
+    },
+    "openFollowups": {
+      "label": "Open Follow-ups"
+    },
+    "overdueFollowups": {
+      "label": "Overdue"
+    },
+    "attendanceThisMonth": {
+      "label": "Attendance This Month"
+    },
+    "activeStages": {
+      "label": "Active Stages"
+    },
+    "attendanceTrend": "Attendance Trend",
+    "attendanceWeekly": "Weekly Attendance",
+    "followupStatus": {
+      "title": "Follow-up Status"
+    },
+    "pipelineDistribution": "Pipeline Distribution",
+    "stageAnalytics": {
+      "title": "Stage Analytics",
+      "stage": "Stage",
+      "children": "Children",
+      "followups": "Follow-ups",
+      "attendance": "Attendance",
+      "attendanceRate": "Rate"
+    },
+    "attendanceStatus": {
+      "present": "Present",
+      "absent": "Absent",
+      "excused": "Excused"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "pipeline": {
+      "new_visitor": "New Visitor",
+      "first_followup": "First Follow-up",
+      "regular_attendee": "Regular Attendee",
+      "active_member": "Active Member",
+      "leader_candidate": "Leader Candidate"
+    },
+    "noData": "No data available.",
+    "loadError": "Failed to load dashboard data."
   }
 }

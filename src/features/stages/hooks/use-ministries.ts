@@ -73,8 +73,11 @@ export function useDeactivateMinistry() {
 
   return useMutation({
     mutationFn: (ministryId: string) => deactivateMinistryAction(ministryId),
-    onSuccess: () => {
+    onSuccess: (_data, ministryId) => {
       queryClient.invalidateQueries({ queryKey: MINISTRY_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: MINISTRY_QUERY_KEYS.detail(ministryId),
+      });
     },
   });
 }

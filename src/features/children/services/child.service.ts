@@ -19,6 +19,7 @@ type ServiceResult<T> = { data: T | null; error: string | null };
 
 export async function listChildren(
   supabase: SupabaseClient,
+  churchId: string,
   filters?: {
     search?: string;
     ministry_id?: string;
@@ -37,6 +38,7 @@ export async function listChildren(
     let query = supabase
       .from("children")
       .select("*, ministries!inner(name_ar), stages!inner(name_ar)", { count: "exact" })
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .order("first_name_ar");
 
@@ -97,12 +99,14 @@ export async function listChildren(
 export async function getChildById(
   supabase: SupabaseClient,
   childId: string,
+  churchId: string,
 ): Promise<ServiceResult<ChildDetail>> {
   try {
     const { data: child, error } = await supabase
       .from("children")
       .select("*, ministries!inner(name_ar), stages!inner(name_ar)")
       .eq("id", childId)
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .single();
 
@@ -114,12 +118,14 @@ export async function getChildById(
       supabase
         .from("attendance")
         .select("*")
+        .eq("church_id", churchId)
         .eq("child_id", childId)
         .order("attendance_date", { ascending: false })
         .limit(50),
       supabase
         .from("followups")
         .select("*, profiles:assigned_to(full_name_ar)")
+        .eq("church_id", churchId)
         .eq("child_id", childId)
         .order("created_at", { ascending: false })
         .limit(50),
@@ -221,6 +227,7 @@ export async function createChild(
 export async function updateChild(
   supabase: SupabaseClient,
   childId: string,
+  churchId: string,
   input: UpdateChildInput,
 ): Promise<ServiceResult<boolean>> {
   try {
@@ -256,7 +263,8 @@ export async function updateChild(
         notes: input.notes ?? null,
         photo_url: input.photo_url ?? null,
       })
-      .eq("id", childId);
+      .eq("id", childId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
@@ -271,6 +279,7 @@ export async function updateChild(
 export async function transferChild(
   supabase: SupabaseClient,
   childId: string,
+  churchId: string,
   input: TransferChildInput,
 ): Promise<ServiceResult<boolean>> {
   try {
@@ -280,7 +289,8 @@ export async function transferChild(
         ministry_id: input.ministry_id,
         stage_id: input.stage_id,
       })
-      .eq("id", childId);
+      .eq("id", childId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
@@ -295,6 +305,7 @@ export async function transferChild(
 export async function deactivateChild(
   supabase: SupabaseClient,
   childId: string,
+  churchId: string,
 ): Promise<ServiceResult<boolean>> {
   try {
     const { error } = await supabase
@@ -303,7 +314,8 @@ export async function deactivateChild(
         deleted_at: new Date().toISOString(),
         status: "inactive",
       })
-      .eq("id", childId);
+      .eq("id", childId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
@@ -437,6 +449,7 @@ export async function batchAttendance(
 
 export async function listAttendance(
   supabase: SupabaseClient,
+  churchId: string,
   filters?: {
     child_id?: string;
     stage_id?: string;
@@ -448,6 +461,7 @@ export async function listAttendance(
     let query = supabase
       .from("attendance")
       .select("*, children!inner(first_name_ar, last_name_ar), stages!inner(name_ar)")
+      .eq("church_id", churchId)
       .order("attendance_date", { ascending: false });
 
     if (filters?.child_id) {
@@ -539,6 +553,7 @@ export async function createFollowup(
 export async function updateFollowup(
   supabase: SupabaseClient,
   followupId: string,
+  churchId: string,
   input: UpdateFollowupInput,
 ): Promise<ServiceResult<boolean>> {
   try {
@@ -557,7 +572,8 @@ export async function updateFollowup(
     const { error } = await supabase
       .from("followups")
       .update(updateData)
-      .eq("id", followupId);
+      .eq("id", followupId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
@@ -571,6 +587,7 @@ export async function updateFollowup(
 
 export async function listFollowups(
   supabase: SupabaseClient,
+  churchId: string,
   filters?: {
     child_id?: string;
     status?: string;
@@ -581,6 +598,7 @@ export async function listFollowups(
     let query = supabase
       .from("followups")
       .select("*, children!inner(first_name_ar, last_name_ar), stages!inner(name_ar), profiles:assigned_to(full_name_ar)")
+      .eq("church_id", churchId)
       .order("created_at", { ascending: false });
 
     if (filters?.child_id) {
@@ -621,12 +639,14 @@ export async function listFollowups(
 
 export async function listStages(
   supabase: SupabaseClient,
+  churchId: string,
   ministryId?: string,
 ): Promise<ServiceResult<Pick<import("../types/child.types").StageRow, "id" | "name_ar" | "ministry_id">[]>> {
   try {
     let query = supabase
       .from("stages")
       .select("id, name_ar, ministry_id")
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .order("name_ar");
 
@@ -648,11 +668,13 @@ export async function listStages(
 
 export async function listMinistries(
   supabase: SupabaseClient,
+  churchId: string,
 ): Promise<ServiceResult<Pick<import("../types/child.types").MinistryRow, "id" | "name_ar">[]>> {
   try {
     const { data, error } = await supabase
       .from("ministries")
       .select("id, name_ar")
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .eq("is_active", true)
       .order("name_ar");
@@ -670,12 +692,14 @@ export async function listMinistries(
 export async function getFollowupById(
   supabase: SupabaseClient,
   followupId: string,
+  churchId: string,
 ): Promise<ServiceResult<Record<string, unknown>>> {
   try {
     const { data, error } = await supabase
       .from("followups")
       .select("*")
       .eq("id", followupId)
+      .eq("church_id", churchId)
       .single();
 
     if (error || !data) {
@@ -691,12 +715,14 @@ export async function getFollowupById(
 export async function deleteFollowup(
   supabase: SupabaseClient,
   followupId: string,
+  churchId: string,
 ): Promise<ServiceResult<boolean>> {
   try {
     const { error } = await supabase
       .from("followups")
       .update({ deleted_at: new Date().toISOString() })
-      .eq("id", followupId);
+      .eq("id", followupId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
