@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Plus } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -41,28 +41,33 @@ const PIPELINE_OPTIONS = [
 
 export function ChildListPage() {
   const t = useTranslations("children");
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [ministryFilter, setMinistryFilter] = useState("all");
+  const [stageFilter, setStageFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [pipelineFilter, setPipelineFilter] = useState("all");
-  const [stageFilter, setStageFilter] = useState("all");
+
+  const [createOpen, setCreateOpen] = useState(false);
   const [editChild, setEditChild] = useState<ChildListItem | null>(null);
   const [deleteChild, setDeleteChild] = useState<ChildListItem | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
 
   const ministriesQuery = useChildMinistries();
   const ministries = ministriesQuery.data?.data ?? [];
-  const firstMinistryId = ministries[0]?.id;
-  const stagesQuery = useChildStages(firstMinistryId);
+
+  const ministryId = ministryFilter !== "all" ? ministryFilter : undefined;
+  const stagesQuery = useChildStages(ministryId);
   const stages = stagesQuery.data?.data ?? [];
 
   const { data, isLoading } = useChildList(
     {
       search: search || undefined,
+      ministry_id: ministryFilter !== "all" ? ministryFilter : undefined,
+      stage_id: stageFilter !== "all" ? stageFilter : undefined,
       status: statusFilter !== "all" ? statusFilter : undefined,
       pipeline_stage: pipelineFilter !== "all" ? pipelineFilter : undefined,
-      stage_id: stageFilter !== "all" ? stageFilter : undefined,
     },
     { page, pageSize: PAGE_SIZE },
   );
@@ -71,29 +76,38 @@ export function ChildListPage() {
   const total = data?.data?.total ?? 0;
   const totalPages = data?.data?.totalPages ?? 0;
 
-  const handleSearch = () => {
-    setPage(1);
-    setSearch(searchInput);
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSearch();
-  };
-
-  const handleStatusChange = (value: unknown) => {
-    setStatusFilter(value as string);
-    setPage(1);
-  };
-
-  const handlePipelineChange = (value: unknown) => {
-    setPipelineFilter(value as string);
+  const handleMinistryChange = (value: unknown) => {
+    setMinistryFilter(value as string);
+    setStageFilter("all");
     setPage(1);
   };
 
-  const handleStageChange = (value: unknown) => {
-    setStageFilter(value as string);
+  const handleFilterChange = (setter: (value: string) => void) => (value: unknown) => {
+    setter(value as string);
     setPage(1);
   };
+
+  const clearFilters = () => {
+    setSearchInput("");
+    setSearch("");
+    setMinistryFilter("all");
+    setStageFilter("all");
+    setStatusFilter("all");
+    setPipelineFilter("all");
+    setPage(1);
+  };
+
+  const hasActiveFilters =
+    search || ministryFilter !== "all" || stageFilter !== "all" ||
+    statusFilter !== "all" || pipelineFilter !== "all";
 
   return (
     <section className="space-y-6">
@@ -113,21 +127,35 @@ export function ChildListPage() {
       </div>
 
       <div className="rounded-xl border bg-card p-4 shadow-sm">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder={t("searchPlaceholder")}
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="pl-9"
-            />
-          </div>
-          <Button variant="outline" onClick={handleSearch}>
-            {t("search")}
-          </Button>
-          <Select value={stageFilter} onValueChange={handleStageChange}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
+          <Input
+            placeholder={t("searchPlaceholder")}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="flex-1 min-w-[200px]"
+          />
+
+          <Select
+            value={ministryFilter}
+            onValueChange={handleMinistryChange}
+          >
+            <SelectTrigger className="w-full sm:w-44">
+              <SelectValue placeholder={t("filters.allMinistries")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.allMinistries")}</SelectItem>
+              {ministries.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {m.name_ar}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={stageFilter}
+            onValueChange={handleFilterChange(setStageFilter)}
+          >
             <SelectTrigger className="w-full sm:w-44">
               <SelectValue placeholder={t("filters.allStages")} />
             </SelectTrigger>
@@ -140,8 +168,12 @@ export function ChildListPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={statusFilter} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-full sm:w-44">
+
+          <Select
+            value={statusFilter}
+            onValueChange={handleFilterChange(setStatusFilter)}
+          >
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder={t("filters.allStatuses")} />
             </SelectTrigger>
             <SelectContent>
@@ -152,8 +184,12 @@ export function ChildListPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={pipelineFilter} onValueChange={handlePipelineChange}>
-            <SelectTrigger className="w-full sm:w-48">
+
+          <Select
+            value={pipelineFilter}
+            onValueChange={handleFilterChange(setPipelineFilter)}
+          >
+            <SelectTrigger className="w-full sm:w-44">
               <SelectValue placeholder={t("filters.allPipeline")} />
             </SelectTrigger>
             <SelectContent>
@@ -164,6 +200,13 @@ export function ChildListPage() {
               ))}
             </SelectContent>
           </Select>
+
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters}>
+              <RotateCcw className="size-4" />
+              {t("filters.clearFilters")}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -175,7 +218,10 @@ export function ChildListPage() {
           onDelete={setDeleteChild}
         />
       ) : (
-        <ChildEmptyState />
+        <ChildEmptyState
+          title={t("empty.title")}
+          description={t("empty.description")}
+        />
       )}
 
       {totalPages > 1 && (
@@ -218,17 +264,19 @@ export function ChildListPage() {
           onOpenChange={(open) => {
             if (!open) setEditChild(null);
           }}
-          child={editChild as unknown as import("../types/child.types").ChildDetail}
+          child={editChild}
         />
       )}
 
-      <ChildDeleteDialog
-        open={!!deleteChild}
-        onOpenChange={(open) => {
-          if (!open) setDeleteChild(null);
-        }}
-        child={deleteChild}
-      />
+      {deleteChild && (
+        <ChildDeleteDialog
+          open={!!deleteChild}
+          onOpenChange={(open) => {
+            if (!open) setDeleteChild(null);
+          }}
+          child={deleteChild}
+        />
+      )}
     </section>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, Moon, Sun, Church, Users, Layers, Baby, CalendarDays, BarChart3, Settings, Bell, LogOut } from "lucide-react";
+import { Menu, Moon, Sun, Church, Users, Layers, Baby, CalendarDays, BarChart3, Settings, Bell, LogOut, ClipboardCheck, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,6 +12,8 @@ const navItems = [
   { label: "Users", href: "/users", icon: Users },
   { label: "Stages", href: "/stages", icon: Layers },
   { label: "Children", href: "/children", icon: Baby },
+  { label: "Attendance", href: "/attendance", icon: ClipboardCheck },
+  { label: "Followups", href: "/followups", icon: Phone },
   { label: "Events", href: "#", icon: CalendarDays },
   { label: "Settings", href: "#", icon: Settings },
 ];

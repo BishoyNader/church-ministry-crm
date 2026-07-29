@@ -232,9 +232,11 @@
       "description": "ابدأ بتسجيل أول طفل لبدء تتبع رحلته في الخدمة."
     },
     "filters": {
+      "allMinistries": "جميع الخدمات",
       "allStages": "جميع المراحل",
       "allStatuses": "جميع الحالات",
-      "allPipeline": "جميع مراحل التطور"
+      "allPipeline": "جميع مراحل التطور",
+      "clearFilters": "إزالة الفلاتر"
     },
     "table": {
       "name": "الاسم",
@@ -244,6 +246,10 @@
       "parentPhone": "هاتف ولي الأمر",
       "enrolledAt": "تاريخ التسجيل",
       "actions": "الإجراءات"
+    },
+    "empty": {
+      "title": "لا يوجد أطفال بعد",
+      "description": "سجّل طفلاً لبدء تتبع الحضور والمتابعات."
     },
     "status": {
       "active": "نشط",
@@ -324,14 +330,128 @@
         "followups": "المتابعات"
       },
       "personalInfo": "المعلومات الشخصية",
+      "firstNameAr": "الاسم الأول (عربي)",
+      "firstNameEn": "الاسم الأول (إنجليزي)",
+      "lastNameAr": "الاسم الأخير (عربي)",
+      "lastNameEn": "الاسم الأخير (إنجليزي)",
+      "dateOfBirth": "تاريخ الميلاد",
+      "gender": "الجنس",
+      "ministry": "الخدمة",
+      "stage": "المرحلة",
       "parentInfo": "ولي الأمر",
+      "father": "الأب",
+      "mother": "الأم",
+      "parentPhone": "هاتف ولي الأمر",
+      "parentEmail": "بريد ولي الأمر",
+      "address": "العنوان",
+      "emergencyContact": "جهة اتصال طارئة",
+      "emergencyPhone": "هاتف الطوارئ",
+      "mobile": "الجوال",
       "medicalInfo": "المعلومات الطبية",
+      "allergies": "الحساسية",
+      "medicalConditions": "الحالات الطبية",
+      "medications": "الأدوية",
       "spiritualInfo": "المعلومات الروحية",
+      "baptismDate": "تاريخ المعمودية",
+      "confessionFrequency": "تكرار الاعتراف",
+      "spiritualNotes": "ملاحظات روحية",
       "educationInfo": "المعلومات التعليمية",
-      "attendancePlaceholder": "تتبع الحضور سيكون متاحًا في مرحلة مستقبلية.",
-      "followupsPlaceholder": "إدارة المتابعات ستكون متاحة في مرحلة مستقبلية.",
+      "school": "المدرسة",
+      "gradeLevel": "الصف الدراسي",
+      "notes": "ملاحظات",
       "editChild": "تعديل الطفل",
-      "backToList": "العودة للقائمة"
+      "backToList": "العودة للقائمة",
+      "attendanceTable": {
+        "date": "التاريخ",
+        "status": "الحالة",
+        "notes": "ملاحظات",
+        "noRecords": "لا توجد سجلات حضور."
+      },
+      "attendanceStatus": {
+        "present": "حاضر",
+        "absent": "غائب",
+        "excused": "معذور"
+      },
+      "followupsTable": {
+        "type": "النوع",
+        "status": "الحالة",
+        "scheduledAt": "موعد المتابعة",
+        "completedAt": "تاريخ الإكمال",
+        "assignedTo": "مسند إلى",
+        "notes": "ملاحظات",
+        "outcome": "النتيجة",
+        "noRecords": "لا توجد متابعات."
+      },
+      "followupStatus": {
+        "scheduled": "مجدول",
+        "in_progress": "قيد التنفيذ",
+        "completed": "مكتمل",
+        "cancelled": "ملغي"
+      },
+      "followupType": {
+        "phone_call": "اتصال هاتفي",
+        "home_visit": "زيارة منزلية",
+        "whatsapp": "واتساب",
+        "church_meeting": "لقاء كنيسة",
+        "other": "أخرى"
+      },
+      "deactivateChild": "إلغاء تنشيط",
+      "notFound": "الطفل غير موجود."
+    },
+    "attendance": {
+      "title": "الحضور",
+      "description": "تسجيل وإدارة حضور الأطفال في كل مرحلة.",
+      "selectStage": "اختر المرحلة",
+      "ministryFilter": "جميع الخدمات",
+      "selectDate": "اختر التاريخ",
+      "childName": "اسم الطفل",
+      "status": "الحالة",
+      "notes": "ملاحظات",
+      "present": "حاضر",
+      "absent": "غائب",
+      "excused": "معذور",
+      "saveAttendance": "حفظ الحضور",
+      "saving": "جارٍ الحفظ…",
+      "saveSuccess": "تم حفظ الحضور بنجاح.",
+      "saveError": "فشل حفظ الحضور.",
+      "noStageSelected": "اختر مرحلة وتاريخ للبدء.",
+      "noChildrenInStage": "لا يوجد أطفال نشطون في هذه المرحلة."
+    },
+    "followups": {
+      "title": "المتابعات",
+      "description": "تتبع وإدارة المتابعات مع الأطفال والعائلات.",
+      "addFollowup": "إضافة متابعة",
+      "searchPlaceholder": "بحث باسم الطفل…",
+      "allTypes": "جميع الأنواع",
+      "allAssignedTo": "الجميع",
+      "child": "الطفل",
+      "type": "النوع",
+      "status": "الحالة",
+      "scheduledAt": "موعد المتابعة",
+      "assignedTo": "مسند إلى",
+      "notes": "ملاحظات",
+      "outcome": "النتيجة",
+      "actions": "الإجراءات",
+      "edit": "تعديل",
+      "changeStatus": "تغيير الحالة",
+      "delete": "حذف",
+      "noFollowups": "لا توجد متابعات بعد.",
+      "createTitle": "إضافة متابعة",
+      "editTitle": "تعديل المتابعة",
+      "formDescription": "املأ بيانات المتابعة أدناه.",
+      "stage": "المرحلة",
+      "selectChild": "اختر طفلاً",
+      "selectStage": "اختر مرحلة",
+      "selectType": "اختر النوع",
+      "selectStatus": "اختر الحالة",
+      "selectAssignedTo": "اختر مستخدمًا",
+      "cancel": "إلغاء",
+      "processing": "جارٍ الحفظ…",
+      "save": "حفظ",
+      "deleteConfirm": "هل أنت متأكد من حذف هذه المتابعة؟",
+      "loadError": "فشل تحميل المتابعات.",
+      "statusDialogTitle": "تغيير الحالة",
+      "statusDialogDescription": "قم بتحديث حالة المتابعة وإضافة أي ملاحظات."
     }
   }
 }

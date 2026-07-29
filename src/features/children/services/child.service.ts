@@ -119,7 +119,7 @@ export async function getChildById(
         .limit(50),
       supabase
         .from("followups")
-        .select("*")
+        .select("*, profiles:assigned_to(full_name_ar)")
         .eq("child_id", childId)
         .order("created_at", { ascending: false })
         .limit(50),
@@ -667,8 +667,50 @@ export async function listMinistries(
   }
 }
 
+export async function getFollowupById(
+  supabase: SupabaseClient,
+  followupId: string,
+): Promise<ServiceResult<Record<string, unknown>>> {
+  try {
+    const { data, error } = await supabase
+      .from("followups")
+      .select("*")
+      .eq("id", followupId)
+      .single();
+
+    if (error || !data) {
+      return { data: null, error: "Followup not found." };
+    }
+
+    return { data, error: null };
+  } catch {
+    return { data: null, error: "Failed to load followup." };
+  }
+}
+
+export async function deleteFollowup(
+  supabase: SupabaseClient,
+  followupId: string,
+): Promise<ServiceResult<boolean>> {
+  try {
+    const { error } = await supabase
+      .from("followups")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", followupId);
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data: true, error: null };
+  } catch {
+    return { data: null, error: "Failed to delete followup." };
+  }
+}
+
 export async function listUsers(
   supabase: SupabaseClient,
+  churchId: string,
 ): Promise<ServiceResult<Pick<import("../types/child.types").ProfileRow, "id" | "full_name_ar" | "full_name_en" | "email">[]>> {
   try {
     const { data, error } = await supabase
@@ -676,6 +718,7 @@ export async function listUsers(
       .select("id, full_name_ar, full_name_en, email")
       .is("deleted_at", null)
       .eq("is_active", true)
+      .eq("church_id", churchId)
       .order("full_name_ar");
 
     if (error) {

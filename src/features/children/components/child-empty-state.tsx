@@ -1,19 +1,27 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { Baby } from "lucide-react";
+import type { ReactNode } from "react";
 
-export function ChildEmptyState() {
-  const t = useTranslations("children.emptyState");
+type ChildEmptyStateProps = {
+  icon?: ReactNode;
+  title: string;
+  description: string;
+};
 
+export function ChildEmptyState({
+  icon,
+  title,
+  description,
+}: ChildEmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-card px-6 py-16 text-center">
       <div className="rounded-2xl bg-muted p-4">
-        <Baby className="size-8 text-muted-foreground" />
+        {icon ?? <Baby className="size-8 text-muted-foreground" />}
       </div>
-      <h3 className="mt-4 text-lg font-semibold">{t("title")}</h3>
+      <h3 className="mt-4 text-lg font-semibold">{title}</h3>
       <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        {t("description")}
+        {description}
       </p>
     </div>
   );

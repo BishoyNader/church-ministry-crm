@@ -232,9 +232,11 @@
       "description": "Start by registering your first child to begin tracking their ministry journey."
     },
     "filters": {
+      "allMinistries": "All Ministries",
       "allStages": "All Stages",
       "allStatuses": "All Statuses",
-      "allPipeline": "All Pipeline Stages"
+      "allPipeline": "All Pipeline Stages",
+      "clearFilters": "Clear Filters"
     },
     "table": {
       "name": "Name",
@@ -244,6 +246,10 @@
       "parentPhone": "Parent Phone",
       "enrolledAt": "Enrolled",
       "actions": "Actions"
+    },
+    "empty": {
+      "title": "No children yet",
+      "description": "Register a child to start tracking attendance and follow-ups."
     },
     "status": {
       "active": "Active",
@@ -324,14 +330,128 @@
         "followups": "Follow-ups"
       },
       "personalInfo": "Personal Information",
+      "firstNameAr": "First Name (Arabic)",
+      "firstNameEn": "First Name (English)",
+      "lastNameAr": "Last Name (Arabic)",
+      "lastNameEn": "Last Name (English)",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "ministry": "Ministry",
+      "stage": "Stage",
       "parentInfo": "Parent / Guardian",
+      "father": "Father",
+      "mother": "Mother",
+      "parentPhone": "Parent Phone",
+      "parentEmail": "Parent Email",
+      "address": "Address",
+      "emergencyContact": "Emergency Contact",
+      "emergencyPhone": "Emergency Phone",
+      "mobile": "Mobile",
       "medicalInfo": "Medical Information",
+      "allergies": "Allergies",
+      "medicalConditions": "Medical Conditions",
+      "medications": "Medications",
       "spiritualInfo": "Spiritual Information",
+      "baptismDate": "Baptism Date",
+      "confessionFrequency": "Confession Frequency",
+      "spiritualNotes": "Spiritual Notes",
       "educationInfo": "Education Information",
-      "attendancePlaceholder": "Attendance tracking will be available in a future phase.",
-      "followupsPlaceholder": "Follow-up management will be available in a future phase.",
+      "school": "School",
+      "gradeLevel": "Grade Level",
+      "notes": "Notes",
       "editChild": "Edit Child",
-      "backToList": "Back to Children"
+      "backToList": "Back to Children",
+      "attendanceTable": {
+        "date": "Date",
+        "status": "Status",
+        "notes": "Notes",
+        "noRecords": "No attendance records found."
+      },
+      "attendanceStatus": {
+        "present": "Present",
+        "absent": "Absent",
+        "excused": "Excused"
+      },
+      "followupsTable": {
+        "type": "Type",
+        "status": "Status",
+        "scheduledAt": "Scheduled",
+        "completedAt": "Completed",
+        "assignedTo": "Assigned To",
+        "notes": "Notes",
+        "outcome": "Outcome",
+        "noRecords": "No follow-ups found."
+      },
+      "followupStatus": {
+        "scheduled": "Scheduled",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "followupType": {
+        "phone_call": "Phone Call",
+        "home_visit": "Home Visit",
+        "whatsapp": "WhatsApp",
+        "church_meeting": "Church Meeting",
+        "other": "Other"
+      },
+      "deactivateChild": "Deactivate",
+      "notFound": "Child not found."
+    },
+    "attendance": {
+      "title": "Attendance",
+      "description": "Record and manage attendance for children in each stage.",
+      "selectStage": "Select Stage",
+      "ministryFilter": "All Ministries",
+      "selectDate": "Select Date",
+      "childName": "Child Name",
+      "status": "Status",
+      "notes": "Notes",
+      "present": "Present",
+      "absent": "Absent",
+      "excused": "Excused",
+      "saveAttendance": "Save Attendance",
+      "saving": "Saving…",
+      "saveSuccess": "Attendance saved successfully.",
+      "saveError": "Failed to save attendance.",
+      "noStageSelected": "Select a stage and date to begin.",
+      "noChildrenInStage": "No active children found in this stage."
+    },
+    "followups": {
+      "title": "Follow-ups",
+      "description": "Track and manage follow-ups with children and families.",
+      "addFollowup": "Add Follow-up",
+      "searchPlaceholder": "Search by child name…",
+      "allTypes": "All Types",
+      "allAssignedTo": "All Assigned To",
+      "child": "Child",
+      "type": "Type",
+      "status": "Status",
+      "scheduledAt": "Scheduled At",
+      "assignedTo": "Assigned To",
+      "notes": "Notes",
+      "outcome": "Outcome",
+      "actions": "Actions",
+      "edit": "Edit",
+      "changeStatus": "Change Status",
+      "delete": "Delete",
+      "noFollowups": "No follow-ups found yet.",
+      "createTitle": "Add Follow-up",
+      "editTitle": "Edit Follow-up",
+      "formDescription": "Fill in the follow-up details below.",
+      "stage": "Stage",
+      "selectChild": "Select a child",
+      "selectStage": "Select a stage",
+      "selectType": "Select type",
+      "selectStatus": "Select status",
+      "selectAssignedTo": "Select user",
+      "cancel": "Cancel",
+      "processing": "Processing…",
+      "save": "Save",
+      "deleteConfirm": "Are you sure you want to delete this follow-up?",
+      "loadError": "Failed to load follow-ups.",
+      "statusDialogTitle": "Change Status",
+      "statusDialogDescription": "Update the follow-up status and add any notes."
     }
   }
 }

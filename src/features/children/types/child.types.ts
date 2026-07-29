@@ -36,11 +36,15 @@ export type ChildListItem = ChildRow & {
   stageNameAr: string;
 };
 
+export type ChildDetailFollowup = FollowupRow & {
+  profiles?: { full_name_ar: string | null } | null;
+};
+
 export type ChildDetail = ChildRow & {
   ministryNameAr: string;
   stageNameAr: string;
   attendance: AttendanceRow[];
-  followups: FollowupRow[];
+  followups: ChildDetailFollowup[];
 };
 
 export type AttendanceListItem = AttendanceRow & {

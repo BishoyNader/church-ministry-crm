@@ -117,8 +117,11 @@ export function useDeactivateChild() {
 
   return useMutation({
     mutationFn: (childId: string) => deactivateChildAction(childId),
-    onSuccess: () => {
+    onSuccess: (_data, childId) => {
       queryClient.invalidateQueries({ queryKey: CHILD_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: CHILD_QUERY_KEYS.detail(childId),
+      });
     },
   });
 }

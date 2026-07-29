@@ -5,6 +5,7 @@ import {
   listFollowupsAction,
   createFollowupAction,
   updateFollowupAction,
+  deleteFollowupAction,
 } from "../actions/child.actions";
 import type {
   CreateFollowupFormValues,
@@ -46,6 +47,18 @@ export function useCreateFollowup() {
   });
 }
 
+export function useDeleteFollowup() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (followupId: string) => deleteFollowupAction(followupId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: FOLLOWUP_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: CHILD_QUERY_KEYS.all });
+    },
+  });
+}
+
 export function useUpdateFollowup() {
   const queryClient = useQueryClient();
 
@@ -59,6 +72,7 @@ export function useUpdateFollowup() {
     }) => updateFollowupAction(followupId, values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FOLLOWUP_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: CHILD_QUERY_KEYS.all });
     },
   });
 }

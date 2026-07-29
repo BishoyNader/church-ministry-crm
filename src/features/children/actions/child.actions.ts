@@ -475,6 +475,10 @@ export async function batchAttendanceAction(
     return { success: false, message: "You do not have permission to record attendance." };
   }
 
+  if (!(await hasPermission(PERMISSION_CODES.ATTENDANCE_UPDATE))) {
+    return { success: false, message: "You do not have permission to update attendance." };
+  }
+
   const result = await childService.batchAttendance(supabase, {
     stage_id: values.stage_id,
     attendance_date: values.attendance_date,
@@ -605,6 +609,9 @@ export async function updateFollowupAction(
     return { success: false, message: "You do not have permission to update followups." };
   }
 
+  const existing = await childService.getFollowupById(supabase, followupId);
+  const oldValues = existing.data ?? undefined;
+
   const result = await childService.updateFollowup(supabase, followupId, {
     status: values.status,
     outcome: values.outcome,
@@ -617,9 +624,42 @@ export async function updateFollowupAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "update", "followup", followupId, undefined, values);
+  await auditLog(supabase, "update", "followup", followupId, oldValues, values);
 
   return { success: true, message: "Followup updated." };
+}
+
+export async function deleteFollowupAction(
+  followupId: string,
+): Promise<ChildActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.FOLLOWUPS_DELETE))) {
+    return { success: false, message: "You do not have permission to delete followups." };
+  }
+
+  const idError = validateId(followupId, "followup ID");
+  if (idError) return idError;
+
+  const existing = await childService.getFollowupById(supabase, followupId);
+  const oldValues = existing.data ?? undefined;
+
+  const result = await childService.deleteFollowup(supabase, followupId);
+
+  if (result.error) {
+    return { success: false, message: result.error };
+  }
+
+  await auditLog(supabase, "delete", "followup", followupId, oldValues);
+
+  return { success: true, message: "Followup deleted." };
 }
 
 export async function listFollowupsAction(
@@ -719,7 +759,17 @@ export async function listUsersAction(): Promise<
     return { success: false, message: "You do not have permission to view users." };
   }
 
-  const result = await childService.listUsers(supabase);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await childService.listUsers(supabase, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };

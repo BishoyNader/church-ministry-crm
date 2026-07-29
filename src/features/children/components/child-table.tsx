@@ -96,7 +96,7 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {child.parent_phone ?? "—"}
+                      {child.parent_phone ?? "\u2014"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {new Date(child.created_at).toLocaleDateString()}
@@ -106,7 +106,7 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          onClick={() => router.push(`/${child.id}`)}
+                          onClick={() => router.push(`/children/${child.id}`)}
                           aria-label={t("table.actions")}
                         >
                           <Eye className="size-4" />

@@ -48,6 +48,9 @@ export {
   createFollowupAction,
   updateFollowupAction,
   listFollowupsAction,
+  listStagesAction,
+  listMinistriesAction,
+  listUsersAction,
 } from "./actions/child.actions";
 
 export {
@@ -83,3 +86,9 @@ export { ChildTable } from "./components/child-table";
 export { ChildFormDialog } from "./components/child-form-dialog";
 export { ChildDeleteDialog } from "./components/child-delete-dialog";
 export { ChildDetailTabs } from "./components/child-detail-tabs";
+export { AttendancePage } from "./components/attendance-page";
+export { AttendanceTable } from "./components/attendance-table";
+export type { AttendanceRecord } from "./components/attendance-table";
+export { FollowupListPage } from "./components/followup-list-page";
+export { FollowupFormDialog } from "./components/followup-form-dialog";
+export { FollowupStatusDialog } from "./components/followup-status-dialog";
