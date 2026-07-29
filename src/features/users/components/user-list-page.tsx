@@ -23,6 +23,8 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/layout/page-header";
+import { SectionCard } from "@/components/layout/section-card";
 import { useUserList, useDeactivateUser } from "../hooks/use-users";
 import { UserForm } from "./user-form";
 import { UserRoleAssignment } from "./user-role-assignment";
@@ -82,18 +84,18 @@ export function UserListPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className="size-4" />
-          {t("createUser")}
-        </Button>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className="size-4" />
+            {t("createUser")}
+          </Button>
+        }
+      />
 
-      <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <SectionCard className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -121,19 +123,19 @@ export function UserListPage() {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </SectionCard>
 
-      <div className="rounded-xl border bg-card shadow-sm">
+      <SectionCard>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-3">{t("table.name")}</th>
                 <th className="px-4 py-3">{t("table.email")}</th>
                 <th className="px-4 py-3">{t("table.roles")}</th>
                 <th className="px-4 py-3">{t("table.status")}</th>
                 <th className="px-4 py-3">{t("table.joined")}</th>
-                <th className="px-4 py-3 text-right">{t("table.actions")}</th>
+                <th className="px-4 py-3 text-end">{t("table.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -145,7 +147,7 @@ export function UserListPage() {
                       <td className="px-4 py-3"><Skeleton className="h-5 w-20" /></td>
                       <td className="px-4 py-3"><Skeleton className="h-5 w-16" /></td>
                       <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-8 w-8 ml-auto" /></td>
+                      <td className="px-4 py-3"><Skeleton className="h-8 w-8 ms-auto" /></td>
                     </tr>
                   ))
                 : users.map((user) => (
@@ -181,7 +183,7 @@ export function UserListPage() {
                       <td className="px-4 py-3 text-muted-foreground">
                         {new Date(user.created_at).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-4 py-3 text-end">
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
@@ -231,7 +233,7 @@ export function UserListPage() {
             </div>
           </div>
         )}
-      </div>
+      </SectionCard>
 
       {createOpen && (
         <UserForm open={createOpen} onOpenChange={setCreateOpen} />

@@ -39,7 +39,7 @@ import {
   useChildStages,
 } from "../hooks/use-children";
 import type { ChildListItem } from "../types/child.types";
-import { FormField } from "@/features/stages/components/form-field";
+import { FormField } from "@/components/ui/form-field";
 
 const PIPELINE_OPTIONS = [
   "new_visitor",

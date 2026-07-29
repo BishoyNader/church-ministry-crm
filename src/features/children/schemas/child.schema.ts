@@ -88,7 +88,7 @@ export const transferChildSchema = z.object({
 });
 
 export const createAttendanceSchema = z.object({
-  child_id: z.string().uuid({ message: "Child is required" }),
+  child_id: z.string().uuid({ message: "Beneficiary is required" }),
   stage_id: z.string().uuid({ message: "Stage is required" }),
   attendance_date: z.string().regex(isoDateRegex, { message: "Date must be in YYYY-MM-DD format" }),
   status: z.enum(["present", "absent", "excused"]),
@@ -110,7 +110,7 @@ export const batchAttendanceSchema = z.object({
 });
 
 export const createFollowupSchema = z.object({
-  child_id: z.string().uuid({ message: "Child is required" }),
+  child_id: z.string().uuid({ message: "Beneficiary is required" }),
   stage_id: z.string().uuid({ message: "Stage is required" }),
   type: z.enum(["phone_call", "home_visit", "whatsapp", "church_meeting", "other"]),
   scheduled_at: optionalIsoDate,

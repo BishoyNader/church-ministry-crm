@@ -9,6 +9,12 @@ type StageAnalyticsTableProps = {
   isLoading: boolean;
 };
 
+function progressColor(pct: number): string {
+  if (pct >= 80) return "bg-emerald-500";
+  if (pct >= 50) return "bg-amber-500";
+  return "bg-rose-500";
+}
+
 export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProps) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
@@ -19,7 +25,7 @@ export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProp
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-3">{t("stageAnalytics.stage")}</th>
               <th className="px-4 py-3">{t("stageAnalytics.children")}</th>
               <th className="px-4 py-3">{t("stageAnalytics.followups")}</th>
@@ -35,7 +41,7 @@ export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProp
                     <td className="px-4 py-3"><Skeleton className="h-4 w-12" /></td>
                     <td className="px-4 py-3"><Skeleton className="h-4 w-12" /></td>
                     <td className="px-4 py-3"><Skeleton className="h-4 w-12" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-16" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
                   </tr>
                 ))
               : data?.map((stage) => (
@@ -46,8 +52,18 @@ export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProp
                     <td className="px-4 py-3 tabular-nums">{stage.totalChildren}</td>
                     <td className="px-4 py-3 tabular-nums">{stage.followupCount}</td>
                     <td className="px-4 py-3 tabular-nums">{stage.attendanceCount}</td>
-                    <td className="px-4 py-3 tabular-nums">
-                      {stage.attendancePercentage}%
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className={"h-full rounded-full transition-all " + progressColor(stage.attendancePercentage)}
+                            style={{ width: `${Math.min(stage.attendancePercentage, 100)}%` }}
+                          />
+                        </div>
+                        <span className="w-10 text-end text-xs font-medium tabular-nums text-muted-foreground">
+                          {stage.attendancePercentage}%
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ))}

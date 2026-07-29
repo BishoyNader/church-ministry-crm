@@ -31,7 +31,7 @@ export async function proxy(request: NextRequest) {
 
   if (user && isAuthPage && !isResetPassword) {
     const redirectResponse = NextResponse.redirect(
-      new URL(`/${locale}`, request.url),
+      new URL(`/${locale}/dashboard`, request.url),
     );
     copyCookies(response, redirectResponse);
     return redirectResponse;

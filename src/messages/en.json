@@ -20,6 +20,26 @@
       "description": "Share key insights across leaders without juggling spreadsheets and emails."
     }
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "children": "Beneficiaries",
+    "attendance": "Attendance",
+    "followups": "Follow-ups",
+    "stages": "Stages",
+    "users": "Users",
+    "events": "Events",
+    "settings": "Settings",
+    "comingSoon": "Soon",
+    "tagline": "Ministry operations",
+    "greeting": "Good morning",
+    "welcomeBack": "Welcome back to your church dashboard",
+    "footerTitle": "Ready for ministry",
+    "footerDescription": "Track members, events, and follow-ups from one place.",
+    "mainNavigation": "Main navigation",
+    "toggleMenu": "Toggle navigation menu",
+    "toggleTheme": "Toggle theme",
+    "signOut": "Sign out"
+  },
   "auth": {
     "loading": "Processing…",
     "generalError": "Something went wrong. Please try again.",
@@ -187,7 +207,7 @@
         "inactive": "Inactive",
         "age": "Age"
       },
-      "childrenCount": "{count} children",
+      "childrenCount": "{count} Beneficiaries",
       "usersCount": "{count} users",
       "form": {
         "createFormTitle": "Add Stage",
@@ -222,14 +242,14 @@
     }
   },
   "children": {
-    "title": "Children Management",
-    "description": "Register, track, and manage children across ministries and stages.",
-    "addChild": "Add Child",
+    "title": "Beneficiary Management",
+    "description": "Register, track, and manage beneficiaries across ministries and stages.",
+    "addChild": "Add Beneficiary",
     "searchPlaceholder": "Search by name, phone, or mobile…",
     "search": "Search",
     "emptyState": {
-      "title": "No children found",
-      "description": "Start by registering your first child to begin tracking their ministry journey."
+      "title": "No beneficiaries found",
+      "description": "Start by registering your first beneficiary to begin tracking their ministry journey."
     },
     "filters": {
       "allMinistries": "All Ministries",
@@ -248,8 +268,8 @@
       "actions": "Actions"
     },
     "empty": {
-      "title": "No children yet",
-      "description": "Register a child to start tracking attendance and follow-ups."
+      "title": "No beneficiaries yet",
+      "description": "Register a beneficiary to start tracking attendance and follow-ups."
     },
     "status": {
       "active": "Active",
@@ -270,9 +290,9 @@
       "next": "Next"
     },
     "form": {
-      "createTitle": "Add Child",
-      "editTitle": "Edit Child",
-      "description": "Fill in the child's information below.",
+      "createTitle": "Add Beneficiary",
+      "editTitle": "Edit Beneficiary",
+      "description": "Fill in the beneficiary's information below.",
       "sections": {
         "personal": "Personal Information",
         "parent": "Parent / Guardian",
@@ -317,7 +337,7 @@
       "processing": "Processing…"
     },
     "delete": {
-      "title": "Deactivate Child",
+      "title": "Deactivate Beneficiary",
       "description": "Are you sure you want to deactivate {name}? They will be removed from active lists but their records will be preserved.",
       "confirm": "Deactivate",
       "cancel": "Cancel",
@@ -359,8 +379,8 @@
       "school": "School",
       "gradeLevel": "Grade Level",
       "notes": "Notes",
-      "editChild": "Edit Child",
-      "backToList": "Back to Children",
+      "editChild": "Edit Beneficiary",
+      "backToList": "Back to Beneficiaries",
       "attendanceTable": {
         "date": "Date",
         "status": "Status",
@@ -396,15 +416,15 @@
         "other": "Other"
       },
       "deactivateChild": "Deactivate",
-      "notFound": "Child not found."
+      "notFound": "Beneficiary not found."
     },
     "attendance": {
       "title": "Attendance",
-      "description": "Record and manage attendance for children in each stage.",
+      "description": "Record and manage attendance for beneficiaries in each stage.",
       "selectStage": "Select Stage",
       "ministryFilter": "All Ministries",
       "selectDate": "Select Date",
-      "childName": "Child Name",
+      "childName": "Beneficiary Name",
       "status": "Status",
       "notes": "Notes",
       "present": "Present",
@@ -415,16 +435,16 @@
       "saveSuccess": "Attendance saved successfully.",
       "saveError": "Failed to save attendance.",
       "noStageSelected": "Select a stage and date to begin.",
-      "noChildrenInStage": "No active children found in this stage."
+      "noChildrenInStage": "No active beneficiaries found in this stage."
     },
     "followups": {
       "title": "Follow-ups",
-      "description": "Track and manage follow-ups with children and families.",
+      "description": "Track and manage follow-ups with beneficiaries and families.",
       "addFollowup": "Add Follow-up",
-      "searchPlaceholder": "Search by child name…",
+      "searchPlaceholder": "Search by beneficiary name…",
       "allTypes": "All Types",
       "allAssignedTo": "All Assigned To",
-      "child": "Child",
+      "child": "Beneficiary",
       "type": "Type",
       "status": "Status",
       "scheduledAt": "Scheduled At",
@@ -440,7 +460,7 @@
       "editTitle": "Edit Follow-up",
       "formDescription": "Fill in the follow-up details below.",
       "stage": "Stage",
-      "selectChild": "Select a child",
+      "selectChild": "Select a beneficiary",
       "selectStage": "Select a stage",
       "selectType": "Select type",
       "selectStatus": "Select status",
@@ -458,7 +478,7 @@
     "title": "Dashboard",
     "description": "An overview of your ministry metrics and analytics.",
     "activeChildren": {
-      "label": "Active Children"
+      "label": "Active Beneficiaries"
     },
     "newChildren": {
       "label": "New This Month"
@@ -467,7 +487,10 @@
       "label": "Open Follow-ups"
     },
     "overdueFollowups": {
-      "label": "Overdue"
+      "label": "Overdue Follow-ups",
+      "description": "{count} follow-up(s) require your attention",
+      "allClear": "All follow-ups are up to date",
+      "viewAll": "View All"
     },
     "attendanceThisMonth": {
       "label": "Attendance This Month"
@@ -484,7 +507,7 @@
     "stageAnalytics": {
       "title": "Stage Analytics",
       "stage": "Stage",
-      "children": "Children",
+    "children": "Beneficiaries",
       "followups": "Follow-ups",
       "attendance": "Attendance",
       "attendanceRate": "Rate"
@@ -506,6 +529,18 @@
       "regular_attendee": "Regular Attendee",
       "active_member": "Active Member",
       "leader_candidate": "Leader Candidate"
+    },
+    "quickActions": {
+      "addChild": "Add Beneficiary",
+      "scheduleFollowup": "Schedule Follow-up",
+      "recordAttendance": "Record Attendance",
+      "viewReports": "View Reports"
+    },
+    "nextFollowupsDue": {
+      "title": "Next Follow-ups Due"
+    },
+    "recentChildren": {
+      "title": "Recent Beneficiaries"
     },
     "noData": "No data available.",
     "loadError": "Failed to load dashboard data."

@@ -40,14 +40,14 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-3">{t("table.name")}</th>
               <th className="px-4 py-3">{t("table.stage")}</th>
               <th className="px-4 py-3">{t("table.status")}</th>
               <th className="px-4 py-3">{t("table.pipelineStage")}</th>
               <th className="px-4 py-3">{t("table.parentPhone")}</th>
               <th className="px-4 py-3">{t("table.enrolledAt")}</th>
-              <th className="px-4 py-3 text-right">{t("table.actions")}</th>
+              <th className="px-4 py-3 text-end">{t("table.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -60,7 +60,7 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
                     <td className="px-4 py-3"><Skeleton className="h-5 w-24" /></td>
                     <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
                     <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-8 w-20 ml-auto" /></td>
+                    <td className="px-4 py-3"><Skeleton className="h-8 w-20 ms-auto" /></td>
                   </tr>
                 ))
               : children_.map((child) => (
@@ -101,7 +101,7 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
                     <td className="px-4 py-3 text-muted-foreground">
                       {new Date(child.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-end">
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"

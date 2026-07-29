@@ -20,6 +20,26 @@
       "description": "شارك الرؤى الأساسية مع القادة دون الاعتماد على الجداول الإلكترونية والبريد الإلكتروني."
     }
   },
+  "nav": {
+    "dashboard": "لوحة المعلومات",
+    "children": "المخدومون",
+    "attendance": "الحضور",
+    "followups": "المتابعات",
+    "stages": "المراحل",
+    "users": "المستخدمين",
+    "events": "الأحداث",
+    "settings": "الإعدادات",
+    "comingSoon": "قريباً",
+    "tagline": "عمليات الخدمة",
+    "greeting": "صباح الخير",
+    "welcomeBack": "مرحبًا بعودتك إلى لوحة معلومات كنيستك",
+    "footerTitle": "جاهز للخدمة",
+    "footerDescription": "تابع الأعضاء والأحداث والمتابعات من مكان واحد.",
+    "mainNavigation": "القائمة الرئيسية",
+    "toggleMenu": "فتح/إغلاق القائمة",
+    "toggleTheme": "تبديل السمة",
+    "signOut": "تسجيل الخروج"
+  },
   "auth": {
     "loading": "جارٍ المعالجة…",
     "generalError": "حدث خطأ. الرجاء المحاولة مرة أخرى.",
@@ -187,7 +207,7 @@
         "inactive": "غير نشط",
         "age": "العمر"
       },
-      "childrenCount": "{count} أطفال",
+      "childrenCount": "{count} مخدومين",
       "usersCount": "{count} مستخدمين",
       "form": {
         "createFormTitle": "إضافة مرحلة",
@@ -222,14 +242,14 @@
     }
   },
   "children": {
-    "title": "إدارة الأطفال",
-    "description": "تسجيل وتتبع وإدارة الأطفال عبر الوزارات والمراحل.",
-    "addChild": "إضافة طفل",
+    "title": "إدارة المخدومين",
+    "description": "تسجيل وتتبع وإدارة المخدومين عبر الخدمات والمراحل.",
+    "addChild": "إضافة مخدوم",
     "searchPlaceholder": "بحث بالاسم أو الهاتف أو الجوال…",
     "search": "بحث",
     "emptyState": {
-      "title": "لم يتم العثور على أطفال",
-      "description": "ابدأ بتسجيل أول طفل لبدء تتبع رحلته في الخدمة."
+      "title": "لم يتم العثور على مخدومين",
+      "description": "ابدأ بتسجيل أول مخدوم لبدء تتبع رحلته في الخدمة."
     },
     "filters": {
       "allMinistries": "جميع الخدمات",
@@ -248,8 +268,8 @@
       "actions": "الإجراءات"
     },
     "empty": {
-      "title": "لا يوجد أطفال بعد",
-      "description": "سجّل طفلاً لبدء تتبع الحضور والمتابعات."
+      "title": "لا يوجد مخدومين بعد",
+      "description": "سجّل مخدوماً لبدء تتبع الحضور والمتابعات."
     },
     "status": {
       "active": "نشط",
@@ -270,9 +290,9 @@
       "next": "التالي"
     },
     "form": {
-      "createTitle": "إضافة طفل",
-      "editTitle": "تعديل بيانات الطفل",
-      "description": "املأ معلومات الطفل أدناه.",
+      "createTitle": "إضافة مخدوم",
+      "editTitle": "تعديل بيانات المخدوم",
+      "description": "املأ معلومات المخدوم أدناه.",
       "sections": {
         "personal": "المعلومات الشخصية",
         "parent": "ولي الأمر",
@@ -317,7 +337,7 @@
       "processing": "جارٍ المعالجة…"
     },
     "delete": {
-      "title": "تعطيل الطفل",
+      "title": "تعطيل المخدوم",
       "description": "هل أنت متأكد من تعطيل {name}؟ سيتم إزالته من القوائم النشطة لكن سجلاته ستبقى محفوظة.",
       "confirm": "تعطيل",
       "cancel": "إلغاء",
@@ -359,8 +379,8 @@
       "school": "المدرسة",
       "gradeLevel": "الصف الدراسي",
       "notes": "ملاحظات",
-      "editChild": "تعديل الطفل",
-      "backToList": "العودة للقائمة",
+      "editChild": "تعديل المخدوم",
+      "backToList": "العودة لقائمة المخدومين",
       "attendanceTable": {
         "date": "التاريخ",
         "status": "الحالة",
@@ -396,15 +416,15 @@
         "other": "أخرى"
       },
       "deactivateChild": "إلغاء تنشيط",
-      "notFound": "الطفل غير موجود."
+      "notFound": "المخدوم غير موجود."
     },
     "attendance": {
       "title": "الحضور",
-      "description": "تسجيل وإدارة حضور الأطفال في كل مرحلة.",
+      "description": "تسجيل وإدارة حضور المخدومين في كل مرحلة.",
       "selectStage": "اختر المرحلة",
       "ministryFilter": "جميع الخدمات",
       "selectDate": "اختر التاريخ",
-      "childName": "اسم الطفل",
+      "childName": "اسم المخدوم",
       "status": "الحالة",
       "notes": "ملاحظات",
       "present": "حاضر",
@@ -415,16 +435,16 @@
       "saveSuccess": "تم حفظ الحضور بنجاح.",
       "saveError": "فشل حفظ الحضور.",
       "noStageSelected": "اختر مرحلة وتاريخ للبدء.",
-      "noChildrenInStage": "لا يوجد أطفال نشطون في هذه المرحلة."
+      "noChildrenInStage": "لا يوجد مخدومين نشطين في هذه المرحلة."
     },
     "followups": {
       "title": "المتابعات",
-      "description": "تتبع وإدارة المتابعات مع الأطفال والعائلات.",
+      "description": "تتبع وإدارة المتابعات مع المخدومين والعائلات.",
       "addFollowup": "إضافة متابعة",
-      "searchPlaceholder": "بحث باسم الطفل…",
+      "searchPlaceholder": "بحث باسم المخدوم…",
       "allTypes": "جميع الأنواع",
       "allAssignedTo": "الجميع",
-      "child": "الطفل",
+      "child": "المخدوم",
       "type": "النوع",
       "status": "الحالة",
       "scheduledAt": "موعد المتابعة",
@@ -440,7 +460,7 @@
       "editTitle": "تعديل المتابعة",
       "formDescription": "املأ بيانات المتابعة أدناه.",
       "stage": "المرحلة",
-      "selectChild": "اختر طفلاً",
+      "selectChild": "اختر مخدوماً",
       "selectStage": "اختر مرحلة",
       "selectType": "اختر النوع",
       "selectStatus": "اختر الحالة",
@@ -458,7 +478,7 @@
     "title": "لوحة المعلومات",
     "description": "نظرة عامة على مقاييس خدمتك وتحليلاتها.",
     "activeChildren": {
-      "label": "الأطفال النشطون"
+      "label": "المخدومون النشطون"
     },
     "newChildren": {
       "label": "الجدد هذا الشهر"
@@ -467,7 +487,10 @@
       "label": "المتابعات المفتوحة"
     },
     "overdueFollowups": {
-      "label": "متأخرة"
+      "label": "المتابعات المتأخرة",
+      "description": "{count} متابعة تحتاج إلى اهتمامك",
+      "allClear": "جميع المتابعات محدثة",
+      "viewAll": "عرض الكل"
     },
     "attendanceThisMonth": {
       "label": "الحضور هذا الشهر"
@@ -484,7 +507,7 @@
     "stageAnalytics": {
       "title": "تحليلات المراحل",
       "stage": "المرحلة",
-      "children": "الأطفال",
+    "children": "المخدومين",
       "followups": "المتابعات",
       "attendance": "الحضور",
       "attendanceRate": "النسبة"
@@ -506,6 +529,18 @@
       "regular_attendee": "حضور منتظم",
       "active_member": "عضو نشط",
       "leader_candidate": "مرشح قيادي"
+    },
+    "quickActions": {
+      "addChild": "إضافة مخدوم",
+      "scheduleFollowup": "جدولة متابعة",
+      "recordAttendance": "تسجيل حضور",
+      "viewReports": "عرض التقارير"
+    },
+    "nextFollowupsDue": {
+      "title": "المتابعات القادمة"
+    },
+    "recentChildren": {
+      "title": "المخدومون الجدد"
     },
     "noData": "لا توجد بيانات متاحة.",
     "loadError": "فشل تحميل بيانات لوحة المعلومات."

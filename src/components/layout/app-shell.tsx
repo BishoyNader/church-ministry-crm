@@ -1,22 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, Moon, Sun, Church, Users, Layers, Baby, CalendarDays, BarChart3, Settings, Bell, LogOut, ClipboardCheck, Phone } from "lucide-react";
+import Link from "next/link";
+import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "next-themes";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { logoutAction } from "@/features/auth/actions/auth.actions";
+import { cn } from "@/lib/utils";
+import { useDirection } from "@/lib/direction";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: BarChart3 },
-  { label: "Users", href: "/users", icon: Users },
-  { label: "Stages", href: "/stages", icon: Layers },
-  { label: "Children", href: "/children", icon: Baby },
-  { label: "Attendance", href: "/attendance", icon: ClipboardCheck },
-  { label: "Followups", href: "/followups", icon: Phone },
-  { label: "Events", href: "#", icon: CalendarDays },
-  { label: "Settings", href: "#", icon: Settings },
-];
+  { labelKey: "dashboard", href: "/dashboard", icon: BarChart3, disabled: false },
+  { labelKey: "children", href: "/children", icon: UserRound, disabled: false },
+  { labelKey: "attendance", href: "/attendance", icon: ClipboardCheck, disabled: false },
+  { labelKey: "followups", href: "/followups", icon: Phone, disabled: false },
+  { labelKey: "stages", href: "/stages", icon: Layers, disabled: false },
+  { labelKey: "users", href: "/users", icon: Users, disabled: false },
+  { labelKey: "events", href: null, icon: CalendarDays, disabled: true },
+  { labelKey: "settings", href: null, icon: Settings, disabled: true },
+] as const;
+
+function getActivePath(pathname: string): string {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] === "ar" || parts[0] === "en") {
+    return "/" + (parts.slice(1).join("/") || "");
+  }
+  return pathname;
+}
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -24,10 +38,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations();
+  const dir = useDirection();
+  const isRtl = dir === "rtl";
+
+  const activePath = getActivePath(pathname);
+  const locale = pathname.startsWith("/ar") ? "ar" : "en";
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-    const locale = pathname.startsWith("/ar") ? "ar" : "en";
     const result = await logoutAction(locale);
     setIsSigningOut(false);
 
@@ -36,39 +55,82 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const renderNavLink = (item: typeof navItems[number], handleClick?: () => void) => {
+    const Icon = item.icon;
+    const isActive = item.href !== null && activePath === item.href;
+
+    if (item.disabled) {
+      return (
+        <span
+          key={item.labelKey}
+          className="flex cursor-not-allowed items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-400 dark:text-slate-600"
+          title={t("nav.comingSoon")}
+        >
+          <Icon className="size-4 shrink-0 opacity-50" />
+          <span className="opacity-50">{t(`nav.${item.labelKey}`)}</span>
+          <Badge variant="outline" className="ms-auto px-1.5 py-0 text-[10px] uppercase leading-none text-muted-foreground">
+            {t("nav.comingSoon")}
+          </Badge>
+        </span>
+      );
+    }
+
+    return (
+      <Link
+          key={item.labelKey}
+          href={item.href!}
+          aria-current={isActive ? "page" : undefined}
+          onClick={handleClick}
+          className={cn(
+            "group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+            isActive
+              ? "bg-ministry/10 text-ministry shadow-sm"
+              : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
+          )}
+        >
+          <Icon className={cn("size-4 shrink-0 transition-transform duration-200", isActive ? "scale-110" : "group-hover:scale-105")} />
+          <span className={cn(isActive && "font-semibold")}>{t(`nav.${item.labelKey}`)}</span>
+          {isActive && (
+            <span className="ms-auto h-1.5 w-1.5 rounded-full bg-ministry" />
+          )}
+        </Link>
+    );
+  };
+
+  const sidebarContent = (
+    <nav className="mt-8 space-y-1" aria-label={t("nav.mainNavigation")}>
+      {navItems.map((item) => renderNavLink(item))}
+    </nav>
+  );
+
+  const mobileNavContent = (
+    <nav className="flex flex-col gap-1 p-4" aria-label={t("nav.mainNavigation")}>
+      {navItems.map((item) => {
+        if (item.disabled) return null;
+        return renderNavLink(item, () => setMobileOpen(false));
+      })}
+    </nav>
+  );
+
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-72 flex-col border-r border-slate-200 bg-white/80 p-6 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 lg:flex">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100" dir={dir}>
+      <div className={cn("flex min-h-screen", isRtl && "flex-row-reverse")}>
+        <aside className="hidden w-72 flex-col border-e border-slate-200 bg-white/80 p-6 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 lg:flex">
+          <Link href={`/${locale}/dashboard`} className="flex items-center gap-3">
             <div className="rounded-2xl bg-emerald-600 p-2 text-white">
               <Church className="size-5" />
             </div>
             <div>
               <p className="text-sm font-semibold">Church CRM</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Ministry operations</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t("nav.tagline")}</p>
             </div>
-          </div>
+          </Link>
 
-          <nav className="mt-8 space-y-2">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                >
-                  <Icon className="size-4" />
-                  {item.label}
-                </a>
-              );
-            })}
-          </nav>
+          {sidebarContent}
 
           <div className="mt-auto rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-900">
-            <p className="font-semibold">Ready for ministry</p>
-            <p className="mt-1 text-slate-500 dark:text-slate-400">Track members, events, and follow-ups from one place.</p>
+            <p className="font-semibold">{t("nav.footerTitle")}</p>
+            <p className="mt-1 text-slate-500 dark:text-slate-400">{t("nav.footerDescription")}</p>
           </div>
         </aside>
 
@@ -76,61 +138,69 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <header className="border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:px-6">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="lg:hidden"
-                  onClick={() => setMobileOpen((value) => !value)}
-                >
-                  <Menu className="size-4" />
-                </Button>
+                <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                  <SheetTrigger>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="lg:hidden"
+                      aria-label={t("nav.toggleMenu")}
+                      aria-expanded={mobileOpen}
+                      aria-controls="mobile-navigation"
+                    >
+                      <Menu className="size-4" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side={isRtl ? "right" : "left"} showCloseButton={false} id="mobile-navigation">
+                    <Link
+                      href={`/${locale}/dashboard`}
+                      className="flex items-center gap-3 px-4 pt-6"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <div className="rounded-2xl bg-emerald-600 p-2 text-white">
+                        <Church className="size-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">Church CRM</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{t("nav.tagline")}</p>
+                      </div>
+                    </Link>
+                    {mobileNavContent}
+                  </SheetContent>
+                </Sheet>
+
                 <div>
-                  <p className="text-sm font-semibold">Good morning</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Welcome back to your church dashboard</p>
+                  <p className="text-sm font-semibold">{t("nav.greeting")}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{t("nav.welcomeBack")}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" aria-label="Notifications">
-                  <Bell className="size-4" />
-                </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Toggle theme"
+                  aria-label={t("nav.toggleTheme")}
                   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                 >
                   {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
                 </Button>
-                <Button variant="ghost" size="icon" aria-label="Sign out" onClick={handleSignOut} disabled={isSigningOut}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={t("nav.signOut")}
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  aria-busy={isSigningOut}
+                >
                   <LogOut className="size-4" />
                 </Button>
               </div>
             </div>
           </header>
 
-          {mobileOpen && (
-            <div className="border-b border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 lg:hidden">
-              <nav className="space-y-2">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      <Icon className="size-4" />
-                      {item.label}
-                    </a>
-                  );
-                })}
-              </nav>
-            </div>
-          )}
-
-          <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+          <main className="flex-1 p-4 sm:p-6 lg:p-8" id="main-content">
+            {children}
+          </main>
         </div>
       </div>
     </div>

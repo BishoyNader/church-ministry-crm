@@ -1,8 +1,11 @@
 export { DashboardPage } from "./components/dashboard-page";
-export { KpiCards } from "./components/kpi-cards";
 export { AttendanceTrendChart } from "./components/attendance-trend-chart";
 export { FollowupStatusChart } from "./components/followup-status-chart";
 export { PipelineChart } from "./components/pipeline-chart";
 export { StageAnalyticsTable } from "./components/stage-analytics-table";
+export { OverdueFollowupsHero } from "./components/overdue-followups-hero";
+export { QuickActions } from "./components/quick-actions";
+export { NextFollowupsDue } from "./components/next-followups-due";
+export { RecentChildren } from "./components/recent-children";
 export { useDashboardData } from "./hooks/use-dashboard";
 export type * from "./types/dashboard.types";

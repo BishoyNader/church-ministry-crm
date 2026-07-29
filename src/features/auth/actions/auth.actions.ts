@@ -46,7 +46,7 @@ export async function loginAction(values: LoginFormValues, locale: string): Prom
   return {
     success: true,
     message: "Signed in successfully.",
-    redirectTo: `/${locale}`,
+    redirectTo: `/${locale}/dashboard`,
   };
 }
 

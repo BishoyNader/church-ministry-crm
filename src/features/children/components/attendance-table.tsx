@@ -34,7 +34,7 @@ export function AttendanceTable({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-muted/50 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-3">{t("childName")}</th>
                 <th className="px-4 py-3">{t("status")}</th>
                 <th className="px-4 py-3">{t("notes")}</th>
@@ -64,7 +64,7 @@ export function AttendanceTable({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-muted/50 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
               <th className="px-4 py-3">{t("childName")}</th>
               <th className="px-4 py-3">{t("status")}</th>
               <th className="px-4 py-3">{t("notes")}</th>

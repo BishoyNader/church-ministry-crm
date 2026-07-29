@@ -18,6 +18,8 @@ import { ChildTable } from "./child-table";
 import { ChildEmptyState } from "./child-empty-state";
 import { ChildFormDialog } from "./child-form-dialog";
 import { ChildDeleteDialog } from "./child-delete-dialog";
+import { PageHeader } from "@/components/layout/page-header";
+import { SectionCard } from "@/components/layout/section-card";
 import type { ChildListItem } from "../types/child.types";
 
 const PAGE_SIZE = 20;
@@ -111,22 +113,20 @@ export function ChildListPage() {
 
   return (
     <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <PermissionGuard permission="children.create">
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="size-4" />
-            {t("addChild")}
-          </Button>
-        </PermissionGuard>
-      </div>
+      <PageHeader
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <PermissionGuard permission="children.create">
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="size-4" />
+              {t("addChild")}
+            </Button>
+          </PermissionGuard>
+        }
+      />
 
-      <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <SectionCard className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
           <Input
             placeholder={t("searchPlaceholder")}
@@ -208,7 +208,7 @@ export function ChildListPage() {
             </Button>
           )}
         </div>
-      </div>
+      </SectionCard>
 
       {isLoading || children.length > 0 ? (
         <ChildTable
@@ -225,7 +225,7 @@ export function ChildListPage() {
       )}
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between rounded-xl border bg-card px-4 py-3 shadow-sm">
+        <SectionCard className="flex items-center justify-between px-4 py-3">
           <p className="text-xs text-muted-foreground">
             {t("pagination.showing", {
               from: (page - 1) * PAGE_SIZE + 1,
@@ -251,7 +251,7 @@ export function ChildListPage() {
               {t("pagination.next")}
             </Button>
           </div>
-        </div>
+        </SectionCard>
       )}
 
       {createOpen && (

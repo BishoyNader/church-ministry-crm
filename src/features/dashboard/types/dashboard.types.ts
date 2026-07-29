@@ -51,6 +51,21 @@ export type StageAnalyticsItem = {
   followupCount: number;
 };
 
+export type ScheduledFollowupItem = {
+  id: string;
+  childId: string;
+  childName: string;
+  scheduledAt: string;
+  status: string;
+};
+
+export type RecentChildItem = {
+  id: string;
+  name: string;
+  pipelineStage: string;
+  createdAt: string;
+};
+
 export type DashboardData = {
   kpis: DashboardKPIs;
   attendanceWeeklyTrend: AttendanceTrendItem[];
@@ -59,4 +74,6 @@ export type DashboardData = {
   followupAnalytics: FollowupAnalytics;
   pipelineAnalytics: PipelineStageCount[];
   stageAnalytics: StageAnalyticsItem[];
+  nextFollowupsDue: ScheduledFollowupItem[];
+  recentChildren: RecentChildItem[];
 };
