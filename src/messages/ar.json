@@ -453,5 +453,61 @@
       "statusDialogTitle": "تغيير الحالة",
       "statusDialogDescription": "قم بتحديث حالة المتابعة وإضافة أي ملاحظات."
     }
+  },
+  "dashboard": {
+    "title": "لوحة المعلومات",
+    "description": "نظرة عامة على مقاييس خدمتك وتحليلاتها.",
+    "activeChildren": {
+      "label": "الأطفال النشطون"
+    },
+    "newChildren": {
+      "label": "الجدد هذا الشهر"
+    },
+    "openFollowups": {
+      "label": "المتابعات المفتوحة"
+    },
+    "overdueFollowups": {
+      "label": "متأخرة"
+    },
+    "attendanceThisMonth": {
+      "label": "الحضور هذا الشهر"
+    },
+    "activeStages": {
+      "label": "المراحل النشطة"
+    },
+    "attendanceTrend": "اتجاه الحضور",
+    "attendanceWeekly": "الحضور الأسبوعي",
+    "followupStatus": {
+      "title": "حالة المتابعات"
+    },
+    "pipelineDistribution": "توزيع المسار",
+    "stageAnalytics": {
+      "title": "تحليلات المراحل",
+      "stage": "المرحلة",
+      "children": "الأطفال",
+      "followups": "المتابعات",
+      "attendance": "الحضور",
+      "attendanceRate": "النسبة"
+    },
+    "attendanceStatus": {
+      "present": "حاضر",
+      "absent": "غائب",
+      "excused": "معذور"
+    },
+    "status": {
+      "scheduled": "مجدول",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    },
+    "pipeline": {
+      "new_visitor": "زائر جديد",
+      "first_followup": "متابعة أولى",
+      "regular_attendee": "حضور منتظم",
+      "active_member": "عضو نشط",
+      "leader_candidate": "مرشح قيادي"
+    },
+    "noData": "لا توجد بيانات متاحة.",
+    "loadError": "فشل تحميل بيانات لوحة المعلومات."
   }
 }

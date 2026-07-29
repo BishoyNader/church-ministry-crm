@@ -57,8 +57,11 @@ export function useUpdateStage() {
       stageId: string;
       values: UpdateStageFormValues;
     }) => updateStageAction(stageId, values),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: STAGE_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: STAGE_QUERY_KEYS.detail(variables.stageId),
+      });
       queryClient.invalidateQueries({ queryKey: MINISTRY_QUERY_KEYS.all });
     },
   });
@@ -69,8 +72,11 @@ export function useDeactivateStage() {
 
   return useMutation({
     mutationFn: (stageId: string) => deactivateStageAction(stageId),
-    onSuccess: () => {
+    onSuccess: (_data, stageId) => {
       queryClient.invalidateQueries({ queryKey: STAGE_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: STAGE_QUERY_KEYS.detail(stageId),
+      });
       queryClient.invalidateQueries({ queryKey: MINISTRY_QUERY_KEYS.all });
     },
   });

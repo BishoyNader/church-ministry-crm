@@ -8,7 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { logoutAction } from "@/features/auth/actions/auth.actions";
 
 const navItems = [
-  { label: "Dashboard", href: "#", icon: BarChart3 },
+  { label: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { label: "Users", href: "/users", icon: Users },
   { label: "Stages", href: "/stages", icon: Layers },
   { label: "Children", href: "/children", icon: Baby },

@@ -14,11 +14,13 @@ type ServiceResult<T> = { data: T | null; error: string | null };
 
 export async function listMinistries(
   supabase: SupabaseClient,
+  churchId: string,
 ): Promise<ServiceResult<MinistryListItem[]>> {
   try {
     const { data: ministries, error } = await supabase
       .from("ministries")
       .select("*")
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .order("sort_order")
       .order("name_ar");
@@ -33,6 +35,7 @@ export async function listMinistries(
       ? await supabase
           .from("stages")
           .select("ministry_id")
+          .eq("church_id", churchId)
           .in("ministry_id", ministryIds)
           .is("deleted_at", null)
       : { data: [] };
@@ -59,12 +62,14 @@ export async function listMinistries(
 export async function getMinistryById(
   supabase: SupabaseClient,
   ministryId: string,
+  churchId: string,
 ): Promise<ServiceResult<MinistryDetail>> {
   try {
     const { data: ministry, error } = await supabase
       .from("ministries")
       .select("*")
       .eq("id", ministryId)
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .single();
 
@@ -76,6 +81,7 @@ export async function getMinistryById(
       .from("stages")
       .select("*")
       .eq("ministry_id", ministryId)
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .order("sort_order")
       .order("name_ar");
@@ -87,6 +93,7 @@ export async function getMinistryById(
         ? supabase
             .from("children")
             .select("stage_id")
+            .eq("church_id", churchId)
             .in("stage_id", stageIds)
             .eq("status", "active")
         : { data: [] as { stage_id: string }[] },
@@ -94,6 +101,7 @@ export async function getMinistryById(
         ? supabase
             .from("user_stage_assignments")
             .select("stage_id")
+            .eq("church_id", churchId)
             .in("stage_id", stageIds)
         : { data: [] as { stage_id: string }[] },
     ]);
@@ -177,6 +185,7 @@ export async function createMinistry(
 export async function updateMinistry(
   supabase: SupabaseClient,
   ministryId: string,
+  churchId: string,
   input: UpdateMinistryInput,
 ): Promise<ServiceResult<boolean>> {
   try {
@@ -190,7 +199,8 @@ export async function updateMinistry(
         sort_order: input.sort_order,
         is_active: input.is_active,
       })
-      .eq("id", ministryId);
+      .eq("id", ministryId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
@@ -205,12 +215,14 @@ export async function updateMinistry(
 export async function deactivateMinistry(
   supabase: SupabaseClient,
   ministryId: string,
+  churchId: string,
 ): Promise<ServiceResult<boolean>> {
   try {
     const { data: stages } = await supabase
       .from("stages")
       .select("id")
       .eq("ministry_id", ministryId)
+      .eq("church_id", churchId)
       .is("deleted_at", null);
 
     const stageIds = (stages ?? []).map((s) => s.id);
@@ -256,12 +268,14 @@ export async function deactivateMinistry(
 
 export async function listStages(
   supabase: SupabaseClient,
+  churchId: string,
   ministryId?: string,
 ): Promise<ServiceResult<StageListItem[]>> {
   try {
     let query = supabase
       .from("stages")
       .select("*")
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .order("sort_order")
       .order("name_ar");
@@ -283,6 +297,7 @@ export async function listStages(
         ? supabase
             .from("children")
             .select("stage_id")
+            .eq("church_id", churchId)
             .in("stage_id", stageIds)
             .eq("status", "active")
         : { data: [] as { stage_id: string }[] },
@@ -290,6 +305,7 @@ export async function listStages(
         ? supabase
             .from("user_stage_assignments")
             .select("stage_id")
+            .eq("church_id", churchId)
             .in("stage_id", stageIds)
         : { data: [] as { stage_id: string }[] },
     ]);
@@ -325,12 +341,14 @@ export async function listStages(
 export async function getStageById(
   supabase: SupabaseClient,
   stageId: string,
+  churchId: string,
 ): Promise<ServiceResult<StageListItem>> {
   try {
     const { data: stage, error } = await supabase
       .from("stages")
       .select("*")
       .eq("id", stageId)
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .single();
 
@@ -342,11 +360,13 @@ export async function getStageById(
       supabase
         .from("children")
         .select("id", { count: "exact", head: true })
+        .eq("church_id", churchId)
         .eq("stage_id", stageId)
         .eq("status", "active"),
       supabase
         .from("user_stage_assignments")
         .select("id", { count: "exact", head: true })
+        .eq("church_id", churchId)
         .eq("stage_id", stageId),
     ]);
 
@@ -414,6 +434,7 @@ export async function createStage(
 export async function updateStage(
   supabase: SupabaseClient,
   stageId: string,
+  churchId: string,
   input: UpdateStageInput,
 ): Promise<ServiceResult<boolean>> {
   try {
@@ -429,7 +450,8 @@ export async function updateStage(
         sort_order: input.sort_order,
         is_active: input.is_active,
       })
-      .eq("id", stageId);
+      .eq("id", stageId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
@@ -444,11 +466,13 @@ export async function updateStage(
 export async function deactivateStage(
   supabase: SupabaseClient,
   stageId: string,
+  churchId: string,
 ): Promise<ServiceResult<boolean>> {
   try {
     const { count } = await supabase
       .from("children")
       .select("id", { count: "exact", head: true })
+      .eq("church_id", churchId)
       .eq("stage_id", stageId)
       .eq("status", "active");
 
@@ -462,7 +486,8 @@ export async function deactivateStage(
     const { error } = await supabase
       .from("stages")
       .update({ deleted_at: new Date().toISOString() })
-      .eq("id", stageId);
+      .eq("id", stageId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
@@ -477,12 +502,14 @@ export async function deactivateStage(
 export async function getStageUsers(
   supabase: SupabaseClient,
   stageId: string,
+  churchId: string,
 ): Promise<ServiceResult<StageUser[]>> {
   try {
     const { data: assignments, error } = await supabase
       .from("user_stage_assignments")
       .select("user_id, profiles:user_id(id, full_name_ar, full_name_en, email, avatar_url)")
-      .eq("stage_id", stageId);
+      .eq("stage_id", stageId)
+      .eq("church_id", churchId);
 
     if (error) {
       return { data: null, error: error.message };
@@ -526,7 +553,8 @@ export async function assignUsersToStage(
     await supabase
       .from("user_stage_assignments")
       .delete()
-      .eq("stage_id", stageId);
+      .eq("stage_id", stageId)
+      .eq("church_id", stage.church_id);
 
     if (userIds.length > 0) {
       const inserts = userIds.map((userId) => ({
@@ -553,11 +581,13 @@ export async function assignUsersToStage(
 
 export async function listAllUsers(
   supabase: SupabaseClient,
+  churchId: string,
 ): Promise<ServiceResult<Pick<import("../types/stage.types").ProfileRow, "id" | "full_name_ar" | "full_name_en" | "email" | "avatar_url">[]>> {
   try {
     const { data, error } = await supabase
       .from("profiles")
       .select("id, full_name_ar, full_name_en, email, avatar_url")
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .eq("is_active", true)
       .order("full_name_ar");

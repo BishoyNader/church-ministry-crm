@@ -132,7 +132,17 @@ export async function listChildrenAction(
     return { success: false, message: "You do not have permission to view children." };
   }
 
-  const result = await childService.listChildren(supabase, filters, pagination);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await childService.listChildren(supabase, profile.church_id, filters, pagination);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -160,7 +170,17 @@ export async function getChildByIdAction(
     return { success: false, message: "You do not have permission to view children." };
   }
 
-  const result = await childService.getChildById(supabase, childId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await childService.getChildById(supabase, childId, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -265,7 +285,17 @@ export async function updateChildAction(
     return { success: false, message: "You do not have permission to update children." };
   }
 
-  const existing = await childService.getChildById(supabase, childId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await childService.getChildById(supabase, childId, profile.church_id);
   const oldValues = existing.data
     ? {
         first_name_ar: existing.data.first_name_ar,
@@ -274,7 +304,7 @@ export async function updateChildAction(
       }
     : undefined;
 
-  const result = await childService.updateChild(supabase, childId, {
+  const result = await childService.updateChild(supabase, childId, profile.church_id, {
     first_name_ar: values.first_name_ar,
     first_name_en: values.first_name_en,
     last_name_ar: values.last_name_ar,
@@ -344,12 +374,22 @@ export async function transferChildAction(
     return { success: false, message: "You do not have permission to update children." };
   }
 
-  const existing = await childService.getChildById(supabase, childId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await childService.getChildById(supabase, childId, profile.church_id);
   const oldValues = existing.data
     ? { ministry_id: existing.data.ministry_id, stage_id: existing.data.stage_id }
     : undefined;
 
-  const result = await childService.transferChild(supabase, childId, {
+  const result = await childService.transferChild(supabase, childId, profile.church_id, {
     ministry_id: values.ministry_id,
     stage_id: values.stage_id,
   });
@@ -385,12 +425,22 @@ export async function deactivateChildAction(
     return { success: false, message: "You do not have permission to delete children." };
   }
 
-  const existing = await childService.getChildById(supabase, childId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await childService.getChildById(supabase, childId, profile.church_id);
   const oldValues = existing.data
     ? { first_name_ar: existing.data.first_name_ar, status: existing.data.status }
     : undefined;
 
-  const result = await childService.deactivateChild(supabase, childId);
+  const result = await childService.deactivateChild(supabase, childId, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -523,7 +573,17 @@ export async function listAttendanceAction(
     return { success: false, message: "You do not have permission to view attendance." };
   }
 
-  const result = await childService.listAttendance(supabase, filters);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await childService.listAttendance(supabase, profile.church_id, filters);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -609,10 +669,20 @@ export async function updateFollowupAction(
     return { success: false, message: "You do not have permission to update followups." };
   }
 
-  const existing = await childService.getFollowupById(supabase, followupId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await childService.getFollowupById(supabase, followupId, profile.church_id);
   const oldValues = existing.data ?? undefined;
 
-  const result = await childService.updateFollowup(supabase, followupId, {
+  const result = await childService.updateFollowup(supabase, followupId, profile.church_id, {
     status: values.status,
     outcome: values.outcome,
     notes: values.notes,
@@ -648,10 +718,20 @@ export async function deleteFollowupAction(
   const idError = validateId(followupId, "followup ID");
   if (idError) return idError;
 
-  const existing = await childService.getFollowupById(supabase, followupId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await childService.getFollowupById(supabase, followupId, profile.church_id);
   const oldValues = existing.data ?? undefined;
 
-  const result = await childService.deleteFollowup(supabase, followupId);
+  const result = await childService.deleteFollowup(supabase, followupId, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -682,7 +762,17 @@ export async function listFollowupsAction(
     return { success: false, message: "You do not have permission to view followups." };
   }
 
-  const result = await childService.listFollowups(supabase, filters);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await childService.listFollowups(supabase, profile.church_id, filters);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -709,7 +799,17 @@ export async function listStagesAction(
     return { success: false, message: "You do not have permission to view stages." };
   }
 
-  const result = await childService.listStages(supabase, ministryId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await childService.listStages(supabase, profile.church_id, ministryId);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -734,7 +834,17 @@ export async function listMinistriesAction(): Promise<
     return { success: false, message: "You do not have permission to view ministries." };
   }
 
-  const result = await childService.listMinistries(supabase);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await childService.listMinistries(supabase, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };

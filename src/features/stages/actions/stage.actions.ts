@@ -41,28 +41,36 @@ async function auditLog(
   oldValues?: Record<string, unknown>,
   newValues?: Record<string, unknown>,
 ) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("church_id")
-    .eq("id", user.id)
-    .single();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("church_id")
+      .eq("id", user.id)
+      .single();
 
-  if (!profile) return;
+    if (!profile) return;
 
-  await supabase.from("audit_logs").insert({
-    church_id: profile.church_id,
-    user_id: user.id,
-    action,
-    entity_type: entityType,
-    entity_id: entityId,
-    old_values: oldValues ?? null,
-    new_values: newValues ?? null,
-  });
+    const { error } = await supabase.from("audit_logs").insert({
+      church_id: profile.church_id,
+      user_id: user.id,
+      action,
+      entity_type: entityType,
+      entity_id: entityId,
+      old_values: oldValues ?? null,
+      new_values: newValues ?? null,
+    });
+
+    if (error) {
+      console.error(`[audit] Failed to write audit log for ${entityType}:${entityId}:`, error.message);
+    }
+  } catch (err) {
+    console.error(`[audit] Unexpected error writing audit log for ${entityType}:${entityId}:`, err);
+  }
 }
 
 function handleZodError(error: unknown): StageActionResult<never> {
@@ -96,7 +104,17 @@ export async function listMinistriesAction(): Promise<
     return { success: false, message: "You do not have permission to view ministries." };
   }
 
-  const result = await stageService.listMinistries(supabase);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await stageService.listMinistries(supabase, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -121,7 +139,17 @@ export async function getMinistryByIdAction(
     return { success: false, message: "You do not have permission to view ministries." };
   }
 
-  const result = await stageService.getMinistryById(supabase, ministryId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await stageService.getMinistryById(supabase, ministryId, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -200,12 +228,22 @@ export async function updateMinistryAction(
     return { success: false, message: "You do not have permission to update ministries." };
   }
 
-  const existing = await stageService.getMinistryById(supabase, ministryId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await stageService.getMinistryById(supabase, ministryId, profile.church_id);
   const oldValues = existing.data
     ? { name_ar: existing.data.name_ar, is_active: existing.data.is_active }
     : undefined;
 
-  const result = await stageService.updateMinistry(supabase, ministryId, {
+  const result = await stageService.updateMinistry(supabase, ministryId, profile.church_id, {
     name_ar: values.name_ar,
     name_en: values.name_en,
     description_ar: values.description_ar,
@@ -242,12 +280,22 @@ export async function deactivateMinistryAction(
     return { success: false, message: "You do not have permission to delete ministries." };
   }
 
-  const existing = await stageService.getMinistryById(supabase, ministryId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await stageService.getMinistryById(supabase, ministryId, profile.church_id);
   const oldValues = existing.data
     ? { name_ar: existing.data.name_ar, is_active: existing.data.is_active }
     : undefined;
 
-  const result = await stageService.deactivateMinistry(supabase, ministryId);
+  const result = await stageService.deactivateMinistry(supabase, ministryId, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -278,7 +326,17 @@ export async function listStagesAction(
     return { success: false, message: "You do not have permission to view stages." };
   }
 
-  const result = await stageService.listStages(supabase, ministryId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await stageService.listStages(supabase, profile.church_id, ministryId);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -361,12 +419,22 @@ export async function updateStageAction(
     return { success: false, message: "You do not have permission to update stages." };
   }
 
-  const existing = await stageService.getStageById(supabase, stageId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await stageService.getStageById(supabase, stageId, profile.church_id);
   const oldValues = existing.data
     ? { name_ar: existing.data.name_ar, is_active: existing.data.is_active }
     : undefined;
 
-  const result = await stageService.updateStage(supabase, stageId, {
+  const result = await stageService.updateStage(supabase, stageId, profile.church_id, {
     name_ar: values.name_ar,
     name_en: values.name_en,
     description_ar: values.description_ar,
@@ -405,12 +473,22 @@ export async function deactivateStageAction(
     return { success: false, message: "You do not have permission to delete stages." };
   }
 
-  const existing = await stageService.getStageById(supabase, stageId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await stageService.getStageById(supabase, stageId, profile.church_id);
   const oldValues = existing.data
     ? { name_ar: existing.data.name_ar, is_active: existing.data.is_active }
     : undefined;
 
-  const result = await stageService.deactivateStage(supabase, stageId);
+  const result = await stageService.deactivateStage(supabase, stageId, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -441,7 +519,17 @@ export async function getStageUsersAction(
     return { success: false, message: "You do not have permission to view stage assignments." };
   }
 
-  const result = await stageService.getStageUsers(supabase, stageId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await stageService.getStageUsers(supabase, stageId, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -472,7 +560,17 @@ export async function assignUsersToStageAction(
     return { success: false, message: "You do not have permission to manage stage assignments." };
   }
 
-  const existing = await stageService.getStageUsers(supabase, values.stageId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await stageService.getStageUsers(supabase, values.stageId, profile.church_id);
   const oldUserIds = existing.data?.map((u) => u.id) ?? [];
 
   const result = await stageService.assignUsersToStage(
@@ -514,7 +612,17 @@ export async function listAllUsersAction(): Promise<
     return { success: false, message: "You do not have permission to view users." };
   }
 
-  const result = await stageService.listAllUsers(supabase);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await stageService.listAllUsers(supabase, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
