@@ -166,7 +166,7 @@ export function FollowupFormDialog({
                 {followup?.childFirstNameAr} {followup?.childLastNameAr}
               </span>
               {" / "}
-              {tDetail(`followupType.${followup?.type}`)}
+              {followup?.type ? tDetail(`followupType.${followup.type}`) : "\u2014"}
             </div>
 
             <FormField

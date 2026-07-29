@@ -196,7 +196,7 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
                   {child.followups.map((record) => (
                     <tr key={record.id} className="border-b transition hover:bg-muted/30">
                       <td className="px-4 py-3 font-medium">
-                        {t(`followupType.${record.type}`)}
+                        {record.type ? t(`followupType.${record.type}`) : "\u2014"}
                       </td>
                       <td className="px-4 py-3">
                         <Badge

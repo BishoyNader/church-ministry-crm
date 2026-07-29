@@ -99,17 +99,28 @@ export async function signUpWithEmail(
   email: string,
   password: string,
 ) {
-  const supabase = await createClient();
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name_ar: fullNameAr,
-        full_name_en: fullNameEn,
-      },
-    },
-  });
+  const admin = createAdminClient();
+
+  const { data: authData, error: authError } = process.env.NODE_ENV === "production"
+    ? await (await createClient()).auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name_ar: fullNameAr,
+            full_name_en: fullNameEn,
+          },
+        },
+      })
+    : await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          full_name_ar: fullNameAr,
+          full_name_en: fullNameEn,
+        },
+      });
 
   if (authError) {
     return { success: false, error: authError.message };
@@ -120,7 +131,6 @@ export async function signUpWithEmail(
     return { success: false, error: "User creation failed." };
   }
 
-  const admin = createAdminClient();
   let churchId: string | null = null;
 
   try {
