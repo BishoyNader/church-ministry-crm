@@ -220,5 +220,118 @@
       "cancel": "إلغاء",
       "processing": "جارٍ الحفظ…"
     }
+  },
+  "children": {
+    "title": "إدارة الأطفال",
+    "description": "تسجيل وتتبع وإدارة الأطفال عبر الوزارات والمراحل.",
+    "addChild": "إضافة طفل",
+    "searchPlaceholder": "بحث بالاسم أو الهاتف أو الجوال…",
+    "search": "بحث",
+    "emptyState": {
+      "title": "لم يتم العثور على أطفال",
+      "description": "ابدأ بتسجيل أول طفل لبدء تتبع رحلته في الخدمة."
+    },
+    "filters": {
+      "allStages": "جميع المراحل",
+      "allStatuses": "جميع الحالات",
+      "allPipeline": "جميع مراحل التطور"
+    },
+    "table": {
+      "name": "الاسم",
+      "stage": "المرحلة",
+      "status": "الحالة",
+      "pipelineStage": "مرحلة التطور",
+      "parentPhone": "هاتف ولي الأمر",
+      "enrolledAt": "تاريخ التسجيل",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "transferred": "منقول",
+      "graduated": "تخرج"
+    },
+    "pipeline": {
+      "new_visitor": "زائر جديد",
+      "first_followup": "متابعة أولى",
+      "regular_attendee": "حاضر منتظم",
+      "active_member": "عضو نشط",
+      "leader_candidate": "مرشح للقيادة"
+    },
+    "pagination": {
+      "showing": "عرض {from}–{to} من {total}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "form": {
+      "createTitle": "إضافة طفل",
+      "editTitle": "تعديل بيانات الطفل",
+      "description": "املأ معلومات الطفل أدناه.",
+      "sections": {
+        "personal": "المعلومات الشخصية",
+        "parent": "ولي الأمر",
+        "medical": "المعلومات الطبية",
+        "spiritual": "المعلومات الروحية",
+        "education": "المعلومات التعليمية"
+      },
+      "firstNameAr": "الاسم الأول (عربي)",
+      "firstNameEn": "الاسم الأول (إنجليزي)",
+      "lastNameAr": "اسم العائلة (عربي)",
+      "lastNameEn": "اسم العائلة (إنجليزي)",
+      "dateOfBirth": "تاريخ الميلاد",
+      "gender": "الجنس",
+      "genderMale": "ذكر",
+      "genderFemale": "أنثى",
+      "ministry": "الوزارة",
+      "stage": "المرحلة",
+      "pipelineStage": "مرحلة التطور",
+      "selectMinistry": "اختر الوزارة",
+      "selectStage": "اختر المرحلة",
+      "selectPipeline": "اختر مرحلة التطور",
+      "parentPhone": "هاتف ولي الأمر",
+      "parentEmail": "بريد ولي الأمر",
+      "parentAddress": "العنوان (عربي)",
+      "fatherName": "اسم الأب (عربي)",
+      "motherName": "اسم الأم (عربي)",
+      "emergencyName": "اسم جهة الاتصال الطارئ",
+      "emergencyPhone": "هاتف جهة الاتصال الطارئ",
+      "mobile": "الجوال",
+      "allergies": "الحساسية",
+      "medicalConditions": "الحالات الطبية",
+      "medications": "الأدوية",
+      "baptismDate": "تاريخ المعمودية",
+      "confessionFrequency": "تكرار الاعتراف",
+      "spiritualNotes": "ملاحظات روحية",
+      "schoolName": "اسم المدرسة (عربي)",
+      "gradeLevel": "المستوى الدراسي",
+      "notes": "ملاحظات",
+      "photoUrl": "رابط الصورة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "processing": "جارٍ المعالجة…"
+    },
+    "delete": {
+      "title": "تعطيل الطفل",
+      "description": "هل أنت متأكد من تعطيل {name}؟ سيتم إزالته من القوائم النشطة لكن سجلاته ستبقى محفوظة.",
+      "confirm": "تعطيل",
+      "cancel": "إلغاء",
+      "processing": "جارٍ التعطيل…"
+    },
+    "detail": {
+      "tabs": {
+        "details": "التفاصيل",
+        "attendance": "الحضور",
+        "followups": "المتابعات"
+      },
+      "personalInfo": "المعلومات الشخصية",
+      "parentInfo": "ولي الأمر",
+      "medicalInfo": "المعلومات الطبية",
+      "spiritualInfo": "المعلومات الروحية",
+      "educationInfo": "المعلومات التعليمية",
+      "attendancePlaceholder": "تتبع الحضور سيكون متاحًا في مرحلة مستقبلية.",
+      "followupsPlaceholder": "إدارة المتابعات ستكون متاحة في مرحلة مستقبلية.",
+      "editChild": "تعديل الطفل",
+      "backToList": "العودة للقائمة"
+    }
   }
 }
