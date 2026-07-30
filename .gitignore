@@ -86,10 +86,9 @@ yarn-error.log*
 .zcode/
 .zencoder/
 
-# duplicate skill / docs dirs
+# duplicate skill / docs dirs (docs/ removed — project docs must be tracked, see CANONICAL_PROJECT_STRUCTURE.md)
 data/
 skills/
-docs/
 
 # vercel
 .vercel

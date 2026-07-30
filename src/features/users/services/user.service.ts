@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   AssignRolesInput,
   AssignStagesInput,
@@ -13,20 +14,22 @@ import type {
 } from "../types/user.types";
 
 export async function listUsers(
+  supabase: SupabaseClient,
+  churchId: string,
   params: UserListParams,
 ): Promise<{ data: UserListResult | null; error: string | null }> {
-  const admin = createAdminClient();
   const { page, pageSize, search, roleFilter } = params;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
   try {
-    let query = admin
+    let query = supabase
       .from("profiles")
       .select(
         "id, church_id, email, full_name_ar, full_name_en, phone, preferred_locale, is_active, avatar_url, last_login_at, created_at, updated_at, deleted_at",
         { count: "exact" },
       )
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .range(from, to);
@@ -48,7 +51,7 @@ export async function listUsers(
     if (users.length > 0) {
       const userIds = users.map((u) => u.id);
 
-      const { data: userRoles } = await admin
+      const { data: userRoles } = await supabase
         .from("user_roles")
         .select("user_id, role_id, roles(id, name_ar, name_en, role_type)")
         .in("user_id", userIds);
@@ -89,15 +92,16 @@ export async function listUsers(
 }
 
 export async function getUserById(
+  supabase: SupabaseClient,
+  churchId: string,
   userId: string,
 ): Promise<{ data: UserDetail | null; error: string | null }> {
-  const admin = createAdminClient();
-
   try {
-    const { data: profile, error } = await admin
+    const { data: profile, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", userId)
+      .eq("church_id", churchId)
       .is("deleted_at", null)
       .single();
 
@@ -105,7 +109,7 @@ export async function getUserById(
       return { data: null, error: "User not found." };
     }
 
-    const { data: userRoles } = await admin
+    const { data: userRoles } = await supabase
       .from("user_roles")
       .select("role_id, roles(*)")
       .eq("user_id", userId);
@@ -114,7 +118,7 @@ export async function getUserById(
       .map((ur) => ur.roles)
       .filter(Boolean) as unknown as RoleRow[];
 
-    const { data: stageAssignments } = await admin
+    const { data: stageAssignments } = await supabase
       .from("user_stage_assignments")
       .select("*, stages(id, name_ar, name_en)")
       .eq("user_id", userId);
@@ -135,6 +139,7 @@ export async function getUserById(
 export async function createUser(
   input: CreateUserInput,
   assignedBy: string,
+  churchId: string,
 ): Promise<{ data: { id: string } | null; error: string | null }> {
   const admin = createAdminClient();
 
@@ -160,7 +165,7 @@ export async function createUser(
       .from("profiles")
       .insert({
         id: userId,
-        church_id: (await getChurchId(admin, assignedBy))!,
+        church_id: churchId,
         email: input.email,
         full_name_ar: input.full_name_ar,
         full_name_en: input.full_name_en ?? null,
@@ -202,13 +207,12 @@ export async function createUser(
 }
 
 export async function updateUser(
+  supabase: SupabaseClient,
   userId: string,
   input: UpdateUserInput,
 ): Promise<{ data: boolean; error: string | null }> {
-  const admin = createAdminClient();
-
   try {
-    const { error } = await admin
+    const { error } = await supabase
       .from("profiles")
       .update({
         full_name_ar: input.full_name_ar,
@@ -230,12 +234,11 @@ export async function updateUser(
 }
 
 export async function deactivateUser(
+  supabase: SupabaseClient,
   userId: string,
 ): Promise<{ data: boolean; error: string | null }> {
-  const admin = createAdminClient();
-
   try {
-    const { error } = await admin
+    const { error } = await supabase
       .from("profiles")
       .update({ is_active: false })
       .eq("id", userId);
@@ -251,13 +254,12 @@ export async function deactivateUser(
 }
 
 export async function assignRoles(
+  supabase: SupabaseClient,
   input: AssignRolesInput,
   assignedBy: string,
 ): Promise<{ data: boolean; error: string | null }> {
-  const admin = createAdminClient();
-
   try {
-    const { data: profile } = await admin
+    const { data: profile } = await supabase
       .from("profiles")
       .select("church_id")
       .eq("id", input.userId)
@@ -267,7 +269,7 @@ export async function assignRoles(
       return { data: false, error: "User not found." };
     }
 
-    await admin
+    await supabase
       .from("user_roles")
       .delete()
       .eq("user_id", input.userId)
@@ -280,7 +282,7 @@ export async function assignRoles(
         role_id: roleId,
         assigned_by: assignedBy,
       }));
-      await admin.from("user_roles").insert(inserts);
+      await supabase.from("user_roles").insert(inserts);
     }
 
     return { data: true, error: null };
@@ -290,13 +292,12 @@ export async function assignRoles(
 }
 
 export async function assignStages(
+  supabase: SupabaseClient,
   input: AssignStagesInput,
   assignedBy: string,
 ): Promise<{ data: boolean; error: string | null }> {
-  const admin = createAdminClient();
-
   try {
-    const { data: profile } = await admin
+    const { data: profile } = await supabase
       .from("profiles")
       .select("church_id")
       .eq("id", input.userId)
@@ -306,7 +307,7 @@ export async function assignStages(
       return { data: false, error: "User not found." };
     }
 
-    await admin
+    await supabase
       .from("user_stage_assignments")
       .delete()
       .eq("user_id", input.userId)
@@ -319,7 +320,7 @@ export async function assignStages(
         stage_id: stageId,
         assigned_by: assignedBy,
       }));
-      await admin.from("user_stage_assignments").insert(inserts);
+      await supabase.from("user_stage_assignments").insert(inserts);
     }
 
     return { data: true, error: null };
@@ -329,11 +330,10 @@ export async function assignStages(
 }
 
 export async function listRoles(
+  supabase: SupabaseClient,
   churchId: string,
 ): Promise<{ data: RoleRow[] | null; error: string | null }> {
-  const admin = createAdminClient();
-
-  const { data, error } = await admin
+  const { data, error } = await supabase
     .from("roles")
     .select("id, church_id, role_type, name_ar, name_en, description_ar, is_system, created_at, updated_at")
     .eq("church_id", churchId)
@@ -347,11 +347,10 @@ export async function listRoles(
 }
 
 export async function listStages(
+  supabase: SupabaseClient,
   churchId: string,
 ): Promise<{ data: StageRow[] | null; error: string | null }> {
-  const admin = createAdminClient();
-
-  const { data, error } = await admin
+  const { data, error } = await supabase
     .from("stages")
     .select("*")
     .eq("church_id", churchId)
@@ -364,16 +363,4 @@ export async function listStages(
   }
 
   return { data: (data ?? []) as unknown as StageRow[], error: null };
-}
-
-async function getChurchId(
-  admin: ReturnType<typeof createAdminClient>,
-  userId: string,
-): Promise<string | null> {
-  const { data } = await admin
-    .from("profiles")
-    .select("church_id")
-    .eq("id", userId)
-    .single();
-  return data?.church_id ?? null;
 }

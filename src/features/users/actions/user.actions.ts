@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { hasPermission } from "@/features/rbac/utils/permission-check";
+import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
   createUserSchema,
   updateUserSchema,
@@ -81,7 +83,30 @@ export async function listUsersAction(
     throw error;
   }
 
-  const result = await userService.listUsers({
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.USERS_READ))) {
+    return { success: false, message: "You do not have permission to view users." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await userService.listUsers(supabase, profile.church_id, {
     page,
     pageSize,
     search,
@@ -104,7 +129,30 @@ export async function listUsersAction(
 export async function getUserAction(
   userId: string,
 ): Promise<UserActionResult<UserDetail>> {
-  const result = await userService.getUserById(userId);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.USERS_READ))) {
+    return { success: false, message: "You do not have permission to view users." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const result = await userService.getUserById(supabase, profile.church_id, userId);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -140,6 +188,20 @@ export async function createUserAction(
     return { success: false, message: "You must be logged in." };
   }
 
+  if (!(await hasPermission(PERMISSION_CODES.USERS_CREATE))) {
+    return { success: false, message: "You do not have permission to create users." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
   const result = await userService.createUser(
     {
       email: values.email,
@@ -152,6 +214,7 @@ export async function createUserAction(
       stageIds: values.stageIds ?? [],
     },
     user.id,
+    profile.church_id,
   );
 
   if (result.error) {
@@ -201,7 +264,21 @@ export async function updateUserAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  const existing = await userService.getUserById(userId);
+  if (!(await hasPermission(PERMISSION_CODES.USERS_UPDATE))) {
+    return { success: false, message: "You do not have permission to update users." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await userService.getUserById(supabase, profile.church_id, userId);
   const oldValues = existing.data
     ? {
         full_name_ar: existing.data.full_name_ar,
@@ -211,7 +288,7 @@ export async function updateUserAction(
       }
     : undefined;
 
-  const result = await userService.updateUser(userId, {
+  const result = await userService.updateUser(supabase, userId, {
     full_name_ar: values.full_name_ar,
     full_name_en: values.full_name_en,
     phone: values.phone,
@@ -243,11 +320,25 @@ export async function deactivateUserAction(
     return { success: false, message: "You must be logged in." };
   }
 
+  if (!(await hasPermission(PERMISSION_CODES.USERS_DELETE))) {
+    return { success: false, message: "You do not have permission to deactivate users." };
+  }
+
   if (user.id === userId) {
     return { success: false, message: "You cannot deactivate your own account." };
   }
 
-  const existing = await userService.getUserById(userId);
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await userService.getUserById(supabase, profile.church_id, userId);
   if (!existing.data) {
     return { success: false, message: "User not found." };
   }
@@ -274,7 +365,7 @@ export async function deactivateUserAction(
     }
   }
 
-  const result = await userService.deactivateUser(userId);
+  const result = await userService.deactivateUser(supabase, userId);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -320,10 +411,25 @@ export async function assignRolesAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  const existing = await userService.getUserById(userId);
+  if (!(await hasPermission(PERMISSION_CODES.USERS_MANAGE))) {
+    return { success: false, message: "You do not have permission to assign roles." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await userService.getUserById(supabase, profile.church_id, userId);
   const oldRoleIds = existing.data?.roles.map((r) => r.id) ?? [];
 
   const result = await userService.assignRoles(
+    supabase,
     { userId, roleIds },
     user.id,
   );
@@ -365,11 +471,26 @@ export async function assignStagesAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  const existing = await userService.getUserById(userId);
+  if (!(await hasPermission(PERMISSION_CODES.USERS_MANAGE))) {
+    return { success: false, message: "You do not have permission to assign stages." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const existing = await userService.getUserById(supabase, profile.church_id, userId);
   const oldStageIds =
     existing.data?.stageAssignments.map((s) => s.stage_id) ?? [];
 
   const result = await userService.assignStages(
+    supabase,
     { userId, stageIds },
     user.id,
   );
@@ -393,7 +514,20 @@ export async function assignStagesAction(
 export async function getRolesAction(
   churchId: string,
 ): Promise<UserActionResult<RoleRow[]>> {
-  const result = await userService.listRoles(churchId);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.USERS_READ))) {
+    return { success: false, message: "You do not have permission to view roles." };
+  }
+
+  const result = await userService.listRoles(supabase, churchId);
   if (result.error) {
     return { success: false, message: result.error };
   }
@@ -403,7 +537,20 @@ export async function getRolesAction(
 export async function getStagesAction(
   churchId: string,
 ): Promise<UserActionResult<StageRow[]>> {
-  const result = await userService.listStages(churchId);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.USERS_READ))) {
+    return { success: false, message: "You do not have permission to view stages." };
+  }
+
+  const result = await userService.listStages(supabase, churchId);
   if (result.error) {
     return { success: false, message: result.error };
   }
