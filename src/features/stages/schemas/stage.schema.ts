@@ -19,7 +19,7 @@ export const updateMinistrySchema = z.object({
 
 export const createStageSchema = z
   .object({
-    ministry_id: z.string().uuid({ message: "Ministry is required" }),
+    service_id: z.string().uuid({ message: "Service is required" }),
     name_ar: z.string().min(2, { message: "Arabic name is required" }),
     name_en: z.string().optional(),
     description_ar: z.string().optional(),

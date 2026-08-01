@@ -40,7 +40,7 @@ export function ChildDeleteDialog({
       : null;
 
   const childName = child
-    ? `${child.first_name_ar} ${child.last_name_ar}`
+    ? child.full_name_ar
     : "";
 
   return (

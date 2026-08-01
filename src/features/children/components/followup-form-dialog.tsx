@@ -33,7 +33,7 @@ import type {
   UpdateFollowupFormValues,
 } from "../schemas/child.schema";
 import { useCreateFollowup, useUpdateFollowup } from "../hooks/use-followups";
-import { useChildList, useChildStages } from "../hooks/use-children";
+import { useChildList } from "../hooks/use-children";
 import { listUsersAction } from "../actions/child.actions";
 import type { FollowupListItem } from "../types/child.types";
 import { FormField } from "@/components/ui/form-field";
@@ -47,7 +47,7 @@ const FOLLOWUP_TYPES = [
 ] as const;
 
 const FOLLOWUP_STATUSES = [
-  "scheduled",
+  "open",
   "in_progress",
   "completed",
   "cancelled",
@@ -74,8 +74,7 @@ export function FollowupFormDialog({
   const { data: childrenResult } = useChildList({}, { pageSize: 500 });
   const children = childrenResult?.data?.data ?? [];
 
-  const { data: stagesResult } = useChildStages();
-  const stages = stagesResult?.data ?? [];
+
 
   const { data: usersResult } = useQuery({
     queryKey: ["users", "list"],
@@ -87,8 +86,7 @@ export function FollowupFormDialog({
   const createForm = useForm<CreateFollowupFormValues>({
     resolver: zodResolver(createFollowupSchema),
     defaultValues: {
-      child_id: "",
-      stage_id: "",
+      beneficiary_id: "",
       type: undefined,
       scheduled_at: "",
       assigned_to: "",
@@ -163,7 +161,7 @@ export function FollowupFormDialog({
           >
             <div className="text-sm text-muted-foreground">
               <span className="font-medium text-foreground">
-                {followup?.childFirstNameAr} {followup?.childLastNameAr}
+                {followup?.childFullNameAr}
               </span>
               {" / "}
               {followup?.type ? tDetail(`followupType.${followup.type}`) : "\u2014"}
@@ -248,13 +246,13 @@ export function FollowupFormDialog({
           >
             <FormField
               label={t("followups.child")}
-              error={createForm.formState.errors.child_id?.message}
+              error={createForm.formState.errors.beneficiary_id?.message}
               required
             >
               <Select
-                value={createForm.watch("child_id")}
+                value={createForm.watch("beneficiary_id")}
                 onValueChange={(value) =>
-                  createForm.setValue("child_id", value as string)
+                  createForm.setValue("beneficiary_id", value as string)
                 }
               >
                 <SelectTrigger className="w-full">
@@ -263,31 +261,7 @@ export function FollowupFormDialog({
                 <SelectContent>
                   {children.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
-                      {c.first_name_ar} {c.last_name_ar}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormField>
-
-            <FormField
-              label={t("followups.stage")}
-              error={createForm.formState.errors.stage_id?.message}
-              required
-            >
-              <Select
-                value={createForm.watch("stage_id")}
-                onValueChange={(value) =>
-                  createForm.setValue("stage_id", value as string)
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t("followups.selectStage")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {stages.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name_ar}
+                      {c.full_name_ar}
                     </SelectItem>
                   ))}
                 </SelectContent>

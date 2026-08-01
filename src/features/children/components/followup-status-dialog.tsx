@@ -29,7 +29,7 @@ import type { FollowupListItem } from "../types/child.types";
 import { FormField } from "@/components/ui/form-field";
 
 const FOLLOWUP_STATUSES = [
-  "scheduled",
+  "open",
   "in_progress",
   "completed",
   "cancelled",
@@ -104,7 +104,7 @@ export function FollowupStatusDialog({
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="text-sm text-muted-foreground">
             <span className="font-medium text-foreground">
-              {followup?.childFirstNameAr} {followup?.childLastNameAr}
+              {followup?.childFullNameAr}
             </span>
             {" / "}
             {followup?.type ? tDetail(`followupType.${followup.type}`) : "\u2014"}

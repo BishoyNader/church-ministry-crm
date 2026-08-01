@@ -50,7 +50,7 @@ export function StageFormDialog({
   const createForm = useForm<CreateStageFormValues>({
     resolver: zodResolver(createStageSchema),
     defaultValues: {
-      ministry_id: ministryId,
+      service_id: ministryId,
       name_ar: "",
       name_en: "",
       description_ar: "",
@@ -76,7 +76,7 @@ export function StageFormDialog({
   });
 
   useEffect(() => {
-    createForm.setValue("ministry_id", ministryId);
+    createForm.setValue("service_id", ministryId);
   }, [ministryId, createForm]);
 
   useEffect(() => {

@@ -36,7 +36,7 @@ export const userListSchema = z.object({
   pageSize: z.number().int().min(1).max(100).default(20),
   search: z.string().optional(),
   roleFilter: z
-    .enum(["super_admin", "church_admin", "stage_leader", "servant", "viewer"])
+    .enum(["platform_owner", "super_admin", "admin", "servant"])
     .optional(),
 });
 

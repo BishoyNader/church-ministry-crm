@@ -16,14 +16,14 @@ import { CHILD_QUERY_KEYS } from "./use-children";
 export const FOLLOWUP_QUERY_KEYS = {
   all: ["followups"] as const,
   list: (filters?: {
-    child_id?: string;
+    beneficiary_id?: string;
     status?: string;
     assigned_to?: string;
   }) => ["followups", "list", filters] as const,
 };
 
 export function useFollowupList(filters?: {
-  child_id?: string;
+  beneficiary_id?: string;
   status?: string;
   assigned_to?: string;
 }) {

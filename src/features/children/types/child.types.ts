@@ -1,20 +1,29 @@
 import type { Database } from "@/types/database.types";
 
-export type ChildRow = Database["public"]["Tables"]["children"]["Row"];
-export type ChildInsert = Database["public"]["Tables"]["children"]["Insert"];
-export type ChildUpdate = Database["public"]["Tables"]["children"]["Update"];
+export type ChildRow = Database["public"]["Tables"]["beneficiaries"]["Row"];
+export type ChildInsert = Database["public"]["Tables"]["beneficiaries"]["Insert"];
+export type ChildUpdate = Database["public"]["Tables"]["beneficiaries"]["Update"];
 
-export type AttendanceRow = Database["public"]["Tables"]["attendance"]["Row"];
-export type AttendanceInsert = Database["public"]["Tables"]["attendance"]["Insert"];
-export type AttendanceUpdate = Database["public"]["Tables"]["attendance"]["Update"];
+export type AttendanceSessionRow = Database["public"]["Tables"]["attendance_sessions"]["Row"];
+export type AttendanceRecordRow = Database["public"]["Tables"]["attendance_records"]["Row"];
+export type AttendanceRecordInsert = Database["public"]["Tables"]["attendance_records"]["Insert"];
 
 export type FollowupRow = Database["public"]["Tables"]["followups"]["Row"];
 export type FollowupInsert = Database["public"]["Tables"]["followups"]["Insert"];
 export type FollowupUpdate = Database["public"]["Tables"]["followups"]["Update"];
 
 export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
-export type MinistryRow = Database["public"]["Tables"]["ministries"]["Row"];
+export type MinistryRow = Database["public"]["Tables"]["services"]["Row"];
 export type StageRow = Database["public"]["Tables"]["stages"]["Row"];
+
+export type ChildRowWithNames = ChildRow & {
+  services?: Pick<MinistryRow, "name_ar"> | null;
+  stages?: Pick<StageRow, "name_ar"> | null;
+};
+
+export type AttendanceRecordWithSession = AttendanceRecordRow & {
+  attendance_sessions?: Pick<AttendanceSessionRow, "session_date"> | null;
+};
 
 // ─── Pagination ──────────────────────────────────────────────
 
@@ -32,7 +41,7 @@ export type PaginatedResult<T> = {
 };
 
 export type ChildListItem = ChildRow & {
-  ministryNameAr: string;
+  serviceNameAr: string;
   stageNameAr: string;
 };
 
@@ -41,94 +50,69 @@ export type ChildDetailFollowup = FollowupRow & {
 };
 
 export type ChildDetail = ChildRow & {
-  ministryNameAr: string;
+  serviceNameAr: string;
   stageNameAr: string;
-  attendance: AttendanceRow[];
+  attendance: AttendanceRecordRow[];
   followups: ChildDetailFollowup[];
 };
 
-export type AttendanceListItem = AttendanceRow & {
-  childFirstNameAr: string;
-  childLastNameAr: string;
+export type AttendanceListItem = AttendanceRecordRow & {
+  childFullNameAr: string;
   stageNameAr: string;
 };
 
 export type FollowupListItem = FollowupRow & {
-  childFirstNameAr: string;
-  childLastNameAr: string;
+  childFullNameAr: string;
   stageNameAr: string;
   assignedToNameAr: string | null;
 };
 
 export type CreateChildInput = {
-  first_name_ar: string;
-  first_name_en?: string;
-  last_name_ar: string;
-  last_name_en?: string;
+  full_name_ar: string;
+  full_name_en?: string;
   date_of_birth?: string;
   gender?: "male" | "female";
-  ministry_id: string;
+  service_id: string;
   stage_id: string;
-  pipeline_stage?: "new_visitor" | "first_followup" | "regular_attendee" | "active_member" | "leader_candidate";
-  parent_phone?: string;
-  parent_email?: string;
-  parent_address_ar?: string;
-  father_name_ar?: string;
-  mother_name_ar?: string;
-  emergency_contact_name?: string;
-  emergency_contact_phone?: string;
+  father_mobile?: string;
+  mother_mobile?: string;
   mobile?: string;
-  allergies?: string;
-  medical_conditions?: string;
-  medications?: string;
-  baptism_date?: string;
-  confession_frequency?: string;
-  spiritual_notes?: string;
-  school_name_ar?: string;
-  grade_level?: string;
+  whatsapp?: string;
+  address?: string;
+  school?: string;
+  confession_father?: string;
   notes?: string;
   photo_url?: string;
 };
 
 export type UpdateChildInput = {
-  first_name_ar: string;
-  first_name_en?: string;
-  last_name_ar: string;
-  last_name_en?: string;
+  full_name_ar: string;
+  full_name_en?: string;
   date_of_birth?: string;
   gender?: "male" | "female";
-  ministry_id: string;
+  service_id: string;
   stage_id: string;
-  pipeline_stage: "new_visitor" | "first_followup" | "regular_attendee" | "active_member" | "leader_candidate";
-  status: "active" | "inactive" | "transferred" | "graduated";
-  parent_phone?: string;
-  parent_email?: string;
-  parent_address_ar?: string;
-  father_name_ar?: string;
-  mother_name_ar?: string;
-  emergency_contact_name?: string;
-  emergency_contact_phone?: string;
+  status: string;
+  father_mobile?: string;
+  mother_mobile?: string;
   mobile?: string;
-  allergies?: string;
-  medical_conditions?: string;
-  medications?: string;
-  baptism_date?: string;
-  confession_frequency?: string;
-  spiritual_notes?: string;
-  school_name_ar?: string;
-  grade_level?: string;
+  whatsapp?: string;
+  address?: string;
+  school?: string;
+  confession_father?: string;
   notes?: string;
   photo_url?: string;
 };
 
 export type TransferChildInput = {
-  ministry_id: string;
+  service_id: string;
   stage_id: string;
 };
 
 export type CreateAttendanceInput = {
-  child_id: string;
+  beneficiary_id: string;
   stage_id: string;
+  service_id: string;
   attendance_date: string;
   status: "present" | "absent" | "excused";
   notes?: string;
@@ -136,17 +120,17 @@ export type CreateAttendanceInput = {
 
 export type BatchAttendanceInput = {
   stage_id: string;
+  service_id: string;
   attendance_date: string;
   records: {
-    child_id: string;
+    beneficiary_id: string;
     status: "present" | "absent" | "excused";
     notes?: string;
   }[];
 };
 
 export type CreateFollowupInput = {
-  child_id: string;
-  stage_id: string;
+  beneficiary_id: string;
   type: "phone_call" | "home_visit" | "whatsapp" | "church_meeting" | "other";
   scheduled_at?: string;
   assigned_to?: string;
@@ -154,7 +138,7 @@ export type CreateFollowupInput = {
 };
 
 export type UpdateFollowupInput = {
-  status?: "scheduled" | "in_progress" | "completed" | "cancelled";
+  status?: "open" | "in_progress" | "completed" | "cancelled";
   outcome?: string;
   notes?: string;
   assigned_to?: string;

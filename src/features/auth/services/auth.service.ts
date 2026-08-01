@@ -1,38 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-function generateSlug(name: string): string {
-  const slug = name
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^\p{L}\p{N}-]/gu, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  return slug || `church-${Date.now()}`;
-}
-
-async function ensureUniqueSlug(
-  admin: ReturnType<typeof createAdminClient>,
-  baseSlug: string,
-): Promise<string> {
-  let candidate = baseSlug;
-  let counter = 1;
-
-  while (true) {
-    const { data } = await admin
-      .from("churches")
-      .select("id")
-      .eq("slug", candidate)
-      .maybeSingle();
-
-    if (!data) return candidate;
-
-    candidate = `${baseSlug}-${counter}`;
-    counter++;
-  }
-}
+import { writeAuditLog } from "@/lib/audit";
+import { generateSlug, ensureUniqueSlug } from "@/lib/utils/slug";
 
 export async function signInWithEmail(email: string, password: string) {
   const supabase = await createClient();
@@ -80,12 +49,7 @@ export async function signInWithEmail(email: string, password: string) {
       .update({ last_login_at: new Date().toISOString() })
       .eq("id", userId);
 
-    await supabase.from("audit_logs").insert({
-      church_id: profile.church_id,
-      user_id: userId,
-      action: "login",
-      entity_type: "session",
-    });
+    await writeAuditLog(supabase, "login", "session", userId);
   }
 
   return { success: true, data };
@@ -185,6 +149,8 @@ export async function signUpWithEmail(
         church_id: church.id,
         user_id: userId,
         role_id: superAdminRole.id,
+        assigned_by: userId,
+        start_date: new Date().toISOString().split("T")[0],
       });
     }
 
@@ -240,12 +206,7 @@ export async function signOut() {
       .single();
 
     if (profile) {
-      await supabase.from("audit_logs").insert({
-        church_id: profile.church_id,
-        user_id: user.id,
-        action: "logout",
-        entity_type: "session",
-      });
+      await writeAuditLog(supabase, "logout", "session", user.id);
     }
   }
 

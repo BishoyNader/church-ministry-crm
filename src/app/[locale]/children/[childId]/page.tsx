@@ -19,7 +19,7 @@ export default async function ChildDetailRoute({
   }
   setRequestLocale(locale);
   return (
-    <PermissionGuard permission="children.read">
+    <PermissionGuard permission="beneficiaries.read">
       <ChildDetailPage childId={childId} />
     </PermissionGuard>
   );

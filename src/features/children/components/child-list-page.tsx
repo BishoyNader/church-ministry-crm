@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PermissionGuard } from "@/features/rbac";
-import { useChildList, useChildMinistries, useChildStages } from "../hooks/use-children";
+import { useChildList, useChildServices, useChildStages } from "../hooks/use-children";
 import { ChildTable } from "./child-table";
 import { ChildEmptyState } from "./child-empty-state";
 import { ChildFormDialog } from "./child-form-dialog";
@@ -32,14 +32,7 @@ const STATUS_OPTIONS = [
   { value: "graduated", labelKey: "status.graduated" },
 ] as const;
 
-const PIPELINE_OPTIONS = [
-  { value: "all", labelKey: "filters.allPipeline" },
-  { value: "new_visitor", labelKey: "pipeline.new_visitor" },
-  { value: "first_followup", labelKey: "pipeline.first_followup" },
-  { value: "regular_attendee", labelKey: "pipeline.regular_attendee" },
-  { value: "active_member", labelKey: "pipeline.active_member" },
-  { value: "leader_candidate", labelKey: "pipeline.leader_candidate" },
-] as const;
+
 
 export function ChildListPage() {
   const t = useTranslations("children");
@@ -47,29 +40,27 @@ export function ChildListPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [ministryFilter, setMinistryFilter] = useState("all");
+  const [serviceFilter, setServiceFilter] = useState("all");
   const [stageFilter, setStageFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [pipelineFilter, setPipelineFilter] = useState("all");
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editChild, setEditChild] = useState<ChildListItem | null>(null);
   const [deleteChild, setDeleteChild] = useState<ChildListItem | null>(null);
 
-  const ministriesQuery = useChildMinistries();
-  const ministries = ministriesQuery.data?.data ?? [];
+  const servicesQuery = useChildServices();
+  const services = servicesQuery.data?.data ?? [];
 
-  const ministryId = ministryFilter !== "all" ? ministryFilter : undefined;
-  const stagesQuery = useChildStages(ministryId);
+  const serviceId = serviceFilter !== "all" ? serviceFilter : undefined;
+  const stagesQuery = useChildStages(serviceId);
   const stages = stagesQuery.data?.data ?? [];
 
   const { data, isLoading } = useChildList(
     {
       search: search || undefined,
-      ministry_id: ministryFilter !== "all" ? ministryFilter : undefined,
+      service_id: serviceFilter !== "all" ? serviceFilter : undefined,
       stage_id: stageFilter !== "all" ? stageFilter : undefined,
       status: statusFilter !== "all" ? statusFilter : undefined,
-      pipeline_stage: pipelineFilter !== "all" ? pipelineFilter : undefined,
     },
     { page, pageSize: PAGE_SIZE },
   );
@@ -86,8 +77,8 @@ export function ChildListPage() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const handleMinistryChange = (value: unknown) => {
-    setMinistryFilter(value as string);
+  const handleServiceChange = (value: unknown) => {
+    setServiceFilter(value as string);
     setStageFilter("all");
     setPage(1);
   };
@@ -100,16 +91,15 @@ export function ChildListPage() {
   const clearFilters = () => {
     setSearchInput("");
     setSearch("");
-    setMinistryFilter("all");
+    setServiceFilter("all");
     setStageFilter("all");
     setStatusFilter("all");
-    setPipelineFilter("all");
     setPage(1);
   };
 
   const hasActiveFilters =
-    search || ministryFilter !== "all" || stageFilter !== "all" ||
-    statusFilter !== "all" || pipelineFilter !== "all";
+    search || serviceFilter !== "all" || stageFilter !== "all" ||
+    statusFilter !== "all";
 
   return (
     <section className="space-y-6">
@@ -117,7 +107,7 @@ export function ChildListPage() {
         title={t("title")}
         description={t("description")}
         actions={
-          <PermissionGuard permission="children.create">
+          <PermissionGuard permission="beneficiaries.create">
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="size-4" />
               {t("addChild")}
@@ -136,17 +126,17 @@ export function ChildListPage() {
           />
 
           <Select
-            value={ministryFilter}
-            onValueChange={handleMinistryChange}
+            value={serviceFilter}
+            onValueChange={handleServiceChange}
           >
             <SelectTrigger className="w-full sm:w-44">
-              <SelectValue placeholder={t("filters.allMinistries")} />
+              <SelectValue placeholder={t("filters.allServices")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("filters.allMinistries")}</SelectItem>
-              {ministries.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {m.name_ar}
+              <SelectItem value="all">{t("filters.allServices")}</SelectItem>
+              {services.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name_ar}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -185,21 +175,7 @@ export function ChildListPage() {
             </SelectContent>
           </Select>
 
-          <Select
-            value={pipelineFilter}
-            onValueChange={handleFilterChange(setPipelineFilter)}
-          >
-            <SelectTrigger className="w-full sm:w-44">
-              <SelectValue placeholder={t("filters.allPipeline")} />
-            </SelectTrigger>
-            <SelectContent>
-              {PIPELINE_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {t(opt.labelKey)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
 
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>

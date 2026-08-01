@@ -21,13 +21,7 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
   graduated: "outline",
 };
 
-const PIPELINE_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  new_visitor: "outline",
-  first_followup: "secondary",
-  regular_attendee: "default",
-  active_member: "default",
-  leader_candidate: "secondary",
-};
+
 
 type ChildDetailPageProps = {
   childId: string;
@@ -36,7 +30,6 @@ type ChildDetailPageProps = {
 export function ChildDetailPage({ childId }: ChildDetailPageProps) {
   const t = useTranslations("children.detail");
   const tStatus = useTranslations("children.status");
-  const tPipeline = useTranslations("children.pipeline");
   const router = useRouter();
   const [editOpen, setEditOpen] = useState(false);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
@@ -75,7 +68,7 @@ export function ChildDetailPage({ childId }: ChildDetailPageProps) {
     );
   }
 
-  const childName = `${child.first_name_ar} ${child.last_name_ar}`;
+  const childName = child.full_name_ar;
 
   return (
     <section className="space-y-6">
@@ -90,18 +83,16 @@ export function ChildDetailPage({ childId }: ChildDetailPageProps) {
           <Badge variant={STATUS_VARIANT[child.status] ?? "secondary"}>
             {tStatus(child.status)}
           </Badge>
-          <Badge variant={PIPELINE_VARIANT[child.pipeline_stage] ?? "secondary"}>
-            {tPipeline(child.pipeline_stage)}
-          </Badge>
+
         </div>
         <div className="flex items-center gap-2">
-          <PermissionGuard permission="children.update">
+          <PermissionGuard permission="beneficiaries.update">
             <Button variant="outline" onClick={() => setEditOpen(true)}>
               <Pencil className="size-4" />
               {t("editChild")}
             </Button>
           </PermissionGuard>
-          <PermissionGuard permission="children.delete">
+          <PermissionGuard permission="beneficiaries.delete">
             <Button variant="outline" onClick={() => setDeactivateOpen(true)}>
               <Ban className="size-4" />
               {t("deactivateChild")}

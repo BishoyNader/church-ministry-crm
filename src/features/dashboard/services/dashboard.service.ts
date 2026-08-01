@@ -17,7 +17,7 @@ type ServiceResult<T> = { data: T | null; error: string | null };
 const ATTENDANCE_MONTHS = 12;
 const NEW_CHILDREN_WINDOW_DAYS = 30;
 
-const OPEN_STATUSES = new Set(["scheduled", "in_progress"]);
+const OPEN_STATUSES = new Set(["open", "in_progress"]);
 
 const PIPELINE_STAGES: string[] = [
   "new_visitor",
@@ -69,29 +69,47 @@ export async function getDashboardData(
     );
     const attendanceMonthsAgoStr = toDateStr(attendanceMonthsAgo);
 
-    const [childrenResult, followupsResult, attendanceResult, stagesResult] =
-      await Promise.all([
-        supabase
-          .from("children")
-          .select("id, name, status, pipeline_stage, created_at, stage_id")
-          .eq("church_id", churchId)
-          .is("deleted_at", null),
-        supabase
-          .from("followups")
-          .select("id, child_id, status, scheduled_at, updated_at, stage_id")
-          .eq("church_id", churchId),
-        supabase
-          .from("attendance")
-          .select("status, attendance_date, stage_id")
-          .eq("church_id", churchId)
-          .gte("attendance_date", attendanceMonthsAgoStr),
-        supabase
-          .from("stages")
-          .select("id, name_ar, name_en")
-          .eq("church_id", churchId)
-          .eq("is_active", true)
-          .is("deleted_at", null),
-      ]);
+    const [
+      childrenResult,
+      followupsResult,
+      attendanceResult,
+      stagesResult,
+      assignmentsResult,
+    ] = await Promise.all([
+      supabase
+        .from("beneficiaries")
+        .select("id, name, full_name_ar, status, created_at")
+        .eq("church_id", churchId)
+        .is("deleted_at", null),
+      supabase
+        .from("followups")
+        .select("id, beneficiary_id, status, scheduled_at, updated_at")
+        .eq("church_id", churchId),
+      supabase
+        .from("attendance_records")
+        .select(
+          `
+          status,
+          attendance_sessions!inner (
+            session_date,
+            stage_id
+          )
+        `,
+        )
+        .eq("church_id", churchId)
+        .gte("attendance_sessions.session_date", attendanceMonthsAgoStr),
+      supabase
+        .from("stages")
+        .select("id, name_ar, name_en")
+        .eq("church_id", churchId)
+        .eq("is_active", true)
+        .is("deleted_at", null),
+      supabase
+        .from("beneficiary_assignments")
+        .select("beneficiary_id, stage_id")
+        .eq("church_id", churchId)
+        .eq("is_current", true),
+    ]);
 
     if (childrenResult.error)
       return { data: null, error: childrenResult.error.message };
@@ -101,11 +119,14 @@ export async function getDashboardData(
       return { data: null, error: attendanceResult.error.message };
     if (stagesResult.error)
       return { data: null, error: stagesResult.error.message };
+    if (assignmentsResult.error)
+      return { data: null, error: assignmentsResult.error.message };
 
     const children = childrenResult.data ?? [];
     const followups = followupsResult.data ?? [];
     const attendance = attendanceResult.data ?? [];
     const stages = stagesResult.data ?? [];
+    const beneficiaryAssignments = assignmentsResult.data ?? [];
 
     const stageNames = new Map(stages.map((s) => [s.id, { nameAr: s.name_ar, nameEn: s.name_en }]));
 
@@ -128,7 +149,7 @@ export async function getDashboardData(
           f.updated_at >= monthStartISO,
       ).length,
       attendanceThisMonth: attendance.filter(
-        (a) => a.attendance_date >= monthStartStr,
+        (a) => a.attendance_sessions?.[0]?.session_date >= monthStartStr,
       ).length,
       activeStages: stages.length,
     };
@@ -148,7 +169,9 @@ export async function getDashboardData(
     >();
 
     for (const a of attendance) {
-      const date = new Date(a.attendance_date);
+      const session = a.attendance_sessions?.[0];
+      if (!session) continue;
+      const date = new Date(session.session_date);
       const wk = getISOWeek(date);
       const mk = getMonthKey(date);
 
@@ -212,8 +235,9 @@ export async function getDashboardData(
       { present: number; absent: number; excused: number }
     >();
     for (const a of attendance) {
-      if (!a.stage_id) continue;
-      const b = stageAttMap.get(a.stage_id) ?? {
+      const sid = a.attendance_sessions?.[0]?.stage_id;
+      if (!sid) continue;
+      const b = stageAttMap.get(sid) ?? {
         present: 0,
         absent: 0,
         excused: 0,
@@ -221,7 +245,7 @@ export async function getDashboardData(
       if (a.status === "present") b.present++;
       else if (a.status === "absent") b.absent++;
       else if (a.status === "excused") b.excused++;
-      stageAttMap.set(a.stage_id, b);
+      stageAttMap.set(sid, b);
     }
 
     const attendanceByStage: AttendanceByStageItem[] = [];
@@ -264,17 +288,10 @@ export async function getDashboardData(
     const followupAnalytics: FollowupAnalytics = { statusCounts, overdue };
 
     // ── Pipeline analytics ──
-    const pipelineMap = new Map<string, number>();
-    for (const c of activeChildren) {
-      pipelineMap.set(
-        c.pipeline_stage,
-        (pipelineMap.get(c.pipeline_stage) ?? 0) + 1,
-      );
-    }
     const pipelineAnalytics: PipelineStageCount[] = PIPELINE_STAGES.map(
       (stage) => ({
         stage,
-        count: pipelineMap.get(stage) ?? 0,
+        count: 0,
       }),
     );
 
@@ -284,11 +301,10 @@ export async function getDashboardData(
     // to SQL-side queries with COUNT(*)
     // and LEFT JOINs to avoid loading all rows into JS.
     const childrenPerStage = new Map<string, number>();
-    for (const c of activeChildren) {
-      if (!c.stage_id) continue;
+    for (const a of beneficiaryAssignments) {
       childrenPerStage.set(
-        c.stage_id,
-        (childrenPerStage.get(c.stage_id) ?? 0) + 1,
+        a.stage_id,
+        (childrenPerStage.get(a.stage_id) ?? 0) + 1,
       );
     }
 
@@ -297,24 +313,18 @@ export async function getDashboardData(
       { present: number; total: number }
     >();
     for (const a of attendance) {
-      if (!a.stage_id || a.attendance_date < monthStartStr) continue;
-      const b = attPerStageThisMonth.get(a.stage_id) ?? {
+      const session = a.attendance_sessions?.[0];
+      if (!session || session.session_date < monthStartStr) continue;
+      const b = attPerStageThisMonth.get(session.stage_id) ?? {
         present: 0,
         total: 0,
       };
       b.total++;
       if (a.status === "present") b.present++;
-      attPerStageThisMonth.set(a.stage_id, b);
+      attPerStageThisMonth.set(session.stage_id, b);
     }
 
     const followupsPerStage = new Map<string, number>();
-    for (const f of followups) {
-      if (!f.stage_id) continue;
-      followupsPerStage.set(
-        f.stage_id,
-        (followupsPerStage.get(f.stage_id) ?? 0) + 1,
-      );
-    }
 
     const stageAnalytics: StageAnalyticsItem[] = stages.map((s) => {
       const att = attPerStageThisMonth.get(s.id) ?? { present: 0, total: 0 };
@@ -332,14 +342,16 @@ export async function getDashboardData(
     });
 
     // ── Next followups due ──
-    const childNameMap = new Map(children.map((c) => [c.id, c.name ?? ""]));
+    const childNameMap = new Map(
+      children.map((c) => [c.id, c.full_name_ar ?? c.name ?? ""]),
+    );
     const nowDate = new Date();
     const nextFollowupsDue: ScheduledFollowupItem[] = followups
       .filter((f) => OPEN_STATUSES.has(f.status) && f.scheduled_at != null)
       .map((f) => ({
         id: f.id,
-        childId: f.child_id ?? "",
-        childName: childNameMap.get(f.child_id ?? "") ?? "",
+        childId: f.beneficiary_id ?? "",
+        childName: childNameMap.get(f.beneficiary_id ?? "") ?? "",
         scheduledAt: f.scheduled_at ?? "",
         status: f.status,
       }))
@@ -360,8 +372,8 @@ export async function getDashboardData(
       .slice(0, 5)
       .map((c) => ({
         id: c.id,
-        name: c.name ?? "",
-        pipelineStage: c.pipeline_stage ?? "",
+        name: c.full_name_ar ?? c.name ?? "",
+        pipelineStage: "",
         createdAt: c.created_at,
       }));
 

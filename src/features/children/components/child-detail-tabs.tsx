@@ -4,7 +4,10 @@ import { useTranslations, useLocale } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ChildEmptyState } from "./child-empty-state";
-import type { ChildDetail } from "../types/child.types";
+import type {
+  ChildDetail,
+  AttendanceRecordWithSession,
+} from "../types/child.types";
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   active: "default",
@@ -13,13 +16,7 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
   graduated: "outline",
 };
 
-const PIPELINE_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  new_visitor: "outline",
-  first_followup: "secondary",
-  regular_attendee: "default",
-  active_member: "default",
-  leader_candidate: "secondary",
-};
+
 
 const ATTENDANCE_STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   present: "default",
@@ -28,7 +25,7 @@ const ATTENDANCE_STATUS_VARIANT: Record<string, "default" | "secondary" | "destr
 };
 
 const FOLLOWUP_STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  scheduled: "outline",
+  open: "outline",
   in_progress: "secondary",
   completed: "default",
   cancelled: "destructive",
@@ -50,10 +47,9 @@ function InfoRow({ label, value }: { label: string; value?: string | null }) {
 export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
   const t = useTranslations("children.detail");
   const tStatus = useTranslations("children.status");
-  const tPipeline = useTranslations("children.pipeline");
   const locale = useLocale();
 
-  const childName = `${child.first_name_ar} ${child.last_name_ar}`;
+  const childName = child.full_name_ar;
 
   return (
     <Tabs defaultValue="details">
@@ -66,66 +62,42 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
       <TabsContent value="details" className="space-y-6">
         <div className="flex items-center gap-3">
           <div className="flex size-12 items-center justify-center rounded-full bg-muted text-lg font-medium">
-            {child.first_name_ar[0]}
+            {child.full_name_ar[0]}
           </div>
           <div>
             <h2 className="text-xl font-semibold">{childName}</h2>
-            {child.first_name_en ? (
-              <p className="text-sm text-muted-foreground">
-                {child.first_name_en} {child.last_name_en ?? ""}
-              </p>
+            {child.full_name_en ? (
+              <p className="text-sm text-muted-foreground">{child.full_name_en}</p>
             ) : null}
           </div>
           <Badge variant={STATUS_VARIANT[child.status] ?? "secondary"}>
             {tStatus(child.status)}
           </Badge>
-          <Badge variant={PIPELINE_VARIANT[child.pipeline_stage] ?? "secondary"}>
-            {tPipeline(child.pipeline_stage)}
-          </Badge>
         </div>
 
         <div className="rounded-xl border bg-card p-4">
           <h3 className="mb-2 font-semibold">{t("personalInfo")}</h3>
-          <InfoRow label={t("firstNameAr")} value={child.first_name_ar} />
-          <InfoRow label={t("firstNameEn")} value={child.first_name_en} />
-          <InfoRow label={t("lastNameAr")} value={child.last_name_ar} />
-          <InfoRow label={t("lastNameEn")} value={child.last_name_en} />
+          <InfoRow label={t("fullNameAr")} value={child.full_name_ar} />
+          <InfoRow label={t("fullNameEn")} value={child.full_name_en} />
           <InfoRow label={t("dateOfBirth")} value={child.date_of_birth} />
           <InfoRow label={t("gender")} value={child.gender} />
-          <InfoRow label={t("ministry")} value={child.ministryNameAr} />
+          <InfoRow label={t("service")} value={child.serviceNameAr} />
           <InfoRow label={t("stage")} value={child.stageNameAr} />
         </div>
 
         <div className="rounded-xl border bg-card p-4">
-          <h3 className="mb-2 font-semibold">{t("parentInfo")}</h3>
-          <InfoRow label={t("father")} value={child.father_name_ar} />
-          <InfoRow label={t("mother")} value={child.mother_name_ar} />
-          <InfoRow label={t("parentPhone")} value={child.parent_phone} />
-          <InfoRow label={t("parentEmail")} value={child.parent_email} />
-          <InfoRow label={t("address")} value={child.parent_address_ar} />
-          <InfoRow label={t("emergencyContact")} value={child.emergency_contact_name} />
-          <InfoRow label={t("emergencyPhone")} value={child.emergency_contact_phone} />
+          <h3 className="mb-2 font-semibold">{t("contactInfo")}</h3>
+          <InfoRow label={t("fatherMobile")} value={child.father_mobile} />
+          <InfoRow label={t("motherMobile")} value={child.mother_mobile} />
           <InfoRow label={t("mobile")} value={child.mobile} />
+          <InfoRow label={t("whatsapp")} value={child.whatsapp} />
+          <InfoRow label={t("address")} value={child.address} />
         </div>
 
         <div className="rounded-xl border bg-card p-4">
-          <h3 className="mb-2 font-semibold">{t("medicalInfo")}</h3>
-          <InfoRow label={t("allergies")} value={child.allergies} />
-          <InfoRow label={t("medicalConditions")} value={child.medical_conditions} />
-          <InfoRow label={t("medications")} value={child.medications} />
-        </div>
-
-        <div className="rounded-xl border bg-card p-4">
-          <h3 className="mb-2 font-semibold">{t("spiritualInfo")}</h3>
-          <InfoRow label={t("baptismDate")} value={child.baptism_date} />
-          <InfoRow label={t("confessionFrequency")} value={child.confession_frequency} />
-          <InfoRow label={t("spiritualNotes")} value={child.spiritual_notes} />
-        </div>
-
-        <div className="rounded-xl border bg-card p-4">
-          <h3 className="mb-2 font-semibold">{t("educationInfo")}</h3>
-          <InfoRow label={t("school")} value={child.school_name_ar} />
-          <InfoRow label={t("gradeLevel")} value={child.grade_level} />
+          <h3 className="mb-2 font-semibold">{t("otherInfo")}</h3>
+          <InfoRow label={t("school")} value={child.school} />
+          <InfoRow label={t("confessionFather")} value={child.confession_father} />
           <InfoRow label={t("notes")} value={child.notes} />
         </div>
       </TabsContent>
@@ -151,7 +123,7 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
                   {child.attendance.map((record) => (
                     <tr key={record.id} className="border-b transition hover:bg-muted/30">
                       <td className="px-4 py-3">
-                        {new Date(record.attendance_date).toLocaleDateString(locale)}
+                        {new Date((record as AttendanceRecordWithSession).attendance_sessions?.session_date ?? record.created_at).toLocaleDateString(locale)}
                       </td>
                       <td className="px-4 py-3">
                         <Badge

@@ -9,7 +9,7 @@ import {
   transferChildAction,
   deactivateChildAction,
   listStagesAction,
-  listMinistriesAction,
+  listServicesAction,
 } from "../actions/child.actions";
 import type {
   CreateChildFormValues,
@@ -23,25 +23,23 @@ export const CHILD_QUERY_KEYS = {
   list: (
     filters?: {
       search?: string;
-      ministry_id?: string;
+      service_id?: string;
       stage_id?: string;
       status?: string;
-      pipeline_stage?: string;
     },
     pagination?: PaginationInput,
   ) => ["children", "list", filters, pagination] as const,
   detail: (id: string) => ["children", "detail", id] as const,
-  stages: (ministryId?: string) => ["children", "stages", ministryId] as const,
-  ministries: () => ["children", "ministries"] as const,
+  stages: (serviceId?: string) => ["children", "stages", serviceId] as const,
+  services: () => ["children", "services"] as const,
 };
 
 export function useChildList(
   filters?: {
     search?: string;
-    ministry_id?: string;
+    service_id?: string;
     stage_id?: string;
     status?: string;
-    pipeline_stage?: string;
   },
   pagination?: PaginationInput,
 ) {
@@ -126,18 +124,18 @@ export function useDeactivateChild() {
   });
 }
 
-export function useChildStages(ministryId?: string) {
+export function useChildStages(serviceId?: string) {
   return useQuery({
-    queryKey: CHILD_QUERY_KEYS.stages(ministryId),
-    queryFn: () => listStagesAction(ministryId),
+    queryKey: CHILD_QUERY_KEYS.stages(serviceId),
+    queryFn: () => listStagesAction(serviceId),
     staleTime: 60_000,
   });
 }
 
-export function useChildMinistries() {
+export function useChildServices() {
   return useQuery({
-    queryKey: CHILD_QUERY_KEYS.ministries(),
-    queryFn: () => listMinistriesAction(),
+    queryKey: CHILD_QUERY_KEYS.services(),
+    queryFn: () => listServicesAction(),
     staleTime: 60_000,
   });
 }

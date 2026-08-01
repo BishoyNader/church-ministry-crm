@@ -35,19 +35,11 @@ import type {
 import {
   useCreateChild,
   useUpdateChild,
-  useChildMinistries,
+  useChildServices,
   useChildStages,
 } from "../hooks/use-children";
 import type { ChildListItem } from "../types/child.types";
 import { FormField } from "@/components/ui/form-field";
-
-const PIPELINE_OPTIONS = [
-  "new_visitor",
-  "first_followup",
-  "regular_attendee",
-  "active_member",
-  "leader_candidate",
-] as const;
 
 const STATUS_OPTIONS = ["active", "inactive", "transferred", "graduated"] as const;
 
@@ -83,119 +75,83 @@ export function ChildFormDialog({
   child,
 }: ChildFormDialogProps) {
   const t = useTranslations("children.form");
-  const tPipeline = useTranslations("children.pipeline");
   const tStatus = useTranslations("children.status");
   const isEdit = !!child;
 
   const createMutation = useCreateChild();
   const updateMutation = useUpdateChild();
-  const ministriesQuery = useChildMinistries();
-  const ministries = ministriesQuery.data?.data ?? [];
+  const servicesQuery = useChildServices();
+  const services = servicesQuery.data?.data ?? [];
 
   const createForm = useForm<CreateChildFormValues>({
     resolver: zodResolver(createChildSchema),
     defaultValues: {
-      first_name_ar: "",
-      first_name_en: "",
-      last_name_ar: "",
-      last_name_en: "",
+      full_name_ar: "",
+      full_name_en: "",
       date_of_birth: "",
       gender: undefined,
-      ministry_id: "",
+      service_id: "",
       stage_id: "",
-      pipeline_stage: undefined,
-      parent_phone: "",
-      parent_email: "",
-      parent_address_ar: "",
-      father_name_ar: "",
-      mother_name_ar: "",
-      emergency_contact_name: "",
-      emergency_contact_phone: "",
+      father_mobile: "",
+      mother_mobile: "",
       mobile: "",
-      allergies: "",
-      medical_conditions: "",
-      medications: "",
-      baptism_date: "",
-      confession_frequency: "",
-      spiritual_notes: "",
-      school_name_ar: "",
-      grade_level: "",
+      whatsapp: "",
+      address: "",
+      school: "",
+      confession_father: "",
       notes: "",
       photo_url: "",
     },
   });
 
-  const createWatchMinistryId = createForm.watch("ministry_id");
-  const createStagesQuery = useChildStages(createWatchMinistryId || undefined);
+  const createWatchServiceId = createForm.watch("service_id");
+  const createStagesQuery = useChildStages(createWatchServiceId || undefined);
   const createStages = createStagesQuery.data?.data ?? [];
 
   const updateForm = useForm<UpdateChildFormValues>({
     resolver: zodResolver(updateChildSchema),
     defaultValues: {
-      first_name_ar: "",
-      first_name_en: "",
-      last_name_ar: "",
-      last_name_en: "",
+      full_name_ar: "",
+      full_name_en: "",
       date_of_birth: "",
       gender: undefined,
-      ministry_id: "",
+      service_id: "",
       stage_id: "",
-      pipeline_stage: "new_visitor",
       status: "active",
-      parent_phone: "",
-      parent_email: "",
-      parent_address_ar: "",
-      father_name_ar: "",
-      mother_name_ar: "",
-      emergency_contact_name: "",
-      emergency_contact_phone: "",
+      father_mobile: "",
+      mother_mobile: "",
       mobile: "",
-      allergies: "",
-      medical_conditions: "",
-      medications: "",
-      baptism_date: "",
-      confession_frequency: "",
-      spiritual_notes: "",
-      school_name_ar: "",
-      grade_level: "",
+      whatsapp: "",
+      address: "",
+      school: "",
+      confession_father: "",
       notes: "",
       photo_url: "",
     },
   });
 
-  const updateWatchMinistryId = updateForm.watch("ministry_id");
-  const updateStagesQuery = useChildStages(updateWatchMinistryId || undefined);
+  const updateWatchServiceId = updateForm.watch("service_id");
+  const updateStagesQuery = useChildStages(updateWatchServiceId || undefined);
   const updateStages = updateStagesQuery.data?.data ?? [];
 
   useEffect(() => {
     if (isEdit && child) {
+      const c = child as Record<string, unknown>;
       updateForm.reset({
-        first_name_ar: child.first_name_ar,
-        first_name_en: child.first_name_en ?? "",
-        last_name_ar: child.last_name_ar,
-        last_name_en: child.last_name_en ?? "",
+        full_name_ar: child.full_name_ar,
+        full_name_en: child.full_name_en ?? "",
         date_of_birth: child.date_of_birth ?? "",
         gender: child.gender ?? undefined,
-        ministry_id: child.ministry_id,
-        stage_id: child.stage_id,
-        pipeline_stage: child.pipeline_stage,
+        service_id: (c.service_id as string) ?? "",
+        stage_id: (c.stage_id as string) ?? "",
         status: child.status,
-        parent_phone: child.parent_phone ?? "",
-        parent_email: child.parent_email ?? "",
-        parent_address_ar: child.parent_address_ar ?? "",
-        father_name_ar: child.father_name_ar ?? "",
-        mother_name_ar: child.mother_name_ar ?? "",
-        emergency_contact_name: child.emergency_contact_name ?? "",
-        emergency_contact_phone: child.emergency_contact_phone ?? "",
+        father_mobile: child.father_mobile ?? "",
+        mother_mobile: child.mother_mobile ?? "",
         mobile: child.mobile ?? "",
-        allergies: child.allergies ?? "",
-        medical_conditions: child.medical_conditions ?? "",
-        medications: child.medications ?? "",
-        baptism_date: child.baptism_date ?? "",
-        confession_frequency: child.confession_frequency ?? "",
-        spiritual_notes: child.spiritual_notes ?? "",
-        school_name_ar: child.school_name_ar ?? "",
-        grade_level: child.grade_level ?? "",
+        whatsapp: child.whatsapp ?? "",
+        address: child.address ?? "",
+        school: child.school ?? "",
+        confession_father: child.confession_father ?? "",
         notes: child.notes ?? "",
         photo_url: child.photo_url ?? "",
       });
@@ -244,24 +200,14 @@ export function ChildFormDialog({
             <CollapsibleSection title={t("sections.personal")} defaultOpen>
               <div className={sectionClasses}>
                 <FormField
-                  label={t("firstNameAr")}
-                  error={updateForm.formState.errors.first_name_ar?.message}
+                  label={t("fullNameAr")}
+                  error={updateForm.formState.errors.full_name_ar?.message}
                   required
                 >
-                  <Input {...updateForm.register("first_name_ar")} />
+                  <Input {...updateForm.register("full_name_ar")} />
                 </FormField>
-                <FormField label={t("firstNameEn")}>
-                  <Input {...updateForm.register("first_name_en")} />
-                </FormField>
-                <FormField
-                  label={t("lastNameAr")}
-                  error={updateForm.formState.errors.last_name_ar?.message}
-                  required
-                >
-                  <Input {...updateForm.register("last_name_ar")} />
-                </FormField>
-                <FormField label={t("lastNameEn")}>
-                  <Input {...updateForm.register("last_name_en")} />
+                <FormField label={t("fullNameEn")}>
+                  <Input {...updateForm.register("full_name_en")} />
                 </FormField>
                 <FormField label={t("dateOfBirth")}>
                   <Input type="date" {...updateForm.register("date_of_birth")} />
@@ -281,24 +227,24 @@ export function ChildFormDialog({
                   </Select>
                 </FormField>
                 <FormField
-                  label={t("ministry")}
-                  error={updateForm.formState.errors.ministry_id?.message}
+                  label={t("service")}
+                  error={updateForm.formState.errors.service_id?.message}
                   required
                 >
                   <Select
-                    value={updateForm.watch("ministry_id")}
+                    value={updateForm.watch("service_id")}
                     onValueChange={(value) => {
-                      updateForm.setValue("ministry_id", value as string);
+                      updateForm.setValue("service_id", value as string);
                       updateForm.setValue("stage_id", "");
                     }}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("selectMinistry")} />
+                      <SelectValue placeholder={t("selectService")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {ministries.map((m) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          {m.name_ar}
+                      {services.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name_ar}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -325,33 +271,11 @@ export function ChildFormDialog({
                     </SelectContent>
                   </Select>
                 </FormField>
-                <FormField label={t("pipelineStage")}>
-                  <Select
-                    value={updateForm.watch("pipeline_stage") ?? ""}
-                    onValueChange={(value) =>
-                      updateForm.setValue(
-                        "pipeline_stage",
-                        value as UpdateChildFormValues["pipeline_stage"],
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("selectPipeline")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PIPELINE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {tPipeline(opt)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormField>
                 <FormField label="Status">
                   <Select
                     value={updateForm.watch("status")}
                     onValueChange={(value) =>
-                      updateForm.setValue("status", value as UpdateChildFormValues["status"])
+                      updateForm.setValue("status", value as string)
                     }
                   >
                     <SelectTrigger className="w-full">
@@ -369,68 +293,33 @@ export function ChildFormDialog({
               </div>
             </CollapsibleSection>
 
-            <CollapsibleSection title={t("sections.parent")}>
+            <CollapsibleSection title={t("sections.contact")}>
               <div className={sectionClasses}>
-                <FormField label={t("fatherName")}>
-                  <Input {...updateForm.register("father_name_ar")} />
+                <FormField label={t("fatherMobile")}>
+                  <Input {...updateForm.register("father_mobile")} />
                 </FormField>
-                <FormField label={t("motherName")}>
-                  <Input {...updateForm.register("mother_name_ar")} />
-                </FormField>
-                <FormField label={t("parentPhone")}>
-                  <Input {...updateForm.register("parent_phone")} />
-                </FormField>
-                <FormField label={t("parentEmail")}>
-                  <Input type="email" {...updateForm.register("parent_email")} />
-                </FormField>
-                <FormField label={t("parentAddress")}>
-                  <Input {...updateForm.register("parent_address_ar")} />
+                <FormField label={t("motherMobile")}>
+                  <Input {...updateForm.register("mother_mobile")} />
                 </FormField>
                 <FormField label={t("mobile")}>
                   <Input {...updateForm.register("mobile")} />
                 </FormField>
-                <FormField label={t("emergencyName")}>
-                  <Input {...updateForm.register("emergency_contact_name")} />
+                <FormField label={t("whatsapp")}>
+                  <Input {...updateForm.register("whatsapp")} />
                 </FormField>
-                <FormField label={t("emergencyPhone")}>
-                  <Input {...updateForm.register("emergency_contact_phone")} />
-                </FormField>
-              </div>
-            </CollapsibleSection>
-
-            <CollapsibleSection title={t("sections.medical")}>
-              <FormField label={t("allergies")}>
-                <Textarea {...updateForm.register("allergies")} />
-              </FormField>
-              <FormField label={t("medicalConditions")}>
-                <Textarea {...updateForm.register("medical_conditions")} />
-              </FormField>
-              <FormField label={t("medications")}>
-                <Textarea {...updateForm.register("medications")} />
-              </FormField>
-            </CollapsibleSection>
-
-            <CollapsibleSection title={t("sections.spiritual")}>
-              <div className={sectionClasses}>
-                <FormField label={t("baptismDate")}>
-                  <Input type="date" {...updateForm.register("baptism_date")} />
-                </FormField>
-                <FormField label={t("confessionFrequency")}>
-                  <Input {...updateForm.register("confession_frequency")} />
+                <FormField label={t("address")}>
+                  <Input {...updateForm.register("address")} />
                 </FormField>
               </div>
-              <FormField label={t("spiritualNotes")}>
-                <Textarea {...updateForm.register("spiritual_notes")} />
-              </FormField>
             </CollapsibleSection>
 
-            <CollapsibleSection title={t("sections.education")}>
+            <CollapsibleSection title={t("sections.other")}>
               <div className={sectionClasses}>
-                <FormField label={t("schoolName")}>
-                  <Input {...updateForm.register("school_name_ar")} />
+                <FormField label={t("school")}>
+                  <Input {...updateForm.register("school")} />
                 </FormField>
-                <FormField label={t("gradeLevel")}>
-                  <Input {...updateForm.register("grade_level")} />
+                <FormField label={t("confessionFather")}>
+                  <Input {...updateForm.register("confession_father")} />
                 </FormField>
                 <FormField label={t("photoUrl")}>
                   <Input {...updateForm.register("photo_url")} />
@@ -462,24 +351,14 @@ export function ChildFormDialog({
             <CollapsibleSection title={t("sections.personal")} defaultOpen>
               <div className={sectionClasses}>
                 <FormField
-                  label={t("firstNameAr")}
-                  error={createForm.formState.errors.first_name_ar?.message}
+                  label={t("fullNameAr")}
+                  error={createForm.formState.errors.full_name_ar?.message}
                   required
                 >
-                  <Input {...createForm.register("first_name_ar")} />
+                  <Input {...createForm.register("full_name_ar")} />
                 </FormField>
-                <FormField label={t("firstNameEn")}>
-                  <Input {...createForm.register("first_name_en")} />
-                </FormField>
-                <FormField
-                  label={t("lastNameAr")}
-                  error={createForm.formState.errors.last_name_ar?.message}
-                  required
-                >
-                  <Input {...createForm.register("last_name_ar")} />
-                </FormField>
-                <FormField label={t("lastNameEn")}>
-                  <Input {...createForm.register("last_name_en")} />
+                <FormField label={t("fullNameEn")}>
+                  <Input {...createForm.register("full_name_en")} />
                 </FormField>
                 <FormField label={t("dateOfBirth")}>
                   <Input type="date" {...createForm.register("date_of_birth")} />
@@ -499,24 +378,24 @@ export function ChildFormDialog({
                   </Select>
                 </FormField>
                 <FormField
-                  label={t("ministry")}
-                  error={createForm.formState.errors.ministry_id?.message}
+                  label={t("service")}
+                  error={createForm.formState.errors.service_id?.message}
                   required
                 >
                   <Select
-                    value={createForm.watch("ministry_id")}
+                    value={createForm.watch("service_id")}
                     onValueChange={(value) => {
-                      createForm.setValue("ministry_id", value as string);
+                      createForm.setValue("service_id", value as string);
                       createForm.setValue("stage_id", "");
                     }}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("selectMinistry")} />
+                      <SelectValue placeholder={t("selectService")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {ministries.map((m) => (
-                        <SelectItem key={m.id} value={m.id}>
-                          {m.name_ar}
+                      {services.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name_ar}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -543,93 +422,36 @@ export function ChildFormDialog({
                     </SelectContent>
                   </Select>
                 </FormField>
-                <FormField label={t("pipelineStage")}>
-                  <Select
-                    value={createForm.watch("pipeline_stage") ?? ""}
-                    onValueChange={(value) =>
-                      createForm.setValue(
-                        "pipeline_stage",
-                        value as CreateChildFormValues["pipeline_stage"],
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("selectPipeline")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PIPELINE_OPTIONS.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {tPipeline(opt)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormField>
               </div>
             </CollapsibleSection>
 
-            <CollapsibleSection title={t("sections.parent")}>
+            <CollapsibleSection title={t("sections.contact")}>
               <div className={sectionClasses}>
-                <FormField label={t("fatherName")}>
-                  <Input {...createForm.register("father_name_ar")} />
+                <FormField label={t("fatherMobile")}>
+                  <Input {...createForm.register("father_mobile")} />
                 </FormField>
-                <FormField label={t("motherName")}>
-                  <Input {...createForm.register("mother_name_ar")} />
-                </FormField>
-                <FormField label={t("parentPhone")}>
-                  <Input {...createForm.register("parent_phone")} />
-                </FormField>
-                <FormField label={t("parentEmail")}>
-                  <Input type="email" {...createForm.register("parent_email")} />
-                </FormField>
-                <FormField label={t("parentAddress")}>
-                  <Input {...createForm.register("parent_address_ar")} />
+                <FormField label={t("motherMobile")}>
+                  <Input {...createForm.register("mother_mobile")} />
                 </FormField>
                 <FormField label={t("mobile")}>
                   <Input {...createForm.register("mobile")} />
                 </FormField>
-                <FormField label={t("emergencyName")}>
-                  <Input {...createForm.register("emergency_contact_name")} />
+                <FormField label={t("whatsapp")}>
+                  <Input {...createForm.register("whatsapp")} />
                 </FormField>
-                <FormField label={t("emergencyPhone")}>
-                  <Input {...createForm.register("emergency_contact_phone")} />
-                </FormField>
-              </div>
-            </CollapsibleSection>
-
-            <CollapsibleSection title={t("sections.medical")}>
-              <FormField label={t("allergies")}>
-                <Textarea {...createForm.register("allergies")} />
-              </FormField>
-              <FormField label={t("medicalConditions")}>
-                <Textarea {...createForm.register("medical_conditions")} />
-              </FormField>
-              <FormField label={t("medications")}>
-                <Textarea {...createForm.register("medications")} />
-              </FormField>
-            </CollapsibleSection>
-
-            <CollapsibleSection title={t("sections.spiritual")}>
-              <div className={sectionClasses}>
-                <FormField label={t("baptismDate")}>
-                  <Input type="date" {...createForm.register("baptism_date")} />
-                </FormField>
-                <FormField label={t("confessionFrequency")}>
-                  <Input {...createForm.register("confession_frequency")} />
+                <FormField label={t("address")}>
+                  <Input {...createForm.register("address")} />
                 </FormField>
               </div>
-              <FormField label={t("spiritualNotes")}>
-                <Textarea {...createForm.register("spiritual_notes")} />
-              </FormField>
             </CollapsibleSection>
 
-            <CollapsibleSection title={t("sections.education")}>
+            <CollapsibleSection title={t("sections.other")}>
               <div className={sectionClasses}>
-                <FormField label={t("schoolName")}>
-                  <Input {...createForm.register("school_name_ar")} />
+                <FormField label={t("school")}>
+                  <Input {...createForm.register("school")} />
                 </FormField>
-                <FormField label={t("gradeLevel")}>
-                  <Input {...createForm.register("grade_level")} />
+                <FormField label={t("confessionFather")}>
+                  <Input {...createForm.register("confession_father")} />
                 </FormField>
                 <FormField label={t("photoUrl")}>
                   <Input {...createForm.register("photo_url")} />

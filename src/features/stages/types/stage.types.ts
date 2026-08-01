@@ -1,17 +1,17 @@
 import type { Database } from "@/types/database.types";
 
-export type MinistryRow = Database["public"]["Tables"]["ministries"]["Row"];
-export type MinistryInsert = Database["public"]["Tables"]["ministries"]["Insert"];
-export type MinistryUpdate = Database["public"]["Tables"]["ministries"]["Update"];
+export type MinistryRow = Database["public"]["Tables"]["services"]["Row"];
+export type MinistryInsert = Database["public"]["Tables"]["services"]["Insert"];
+export type MinistryUpdate = Database["public"]["Tables"]["services"]["Update"];
 
 export type StageRow = Database["public"]["Tables"]["stages"]["Row"];
 export type StageInsert = Database["public"]["Tables"]["stages"]["Insert"];
 export type StageUpdate = Database["public"]["Tables"]["stages"]["Update"];
 
 export type UserStageAssignmentRow =
-  Database["public"]["Tables"]["user_stage_assignments"]["Row"];
+  Database["public"]["Tables"]["servant_stage_assignments"]["Row"];
 export type UserStageAssignmentInsert =
-  Database["public"]["Tables"]["user_stage_assignments"]["Insert"];
+  Database["public"]["Tables"]["servant_stage_assignments"]["Insert"];
 
 export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
@@ -51,7 +51,7 @@ export type UpdateMinistryInput = {
 };
 
 export type CreateStageInput = {
-  ministry_id: string;
+  service_id: string;
   name_ar: string;
   name_en?: string;
   description_ar?: string;

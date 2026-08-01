@@ -75,23 +75,19 @@ export function AttendanceTable({
               const current = records[child.id];
               return (
                 <tr key={child.id} className="border-b transition hover:bg-muted/30">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                        {child.first_name_ar[0]}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                          {child.full_name_ar[0]}
+                        </div>
+                        <div>
+                          <p className="font-medium">{child.full_name_ar}</p>
+                          {child.full_name_en ? (
+                            <p className="text-xs text-muted-foreground">{child.full_name_en}</p>
+                          ) : null}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium">
-                          {child.first_name_ar} {child.last_name_ar}
-                        </p>
-                        {child.first_name_en ? (
-                          <p className="text-xs text-muted-foreground">
-                            {child.first_name_en} {child.last_name_en ?? ""}
-                          </p>
-                        ) : null}
-                      </div>
-                    </div>
-                  </td>
+                    </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-1">
                       {STATUS_OPTIONS.map((option) => (
