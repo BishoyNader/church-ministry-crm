@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { writeAuditLog } from "@/lib/audit";
 import { hasPermission } from "@/features/rbac/utils/permission-check";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
@@ -40,46 +41,6 @@ export type ChildActionResult<T = unknown> = {
   data?: T;
 };
 
-async function auditLog(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  action: string,
-  entityType: string,
-  entityId: string,
-  oldValues?: Record<string, unknown>,
-  newValues?: Record<string, unknown>,
-) {
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("church_id")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile) return;
-
-    const { error } = await supabase.from("audit_logs").insert({
-      church_id: profile.church_id,
-      user_id: user.id,
-      action,
-      entity_type: entityType,
-      entity_id: entityId,
-      old_values: oldValues ?? null,
-      new_values: newValues ?? null,
-    });
-
-    if (error) {
-      console.error(`[audit] Failed to write audit log for ${entityType}:${entityId}:`, error.message);
-    }
-  } catch (err) {
-    console.error(`[audit] Unexpected error writing audit log for ${entityType}:${entityId}:`, err);
-  }
-}
-
 function handleZodError(error: unknown): ChildActionResult<never> {
   if (error instanceof ZodError) {
     return {
@@ -112,10 +73,9 @@ function validateId(id: string, label: string): ChildActionResult<never> | null 
 export async function listChildrenAction(
   filters?: {
     search?: string;
-    ministry_id?: string;
+    service_id?: string;
     stage_id?: string;
     status?: string;
-    pipeline_stage?: string;
   },
   pagination?: PaginationInput,
 ): Promise<ChildActionResult<PaginatedResult<ChildListItem>>> {
@@ -128,7 +88,7 @@ export async function listChildrenAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_READ))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_READ))) {
     return { success: false, message: "You do not have permission to view children." };
   }
 
@@ -166,7 +126,7 @@ export async function getChildByIdAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_READ))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_READ))) {
     return { success: false, message: "You do not have permission to view children." };
   }
 
@@ -207,36 +167,24 @@ export async function createChildAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_CREATE))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_CREATE))) {
     return { success: false, message: "You do not have permission to create children." };
   }
 
   const result = await childService.createChild(supabase, {
-    first_name_ar: values.first_name_ar,
-    first_name_en: values.first_name_en,
-    last_name_ar: values.last_name_ar,
-    last_name_en: values.last_name_en,
+    full_name_ar: values.full_name_ar,
+    full_name_en: values.full_name_en,
     date_of_birth: values.date_of_birth,
     gender: values.gender,
-    ministry_id: values.ministry_id,
+    service_id: values.service_id,
     stage_id: values.stage_id,
-    pipeline_stage: values.pipeline_stage,
-    parent_phone: values.parent_phone,
-    parent_email: values.parent_email,
-    parent_address_ar: values.parent_address_ar,
-    father_name_ar: values.father_name_ar,
-    mother_name_ar: values.mother_name_ar,
-    emergency_contact_name: values.emergency_contact_name,
-    emergency_contact_phone: values.emergency_contact_phone,
+    father_mobile: values.father_mobile,
+    mother_mobile: values.mother_mobile,
     mobile: values.mobile,
-    allergies: values.allergies,
-    medical_conditions: values.medical_conditions,
-    medications: values.medications,
-    baptism_date: values.baptism_date,
-    confession_frequency: values.confession_frequency,
-    spiritual_notes: values.spiritual_notes,
-    school_name_ar: values.school_name_ar,
-    grade_level: values.grade_level,
+    whatsapp: values.whatsapp,
+    address: values.address,
+    school: values.school,
+    confession_father: values.confession_father,
     notes: values.notes,
     photo_url: values.photo_url,
   });
@@ -246,9 +194,8 @@ export async function createChildAction(
   }
 
   if (result.data) {
-    await auditLog(supabase, "create", "child", result.data.id, undefined, {
-      first_name_ar: values.first_name_ar,
-      last_name_ar: values.last_name_ar,
+    await writeAuditLog(supabase, "create", "child", result.data.id, undefined, {
+      full_name_ar: values.full_name_ar,
     });
   }
 
@@ -281,7 +228,7 @@ export async function updateChildAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_UPDATE))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_UPDATE))) {
     return { success: false, message: "You do not have permission to update children." };
   }
 
@@ -298,39 +245,26 @@ export async function updateChildAction(
   const existing = await childService.getChildById(supabase, childId, profile.church_id);
   const oldValues = existing.data
     ? {
-        first_name_ar: existing.data.first_name_ar,
+        full_name_ar: existing.data.full_name_ar,
         status: existing.data.status,
-        pipeline_stage: existing.data.pipeline_stage,
       }
     : undefined;
 
   const result = await childService.updateChild(supabase, childId, profile.church_id, {
-    first_name_ar: values.first_name_ar,
-    first_name_en: values.first_name_en,
-    last_name_ar: values.last_name_ar,
-    last_name_en: values.last_name_en,
+    full_name_ar: values.full_name_ar,
+    full_name_en: values.full_name_en,
     date_of_birth: values.date_of_birth,
     gender: values.gender,
-    ministry_id: values.ministry_id,
+    service_id: values.service_id,
     stage_id: values.stage_id,
-    pipeline_stage: values.pipeline_stage,
     status: values.status,
-    parent_phone: values.parent_phone,
-    parent_email: values.parent_email,
-    parent_address_ar: values.parent_address_ar,
-    father_name_ar: values.father_name_ar,
-    mother_name_ar: values.mother_name_ar,
-    emergency_contact_name: values.emergency_contact_name,
-    emergency_contact_phone: values.emergency_contact_phone,
+    father_mobile: values.father_mobile,
+    mother_mobile: values.mother_mobile,
     mobile: values.mobile,
-    allergies: values.allergies,
-    medical_conditions: values.medical_conditions,
-    medications: values.medications,
-    baptism_date: values.baptism_date,
-    confession_frequency: values.confession_frequency,
-    spiritual_notes: values.spiritual_notes,
-    school_name_ar: values.school_name_ar,
-    grade_level: values.grade_level,
+    whatsapp: values.whatsapp,
+    address: values.address,
+    school: values.school,
+    confession_father: values.confession_father,
     notes: values.notes,
     photo_url: values.photo_url,
   });
@@ -339,10 +273,9 @@ export async function updateChildAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "update", "child", childId, oldValues, {
-    first_name_ar: values.first_name_ar,
+  await writeAuditLog(supabase, "update", "child", childId, oldValues, {
+    full_name_ar: values.full_name_ar,
     status: values.status,
-    pipeline_stage: values.pipeline_stage,
   });
 
   return { success: true, message: "Child updated successfully." };
@@ -370,7 +303,7 @@ export async function transferChildAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_UPDATE))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_UPDATE))) {
     return { success: false, message: "You do not have permission to update children." };
   }
 
@@ -384,13 +317,8 @@ export async function transferChildAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const existing = await childService.getChildById(supabase, childId, profile.church_id);
-  const oldValues = existing.data
-    ? { ministry_id: existing.data.ministry_id, stage_id: existing.data.stage_id }
-    : undefined;
-
   const result = await childService.transferChild(supabase, childId, profile.church_id, {
-    ministry_id: values.ministry_id,
+    service_id: values.service_id,
     stage_id: values.stage_id,
   });
 
@@ -398,8 +326,8 @@ export async function transferChildAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "update", "child", childId, oldValues, {
-    ministry_id: values.ministry_id,
+  await writeAuditLog(supabase, "update", "child", childId, undefined, {
+    service_id: values.service_id,
     stage_id: values.stage_id,
   });
 
@@ -421,7 +349,7 @@ export async function deactivateChildAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_DELETE))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_DELETE))) {
     return { success: false, message: "You do not have permission to delete children." };
   }
 
@@ -437,7 +365,7 @@ export async function deactivateChildAction(
 
   const existing = await childService.getChildById(supabase, childId, profile.church_id);
   const oldValues = existing.data
-    ? { first_name_ar: existing.data.first_name_ar, status: existing.data.status }
+    ? { full_name_ar: existing.data.full_name_ar, status: existing.data.status }
     : undefined;
 
   const result = await childService.deactivateChild(supabase, childId, profile.church_id);
@@ -446,7 +374,7 @@ export async function deactivateChildAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "delete", "child", childId, oldValues, {
+  await writeAuditLog(supabase, "delete", "child", childId, oldValues, {
     deleted_at: new Date().toISOString(),
   });
 
@@ -478,8 +406,9 @@ export async function createAttendanceAction(
   }
 
   const result = await childService.createAttendance(supabase, {
-    child_id: values.child_id,
+    beneficiary_id: values.beneficiary_id,
     stage_id: values.stage_id,
+    service_id: values.service_id,
     attendance_date: values.attendance_date,
     status: values.status,
     notes: values.notes,
@@ -490,8 +419,8 @@ export async function createAttendanceAction(
   }
 
   if (result.data) {
-    await auditLog(supabase, "create", "attendance", result.data.id, undefined, {
-      child_id: values.child_id,
+    await writeAuditLog(supabase, "create", "attendance", result.data.id, undefined, {
+      beneficiary_id: values.beneficiary_id,
       status: values.status,
     });
   }
@@ -525,12 +454,9 @@ export async function batchAttendanceAction(
     return { success: false, message: "You do not have permission to record attendance." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.ATTENDANCE_UPDATE))) {
-    return { success: false, message: "You do not have permission to update attendance." };
-  }
-
   const result = await childService.batchAttendance(supabase, {
     stage_id: values.stage_id,
+    service_id: values.service_id,
     attendance_date: values.attendance_date,
     records: values.records,
   });
@@ -539,7 +465,7 @@ export async function batchAttendanceAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "create", "attendance", values.stage_id, undefined, {
+  await writeAuditLog(supabase, "create", "attendance", values.stage_id, undefined, {
     stage_id: values.stage_id,
     date: values.attendance_date,
     count: values.records.length,
@@ -554,7 +480,7 @@ export async function batchAttendanceAction(
 
 export async function listAttendanceAction(
   filters?: {
-    child_id?: string;
+    beneficiary_id?: string;
     stage_id?: string;
     from_date?: string;
     to_date?: string;
@@ -617,8 +543,7 @@ export async function createFollowupAction(
   }
 
   const result = await childService.createFollowup(supabase, {
-    child_id: values.child_id,
-    stage_id: values.stage_id,
+    beneficiary_id: values.beneficiary_id,
     type: values.type,
     scheduled_at: values.scheduled_at,
     assigned_to: values.assigned_to,
@@ -630,8 +555,8 @@ export async function createFollowupAction(
   }
 
   if (result.data) {
-    await auditLog(supabase, "create", "followup", result.data.id, undefined, {
-      child_id: values.child_id,
+    await writeAuditLog(supabase, "create", "followup", result.data.id, undefined, {
+      beneficiary_id: values.beneficiary_id,
       type: values.type,
     });
   }
@@ -694,7 +619,7 @@ export async function updateFollowupAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "update", "followup", followupId, oldValues, values);
+  await writeAuditLog(supabase, "update", "followup", followupId, oldValues, values);
 
   return { success: true, message: "Followup updated." };
 }
@@ -737,14 +662,14 @@ export async function deleteFollowupAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "delete", "followup", followupId, oldValues);
+  await writeAuditLog(supabase, "delete", "followup", followupId, oldValues);
 
   return { success: true, message: "Followup deleted." };
 }
 
 export async function listFollowupsAction(
   filters?: {
-    child_id?: string;
+    beneficiary_id?: string;
     status?: string;
     assigned_to?: string;
   },
@@ -784,8 +709,8 @@ export async function listFollowupsAction(
 // ─── Reference Data Actions ─────────────────────────────────
 
 export async function listStagesAction(
-  ministryId?: string,
-): Promise<ChildActionResult<Pick<import("../types/child.types").StageRow, "id" | "name_ar" | "ministry_id">[]>> {
+  serviceId?: string,
+): Promise<ChildActionResult<Pick<import("../types/child.types").StageRow, "id" | "name_ar" | "service_id">[]>> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -795,7 +720,7 @@ export async function listStagesAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_READ))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_READ))) {
     return { success: false, message: "You do not have permission to view stages." };
   }
 
@@ -809,7 +734,7 @@ export async function listStagesAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await childService.listStages(supabase, profile.church_id, ministryId);
+  const result = await childService.listStages(supabase, profile.church_id, serviceId);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -818,7 +743,7 @@ export async function listStagesAction(
   return { success: true, data: result.data ?? [] };
 }
 
-export async function listMinistriesAction(): Promise<
+export async function listServicesAction(): Promise<
   ChildActionResult<Pick<import("../types/child.types").MinistryRow, "id" | "name_ar">[]>
 > {
   const supabase = await createClient();
@@ -830,7 +755,7 @@ export async function listMinistriesAction(): Promise<
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_READ))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_READ))) {
     return { success: false, message: "You do not have permission to view ministries." };
   }
 
@@ -844,7 +769,7 @@ export async function listMinistriesAction(): Promise<
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await childService.listMinistries(supabase, profile.church_id);
+  const result = await childService.listServices(supabase, profile.church_id);
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -865,7 +790,7 @@ export async function listUsersAction(): Promise<
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.CHILDREN_READ))) {
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_READ))) {
     return { success: false, message: "You do not have permission to view users." };
   }
 

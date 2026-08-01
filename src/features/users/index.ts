@@ -24,6 +24,11 @@ export {
 } from "./services/user.service";
 
 export {
+  approveServant,
+  rejectServant,
+} from "./services/approval.service";
+
+export {
   listUsersAction,
   getUserAction,
   createUserAction,

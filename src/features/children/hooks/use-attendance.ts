@@ -15,7 +15,7 @@ import { CHILD_QUERY_KEYS } from "./use-children";
 export const ATTENDANCE_QUERY_KEYS = {
   all: ["attendance"] as const,
   list: (filters?: {
-    child_id?: string;
+    beneficiary_id?: string;
     stage_id?: string;
     from_date?: string;
     to_date?: string;
@@ -24,7 +24,7 @@ export const ATTENDANCE_QUERY_KEYS = {
 
 export function useAttendanceList(
   filters?: {
-    child_id?: string;
+    beneficiary_id?: string;
     stage_id?: string;
     from_date?: string;
     to_date?: string;

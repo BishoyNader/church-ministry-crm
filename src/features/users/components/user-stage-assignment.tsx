@@ -37,7 +37,7 @@ export function UserStageAssignment({
   const stages = stagesQuery.data?.data ?? [];
 
   const [selectedIds, setSelectedIds] = useState<string[]>(
-    () => user?.stageAssignments.map((s) => s.stage_id) ?? [],
+    () => user?.stageAssignments.map((s) => s.stage_id).filter((id): id is string => id !== null) ?? [],
   );
 
   const toggle = (stageId: string) => {

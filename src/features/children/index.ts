@@ -49,7 +49,7 @@ export {
   updateFollowupAction,
   listFollowupsAction,
   listStagesAction,
-  listMinistriesAction,
+  listServicesAction,
   listUsersAction,
 } from "./actions/child.actions";
 
@@ -61,7 +61,7 @@ export {
   useTransferChild,
   useDeactivateChild,
   useChildStages,
-  useChildMinistries,
+  useChildServices,
   CHILD_QUERY_KEYS,
 } from "./hooks/use-children";
 

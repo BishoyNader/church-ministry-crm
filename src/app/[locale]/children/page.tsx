@@ -19,7 +19,7 @@ export default async function ChildrenPage({
   }
   setRequestLocale(locale);
   return (
-    <PermissionGuard permission="children.read">
+    <PermissionGuard permission="beneficiaries.read">
       <ChildListPage />
     </PermissionGuard>
   );

@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { writeAuditLog } from "@/lib/audit";
 import { hasPermission } from "@/features/rbac/utils/permission-check";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
@@ -29,38 +30,6 @@ export type UserActionResult<T = unknown> = {
   fieldErrors?: Partial<Record<string, string>>;
   data?: T;
 };
-
-async function auditLog(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  action: string,
-  entityType: string,
-  entityId: string,
-  oldValues?: Record<string, unknown>,
-  newValues?: Record<string, unknown>,
-) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("church_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile) return;
-
-  await supabase.from("audit_logs").insert({
-    church_id: profile.church_id,
-    user_id: user.id,
-    action,
-    entity_type: entityType,
-    entity_id: entityId,
-    old_values: oldValues ?? null,
-    new_values: newValues ?? null,
-  });
-}
 
 export async function listUsersAction(
   page: number,
@@ -111,11 +80,10 @@ export async function listUsersAction(
     pageSize,
     search,
     roleFilter: roleFilter as
+      | "platform_owner"
       | "super_admin"
-      | "church_admin"
-      | "stage_leader"
+      | "admin"
       | "servant"
-      | "viewer"
       | undefined,
   });
 
@@ -188,7 +156,7 @@ export async function createUserAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.USERS_CREATE))) {
+  if (!(await hasPermission(PERMISSION_CODES.SERVANTS_CREATE))) {
     return { success: false, message: "You do not have permission to create users." };
   }
 
@@ -200,6 +168,11 @@ export async function createUserAction(
 
   if (!profile) {
     return { success: false, message: "User profile not found." };
+  }
+
+  const actorDetail = await userService.getUserById(supabase, profile.church_id, user.id);
+  if (!(actorDetail.data?.roles.some((r) => r.role_type === "super_admin") ?? false)) {
+    return { success: false, message: "Only a super admin can create users." };
   }
 
   const result = await userService.createUser(
@@ -222,7 +195,7 @@ export async function createUserAction(
   }
 
   if (result.data) {
-    await auditLog(supabase, "create", "user", result.data.id, undefined, {
+    await writeAuditLog(supabase, "create", "user", result.data.id, undefined, {
       email: values.email,
       full_name_ar: values.full_name_ar,
       roleIds: values.roleIds,
@@ -300,7 +273,7 @@ export async function updateUserAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "update", "user", userId, oldValues, {
+  await writeAuditLog(supabase, "update", "user", userId, oldValues, {
     full_name_ar: values.full_name_ar,
     is_active: values.is_active,
   });
@@ -320,7 +293,7 @@ export async function deactivateUserAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.USERS_DELETE))) {
+  if (!(await hasPermission(PERMISSION_CODES.SERVANTS_DELETE))) {
     return { success: false, message: "You do not have permission to deactivate users." };
   }
 
@@ -348,6 +321,7 @@ export async function deactivateUserAction(
       .from("user_roles")
       .select("id", { count: "exact", head: true })
       .eq("church_id", existing.data.church_id)
+      .is("end_date", null)
       .eq("role_id", (
         await supabase
           .from("roles")
@@ -371,7 +345,7 @@ export async function deactivateUserAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(
+  await writeAuditLog(
     supabase,
     "update",
     "user",
@@ -411,7 +385,7 @@ export async function assignRolesAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.USERS_MANAGE))) {
+  if (!(await hasPermission(PERMISSION_CODES.SERVANTS_ASSIGN))) {
     return { success: false, message: "You do not have permission to assign roles." };
   }
 
@@ -423,6 +397,11 @@ export async function assignRolesAction(
 
   if (!profile) {
     return { success: false, message: "User profile not found." };
+  }
+
+  const actorDetail = await userService.getUserById(supabase, profile.church_id, user.id);
+  if (!(actorDetail.data?.roles.some((r) => r.role_type === "super_admin") ?? false)) {
+    return { success: false, message: "Only a super admin can assign roles." };
   }
 
   const existing = await userService.getUserById(supabase, profile.church_id, userId);
@@ -438,7 +417,7 @@ export async function assignRolesAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "update", "user", userId, { roleIds: oldRoleIds }, { roleIds });
+  await writeAuditLog(supabase, "update", "user", userId, { roleIds: oldRoleIds }, { roleIds });
 
   return { success: true, message: "Roles updated successfully." };
 }
@@ -471,7 +450,7 @@ export async function assignStagesAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.USERS_MANAGE))) {
+  if (!(await hasPermission(PERMISSION_CODES.SERVANTS_ASSIGN))) {
     return { success: false, message: "You do not have permission to assign stages." };
   }
 
@@ -499,7 +478,7 @@ export async function assignStagesAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(
+  await writeAuditLog(
     supabase,
     "update",
     "user",

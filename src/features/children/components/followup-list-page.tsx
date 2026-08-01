@@ -25,10 +25,10 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import type { FollowupListItem } from "../types/child.types";
 
-const STATUS_OPTIONS = ["scheduled", "in_progress", "completed", "cancelled"] as const;
+const STATUS_OPTIONS = ["open", "in_progress", "completed", "cancelled"] as const;
 
 const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  scheduled: "outline",
+  open: "outline",
   in_progress: "secondary",
   completed: "default",
   cancelled: "destructive",
@@ -82,8 +82,7 @@ export function FollowupListPage() {
       const q = search.toLowerCase();
       filtered = filtered.filter(
         (f) =>
-          f.childFirstNameAr?.toLowerCase().includes(q) ||
-          f.childLastNameAr?.toLowerCase().includes(q),
+          f.childFullNameAr?.toLowerCase().includes(q),
       );
     }
 
@@ -262,12 +261,10 @@ export function FollowupListPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                          {followup.childFirstNameAr[0]}
+                          {followup.childFullNameAr?.[0]}
                         </div>
                         <div>
-                          <p className="font-medium">
-                            {followup.childFirstNameAr} {followup.childLastNameAr}
-                          </p>
+                          <p className="font-medium">{followup.childFullNameAr}</p>
                         </div>
                       </div>
                     </td>

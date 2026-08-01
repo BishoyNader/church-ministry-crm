@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
 import { PermissionGuard } from "@/features/rbac";
-import { useChildList, useChildMinistries, useChildStages } from "../hooks/use-children";
+import { useChildList, useChildServices, useChildStages } from "../hooks/use-children";
 import { useAttendanceList, useBatchAttendance } from "../hooks/use-attendance";
 import { AttendanceTable, type AttendanceRecord } from "./attendance-table";
 import { ChildEmptyState } from "./child-empty-state";
@@ -24,15 +24,15 @@ export function AttendancePage() {
 
   const [stageId, setStageId] = useState<string | null>(null);
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [ministryFilter, setMinistryFilter] = useState("all");
+  const [serviceFilter, setServiceFilter] = useState("all");
   const [userRecords, setUserRecords] = useState<Record<string, AttendanceRecord>>({});
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const ministriesQuery = useChildMinistries();
-  const ministries = ministriesQuery.data?.data ?? [];
+  const servicesQuery = useChildServices();
+  const services = servicesQuery.data?.data ?? [];
 
-  const ministryId = ministryFilter !== "all" ? ministryFilter : undefined;
-  const stagesQuery = useChildStages(ministryId);
+  const serviceId = serviceFilter !== "all" ? serviceFilter : undefined;
+  const stagesQuery = useChildStages(serviceId);
   const stages = stagesQuery.data?.data ?? [];
 
   const childrenQuery = useChildList(
@@ -51,8 +51,9 @@ export function AttendancePage() {
     const merged = { ...userRecords };
     const existing = attendanceQuery.data?.data ?? [];
     for (const record of existing) {
-      if (!merged[record.child_id]) {
-        merged[record.child_id] = {
+      const bid = record.beneficiary_id;
+      if (bid && !merged[bid]) {
+        merged[bid] = {
           status: record.status as AttendanceRecord["status"],
           notes: record.notes ?? "",
         };
@@ -71,8 +72,8 @@ export function AttendancePage() {
     setUserRecords({});
   };
 
-  const handleMinistryChange = (value: unknown) => {
-    setMinistryFilter(value as string);
+  const handleServiceChange = (value: unknown) => {
+    setServiceFilter(value as string);
     setStageId(null);
     setUserRecords({});
   };
@@ -90,11 +91,19 @@ export function AttendancePage() {
     if (!stageId || !hasRecords) return;
     setSaveError(null);
 
+    const stage = stages.find((s) => s.id === stageId);
+    const sid = stage?.service_id ?? serviceId;
+    if (!sid) {
+      setSaveError(tAttendance("selectServiceFirst"));
+      return;
+    }
+
     const result = await batchMutation.mutateAsync({
       stage_id: stageId,
+      service_id: sid,
       attendance_date: date,
-      records: Object.entries(records).map(([childId, record]) => ({
-        child_id: childId,
+      records: Object.entries(records).map(([beneficiaryId, record]) => ({
+        beneficiary_id: beneficiaryId,
         status: record.status,
         notes: record.notes || undefined,
       })),
@@ -127,17 +136,17 @@ export function AttendancePage() {
 
         <div className="flex-1 space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">
-            {t("filters.allMinistries")}
+            {t("filters.allServices")}
           </label>
-          <Select value={ministryFilter} onValueChange={handleMinistryChange}>
+          <Select value={serviceFilter} onValueChange={handleServiceChange}>
             <SelectTrigger className="w-full sm:w-44">
-              <SelectValue placeholder={t("filters.allMinistries")} />
+              <SelectValue placeholder={t("filters.allServices")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("filters.allMinistries")}</SelectItem>
-              {ministries.map((m) => (
-                <SelectItem key={m.id} value={m.id}>
-                  {m.name_ar}
+              <SelectItem value="all">{t("filters.allServices")}</SelectItem>
+              {services.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name_ar}
                 </SelectItem>
               ))}
             </SelectContent>

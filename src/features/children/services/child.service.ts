@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   ChildListItem,
+  ChildRowWithNames,
   ChildDetail,
   AttendanceListItem,
   FollowupListItem,
@@ -22,10 +23,9 @@ export async function listChildren(
   churchId: string,
   filters?: {
     search?: string;
-    ministry_id?: string;
+    service_id?: string;
     stage_id?: string;
     status?: string;
-    pipeline_stage?: string;
   },
   pagination?: PaginationInput,
 ): Promise<ServiceResult<PaginatedResult<ChildListItem>>> {
@@ -36,21 +36,21 @@ export async function listChildren(
     const to = from + pageSize - 1;
 
     let query = supabase
-      .from("children")
-      .select("*, ministries!inner(name_ar), stages!inner(name_ar)", { count: "exact" })
+      .from("beneficiaries")
+      .select("*, services!inner(name_ar), stages!inner(name_ar)", { count: "exact" })
       .eq("church_id", churchId)
       .is("deleted_at", null)
-      .order("first_name_ar");
+      .order("full_name_ar");
 
     if (filters?.search) {
       const term = `%${filters.search}%`;
       query = query.or(
-        `first_name_ar.ilike.${term},first_name_en.ilike.${term},last_name_ar.ilike.${term},last_name_en.ilike.${term},parent_phone.ilike.${term},mobile.ilike.${term}`,
+        `full_name_ar.ilike.${term},full_name_en.ilike.${term},mobile.ilike.${term}`,
       );
     }
 
-    if (filters?.ministry_id) {
-      query = query.eq("ministry_id", filters.ministry_id);
+    if (filters?.service_id) {
+      query = query.eq("service_id", filters.service_id);
     }
 
     if (filters?.stage_id) {
@@ -61,10 +61,6 @@ export async function listChildren(
       query = query.eq("status", filters.status);
     }
 
-    if (filters?.pipeline_stage) {
-      query = query.eq("pipeline_stage", filters.pipeline_stage);
-    }
-
     query = query.range(from, to);
 
     const { data, error, count } = await query;
@@ -73,11 +69,14 @@ export async function listChildren(
       return { data: null, error: error.message };
     }
 
-    const result: ChildListItem[] = (data ?? []).map((row) => ({
-      ...row,
-      ministryNameAr: row.ministries?.name_ar ?? "",
-      stageNameAr: row.stages?.name_ar ?? "",
-    } as ChildListItem));
+    const result: ChildListItem[] = (data ?? []).map((row) => {
+      const joined = row as ChildRowWithNames;
+      return {
+        ...row,
+        serviceNameAr: joined.services?.name_ar ?? "",
+        stageNameAr: joined.stages?.name_ar ?? "",
+      } as ChildListItem;
+    });
 
     const total = count ?? 0;
 
@@ -103,8 +102,8 @@ export async function getChildById(
 ): Promise<ServiceResult<ChildDetail>> {
   try {
     const { data: child, error } = await supabase
-      .from("children")
-      .select("*, ministries!inner(name_ar), stages!inner(name_ar)")
+      .from("beneficiaries")
+      .select("*, services!inner(name_ar), stages!inner(name_ar)")
       .eq("id", childId)
       .eq("church_id", churchId)
       .is("deleted_at", null)
@@ -116,17 +115,17 @@ export async function getChildById(
 
     const [attendanceResult, followupsResult] = await Promise.all([
       supabase
-        .from("attendance")
-        .select("*")
+        .from("attendance_records")
+        .select("*, attendance_sessions!inner(session_date)")
         .eq("church_id", churchId)
-        .eq("child_id", childId)
-        .order("attendance_date", { ascending: false })
+        .eq("beneficiary_id", childId)
+        .order("created_at", { ascending: false })
         .limit(50),
       supabase
         .from("followups")
         .select("*, profiles:assigned_to(full_name_ar)")
         .eq("church_id", churchId)
-        .eq("child_id", childId)
+        .eq("beneficiary_id", childId)
         .order("created_at", { ascending: false })
         .limit(50),
     ]);
@@ -139,7 +138,7 @@ export async function getChildById(
     return {
       data: {
         ...(typedChild as Record<string, unknown>),
-        ministryNameAr: typedChild.ministries?.name_ar ?? "",
+        serviceNameAr: typedChild.services?.name_ar ?? "",
         stageNameAr: typedChild.stages?.name_ar ?? "",
         attendance: attendanceResult.data ?? [],
         followups: followupsResult.data ?? [],
@@ -179,35 +178,20 @@ export async function createChild(
     // children, attendance, and followups tables.
 
     const { data, error } = await supabase
-      .from("children")
+      .from("beneficiaries")
       .insert({
         church_id: profile.church_id,
-        created_by: user.id,
-        first_name_ar: input.first_name_ar,
-        first_name_en: input.first_name_en ?? null,
-        last_name_ar: input.last_name_ar,
-        last_name_en: input.last_name_en ?? null,
+        full_name_ar: input.full_name_ar,
+        full_name_en: input.full_name_en ?? null,
         date_of_birth: input.date_of_birth ?? null,
         gender: input.gender ?? null,
-        ministry_id: input.ministry_id,
-        stage_id: input.stage_id,
-        pipeline_stage: input.pipeline_stage ?? "new_visitor",
-        parent_phone: input.parent_phone ?? null,
-        parent_email: input.parent_email ?? null,
-        parent_address_ar: input.parent_address_ar ?? null,
-        father_name_ar: input.father_name_ar ?? null,
-        mother_name_ar: input.mother_name_ar ?? null,
-        emergency_contact_name: input.emergency_contact_name ?? null,
-        emergency_contact_phone: input.emergency_contact_phone ?? null,
+        father_mobile: input.father_mobile ?? null,
+        mother_mobile: input.mother_mobile ?? null,
         mobile: input.mobile ?? null,
-        allergies: input.allergies ?? null,
-        medical_conditions: input.medical_conditions ?? null,
-        medications: input.medications ?? null,
-        baptism_date: input.baptism_date ?? null,
-        confession_frequency: input.confession_frequency ?? null,
-        spiritual_notes: input.spiritual_notes ?? null,
-        school_name_ar: input.school_name_ar ?? null,
-        grade_level: input.grade_level ?? null,
+        whatsapp: input.whatsapp ?? null,
+        address: input.address ?? null,
+        school: input.school ?? null,
+        confession_father: input.confession_father ?? null,
         notes: input.notes ?? null,
         photo_url: input.photo_url ?? null,
       })
@@ -232,34 +216,20 @@ export async function updateChild(
 ): Promise<ServiceResult<boolean>> {
   try {
     const { error } = await supabase
-      .from("children")
+      .from("beneficiaries")
       .update({
-        first_name_ar: input.first_name_ar,
-        first_name_en: input.first_name_en ?? null,
-        last_name_ar: input.last_name_ar,
-        last_name_en: input.last_name_en ?? null,
+        full_name_ar: input.full_name_ar,
+        full_name_en: input.full_name_en ?? null,
         date_of_birth: input.date_of_birth ?? null,
         gender: input.gender ?? null,
-        ministry_id: input.ministry_id,
-        stage_id: input.stage_id,
-        pipeline_stage: input.pipeline_stage,
         status: input.status,
-        parent_phone: input.parent_phone ?? null,
-        parent_email: input.parent_email ?? null,
-        parent_address_ar: input.parent_address_ar ?? null,
-        father_name_ar: input.father_name_ar ?? null,
-        mother_name_ar: input.mother_name_ar ?? null,
-        emergency_contact_name: input.emergency_contact_name ?? null,
-        emergency_contact_phone: input.emergency_contact_phone ?? null,
+        father_mobile: input.father_mobile ?? null,
+        mother_mobile: input.mother_mobile ?? null,
         mobile: input.mobile ?? null,
-        allergies: input.allergies ?? null,
-        medical_conditions: input.medical_conditions ?? null,
-        medications: input.medications ?? null,
-        baptism_date: input.baptism_date ?? null,
-        confession_frequency: input.confession_frequency ?? null,
-        spiritual_notes: input.spiritual_notes ?? null,
-        school_name_ar: input.school_name_ar ?? null,
-        grade_level: input.grade_level ?? null,
+        whatsapp: input.whatsapp ?? null,
+        address: input.address ?? null,
+        school: input.school ?? null,
+        confession_father: input.confession_father ?? null,
         notes: input.notes ?? null,
         photo_url: input.photo_url ?? null,
       })
@@ -283,14 +253,25 @@ export async function transferChild(
   input: TransferChildInput,
 ): Promise<ServiceResult<boolean>> {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { data: null, error: "You must be logged in." };
+    }
+
     const { error } = await supabase
-      .from("children")
-      .update({
-        ministry_id: input.ministry_id,
+      .from("beneficiary_assignments")
+      .insert({
+        church_id: churchId,
+        beneficiary_id: childId,
+        service_id: input.service_id,
         stage_id: input.stage_id,
-      })
-      .eq("id", childId)
-      .eq("church_id", churchId);
+        assigned_by: user.id,
+        servant_id: user.id,
+        start_date: new Date().toISOString().slice(0, 10),
+        is_current: true,
+      });
 
     if (error) {
       return { data: null, error: error.message };
@@ -309,7 +290,7 @@ export async function deactivateChild(
 ): Promise<ServiceResult<boolean>> {
   try {
     const { error } = await supabase
-      .from("children")
+      .from("beneficiaries")
       .update({
         deleted_at: new Date().toISOString(),
         status: "inactive",
@@ -349,13 +330,30 @@ export async function createAttendance(
       return { data: null, error: "Profile not found." };
     }
 
+    const { data: session, error: sessionError } = await supabase
+      .from("attendance_sessions")
+      .upsert({
+        church_id: profile.church_id,
+        service_id: input.service_id,
+        stage_id: input.stage_id,
+        session_date: input.attendance_date,
+        created_by: user.id,
+      }, {
+        onConflict: "church_id,service_id,stage_id,session_date",
+      })
+      .select("id")
+      .single();
+
+    if (sessionError) {
+      return { data: null, error: sessionError.message };
+    }
+
     const { data, error } = await supabase
-      .from("attendance")
+      .from("attendance_records")
       .insert({
         church_id: profile.church_id,
-        child_id: input.child_id,
-        stage_id: input.stage_id,
-        attendance_date: input.attendance_date,
+        session_id: session.id,
+        beneficiary_id: input.beneficiary_id,
         status: input.status,
         notes: input.notes ?? null,
         recorded_by: user.id,
@@ -395,35 +393,51 @@ export async function batchAttendance(
       return { data: null, error: "Profile not found." };
     }
 
-    const childIds = input.records.map((r) => r.child_id);
+    const { data: session, error: sessionError } = await supabase
+      .from("attendance_sessions")
+      .upsert({
+        church_id: profile.church_id,
+        service_id: input.service_id,
+        stage_id: input.stage_id,
+        session_date: input.attendance_date,
+        created_by: user.id,
+      }, {
+        onConflict: "church_id,service_id,stage_id,session_date",
+      })
+      .select("id")
+      .single();
+
+    if (sessionError) {
+      return { data: null, error: sessionError.message };
+    }
+
+    const beneficiaryIds = input.records.map((r) => r.beneficiary_id);
 
     const { data: existing } = await supabase
-      .from("attendance")
-      .select("child_id")
+      .from("attendance_records")
+      .select("beneficiary_id")
       .eq("church_id", profile.church_id)
-      .eq("stage_id", input.stage_id)
-      .eq("attendance_date", input.attendance_date)
-      .in("child_id", childIds);
+      .eq("session_id", session.id)
+      .in("beneficiary_id", beneficiaryIds);
 
-    const existingChildIds = new Set((existing ?? []).map((r) => r.child_id));
+    const existingIds = new Set((existing ?? []).map((r) => r.beneficiary_id));
 
     let created = 0;
     let updated = 0;
 
     const results = await Promise.all(
       input.records.map((record) =>
-        supabase.from("attendance").upsert(
+        supabase.from("attendance_records").upsert(
           {
             church_id: profile.church_id,
-            child_id: record.child_id,
-            stage_id: input.stage_id,
-            attendance_date: input.attendance_date,
+            session_id: session.id,
+            beneficiary_id: record.beneficiary_id,
             status: record.status,
             notes: record.notes ?? null,
             recorded_by: user.id,
           },
           {
-            onConflict: "church_id,child_id,attendance_date",
+            onConflict: "church_id,session_id,beneficiary_id",
           },
         ),
       ),
@@ -434,7 +448,7 @@ export async function batchAttendance(
       if (result.error) {
         return { data: null, error: result.error.message };
       }
-      if (existingChildIds.has(input.records[i].child_id)) {
+      if (existingIds.has(input.records[i].beneficiary_id)) {
         updated++;
       } else {
         created++;
@@ -451,7 +465,7 @@ export async function listAttendance(
   supabase: SupabaseClient,
   churchId: string,
   filters?: {
-    child_id?: string;
+    beneficiary_id?: string;
     stage_id?: string;
     from_date?: string;
     to_date?: string;
@@ -459,25 +473,25 @@ export async function listAttendance(
 ): Promise<ServiceResult<AttendanceListItem[]>> {
   try {
     let query = supabase
-      .from("attendance")
-      .select("*, children!inner(first_name_ar, last_name_ar), stages!inner(name_ar)")
+      .from("attendance_records")
+      .select("*, attendance_sessions!inner(session_date, stage_id, service_id), beneficiaries!inner(full_name_ar), stages!inner(name_ar)")
       .eq("church_id", churchId)
-      .order("attendance_date", { ascending: false });
+      .order("created_at", { ascending: false });
 
-    if (filters?.child_id) {
-      query = query.eq("child_id", filters.child_id);
+    if (filters?.beneficiary_id) {
+      query = query.eq("beneficiary_id", filters.beneficiary_id);
     }
 
     if (filters?.stage_id) {
-      query = query.eq("stage_id", filters.stage_id);
+      query = query.eq("attendance_sessions.stage_id", filters.stage_id);
     }
 
     if (filters?.from_date) {
-      query = query.gte("attendance_date", filters.from_date);
+      query = query.gte("attendance_sessions.session_date", filters.from_date);
     }
 
     if (filters?.to_date) {
-      query = query.lte("attendance_date", filters.to_date);
+      query = query.lte("attendance_sessions.session_date", filters.to_date);
     }
 
     const { data, error } = await query;
@@ -491,8 +505,7 @@ export async function listAttendance(
     const rows = (data ?? []) as AttendanceRowWithJoins[];
     const result: AttendanceListItem[] = rows.map((row) => ({
       ...row,
-      childFirstNameAr: row.children?.first_name_ar ?? "",
-      childLastNameAr: row.children?.last_name_ar ?? "",
+      childFullNameAr: row.beneficiaries?.full_name_ar ?? "",
       stageNameAr: row.stages?.name_ar ?? "",
     } as AttendanceListItem));
     /* eslint-enable @typescript-eslint/no-explicit-any */
@@ -529,9 +542,8 @@ export async function createFollowup(
       .from("followups")
       .insert({
         church_id: profile.church_id,
-        created_by: user.id,
-        child_id: input.child_id,
-        stage_id: input.stage_id,
+        servant_id: user.id,
+        beneficiary_id: input.beneficiary_id,
         type: input.type,
         scheduled_at: input.scheduled_at ?? null,
         assigned_to: input.assigned_to || null,
@@ -589,7 +601,7 @@ export async function listFollowups(
   supabase: SupabaseClient,
   churchId: string,
   filters?: {
-    child_id?: string;
+    beneficiary_id?: string;
     status?: string;
     assigned_to?: string;
   },
@@ -597,12 +609,12 @@ export async function listFollowups(
   try {
     let query = supabase
       .from("followups")
-      .select("*, children!inner(first_name_ar, last_name_ar), stages!inner(name_ar), profiles:assigned_to(full_name_ar)")
+      .select("*, beneficiaries!inner(full_name_ar), stages!inner(name_ar), profiles:assigned_to(full_name_ar)")
       .eq("church_id", churchId)
       .order("created_at", { ascending: false });
 
-    if (filters?.child_id) {
-      query = query.eq("child_id", filters.child_id);
+    if (filters?.beneficiary_id) {
+      query = query.eq("beneficiary_id", filters.beneficiary_id);
     }
 
     if (filters?.status) {
@@ -624,8 +636,7 @@ export async function listFollowups(
     const rows = (data ?? []) as FollowupRowWithJoins[];
     const result: FollowupListItem[] = rows.map((row) => ({
       ...row,
-      childFirstNameAr: row.children?.first_name_ar ?? "",
-      childLastNameAr: row.children?.last_name_ar ?? "",
+      childFullNameAr: row.beneficiaries?.full_name_ar ?? "",
       stageNameAr: row.stages?.name_ar ?? "",
       assignedToNameAr: row.profiles?.full_name_ar ?? null,
     } as FollowupListItem));
@@ -640,18 +651,18 @@ export async function listFollowups(
 export async function listStages(
   supabase: SupabaseClient,
   churchId: string,
-  ministryId?: string,
-): Promise<ServiceResult<Pick<import("../types/child.types").StageRow, "id" | "name_ar" | "ministry_id">[]>> {
+  serviceId?: string,
+): Promise<ServiceResult<Pick<import("../types/child.types").StageRow, "id" | "name_ar" | "service_id">[]>> {
   try {
     let query = supabase
       .from("stages")
-      .select("id, name_ar, ministry_id")
+      .select("id, name_ar, service_id")
       .eq("church_id", churchId)
       .is("deleted_at", null)
       .order("name_ar");
 
-    if (ministryId) {
-      query = query.eq("ministry_id", ministryId);
+    if (serviceId) {
+      query = query.eq("service_id", serviceId);
     }
 
     const { data, error } = await query;
@@ -666,13 +677,13 @@ export async function listStages(
   }
 }
 
-export async function listMinistries(
+export async function listServices(
   supabase: SupabaseClient,
   churchId: string,
 ): Promise<ServiceResult<Pick<import("../types/child.types").MinistryRow, "id" | "name_ar">[]>> {
   try {
     const { data, error } = await supabase
-      .from("ministries")
+      .from("services")
       .select("id, name_ar")
       .eq("church_id", churchId)
       .is("deleted_at", null)
@@ -685,7 +696,7 @@ export async function listMinistries(
 
     return { data: data ?? [], error: null };
   } catch {
-    return { data: null, error: "Failed to list ministries." };
+    return { data: null, error: "Failed to list services." };
   }
 }
 

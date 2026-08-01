@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { writeAuditLog } from "@/lib/audit";
 import { hasPermission } from "@/features/rbac/utils/permission-check";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
@@ -32,46 +33,6 @@ export type StageActionResult<T = unknown> = {
   fieldErrors?: Partial<Record<string, string>>;
   data?: T;
 };
-
-async function auditLog(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  action: string,
-  entityType: string,
-  entityId: string,
-  oldValues?: Record<string, unknown>,
-  newValues?: Record<string, unknown>,
-) {
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("church_id")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile) return;
-
-    const { error } = await supabase.from("audit_logs").insert({
-      church_id: profile.church_id,
-      user_id: user.id,
-      action,
-      entity_type: entityType,
-      entity_id: entityId,
-      old_values: oldValues ?? null,
-      new_values: newValues ?? null,
-    });
-
-    if (error) {
-      console.error(`[audit] Failed to write audit log for ${entityType}:${entityId}:`, error.message);
-    }
-  } catch (err) {
-    console.error(`[audit] Unexpected error writing audit log for ${entityType}:${entityId}:`, err);
-  }
-}
 
 function handleZodError(error: unknown): StageActionResult<never> {
   if (error instanceof ZodError) {
@@ -193,7 +154,7 @@ export async function createMinistryAction(
   }
 
   if (result.data) {
-    await auditLog(supabase, "create", "ministry", result.data.id, undefined, {
+    await writeAuditLog(supabase, "create", "ministry", result.data.id, undefined, {
       name_ar: values.name_ar,
     });
   }
@@ -256,7 +217,7 @@ export async function updateMinistryAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "update", "ministry", ministryId, oldValues, {
+  await writeAuditLog(supabase, "update", "ministry", ministryId, oldValues, {
     name_ar: values.name_ar,
     is_active: values.is_active,
   });
@@ -301,7 +262,7 @@ export async function deactivateMinistryAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "delete", "ministry", ministryId, oldValues, {
+  await writeAuditLog(supabase, "delete", "ministry", ministryId, oldValues, {
     deleted_at: new Date().toISOString(),
   });
 
@@ -368,7 +329,7 @@ export async function createStageAction(
   }
 
   const result = await stageService.createStage(supabase, {
-    ministry_id: values.ministry_id,
+    service_id: values.service_id,
     name_ar: values.name_ar,
     name_en: values.name_en,
     description_ar: values.description_ar,
@@ -383,9 +344,9 @@ export async function createStageAction(
   }
 
   if (result.data) {
-    await auditLog(supabase, "create", "stage", result.data.id, undefined, {
+    await writeAuditLog(supabase, "create", "stage", result.data.id, undefined, {
       name_ar: values.name_ar,
-      ministry_id: values.ministry_id,
+      service_id: values.service_id,
     });
   }
 
@@ -449,7 +410,7 @@ export async function updateStageAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "update", "stage", stageId, oldValues, {
+  await writeAuditLog(supabase, "update", "stage", stageId, oldValues, {
     name_ar: values.name_ar,
     is_active: values.is_active,
   });
@@ -494,7 +455,7 @@ export async function deactivateStageAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(supabase, "delete", "stage", stageId, oldValues, {
+  await writeAuditLog(supabase, "delete", "stage", stageId, oldValues, {
     deleted_at: new Date().toISOString(),
   });
 
@@ -556,7 +517,7 @@ export async function assignUsersToStageAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.USERS_MANAGE))) {
+  if (!(await hasPermission(PERMISSION_CODES.SERVANTS_ASSIGN))) {
     return { success: false, message: "You do not have permission to manage stage assignments." };
   }
 
@@ -584,7 +545,7 @@ export async function assignUsersToStageAction(
     return { success: false, message: result.error };
   }
 
-  await auditLog(
+  await writeAuditLog(
     supabase,
     "update",
     "stage",

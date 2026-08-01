@@ -54,7 +54,8 @@ export async function listUsers(
       const { data: userRoles } = await supabase
         .from("user_roles")
         .select("user_id, role_id, roles(id, name_ar, name_en, role_type)")
-        .in("user_id", userIds);
+        .in("user_id", userIds)
+        .is("end_date", null);
 
       const rolesByUser = new Map<string, UserListItem["roles"]>();
       for (const ur of userRoles ?? []) {
@@ -112,16 +113,17 @@ export async function getUserById(
     const { data: userRoles } = await supabase
       .from("user_roles")
       .select("role_id, roles(*)")
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .is("end_date", null);
 
     const roles = (userRoles ?? [])
       .map((ur) => ur.roles)
       .filter(Boolean) as unknown as RoleRow[];
 
     const { data: stageAssignments } = await supabase
-      .from("user_stage_assignments")
+      .from("servant_stage_assignments")
       .select("*, stages(id, name_ar, name_en)")
-      .eq("user_id", userId);
+      .eq("servant_id", userId);
 
     return {
       data: {
@@ -181,23 +183,34 @@ export async function createUser(
     }
 
     if (input.roleIds.length > 0) {
-      const roleInserts = input.roleIds.map((roleId) => ({
-        church_id: profile.church_id,
-        user_id: userId,
-        role_id: roleId,
-        assigned_by: assignedBy,
-      }));
-      await admin.from("user_roles").insert(roleInserts);
+      const rolesValid = await validateRolesInChurch(
+        admin,
+        profile.church_id,
+        input.roleIds,
+      );
+      if (!rolesValid) {
+        await admin.auth.admin.deleteUser(userId);
+        return { data: null, error: "Selected roles do not belong to this church." };
+      }
+      await syncRoleGrants(admin, profile.church_id, userId, input.roleIds, assignedBy);
     }
 
     if (input.stageIds.length > 0) {
+      const { data: stages } = await admin
+        .from("stages")
+        .select("id, service_id")
+        .in("id", input.stageIds);
+
+      const stageServiceMap = new Map(stages?.map((s) => [s.id, s.service_id]) ?? []);
+
       const stageInserts = input.stageIds.map((stageId) => ({
         church_id: profile.church_id,
-        user_id: userId,
+        servant_id: userId,
         stage_id: stageId,
+        service_id: stageServiceMap.get(stageId) ?? "",
         assigned_by: assignedBy,
       }));
-      await admin.from("user_stage_assignments").insert(stageInserts);
+      await admin.from("servant_stage_assignments").insert(stageInserts);
     }
 
     return { data: { id: userId }, error: null };
@@ -253,6 +266,136 @@ export async function deactivateUser(
   }
 }
 
+function toDateOnly(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
+
+async function isSuperAdminOfChurch(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  churchId: string,
+): Promise<boolean> {
+  const { data: grants } = await admin
+    .from("user_roles")
+    .select("role_id, roles(role_type)")
+    .eq("user_id", userId)
+    .eq("church_id", churchId)
+    .is("end_date", null);
+
+  return (grants ?? []).some(
+    (g) => (g as { roles?: { role_type?: string } | null })?.roles?.role_type === "super_admin",
+  );
+}
+
+async function getSuperAdminRoleId(
+  admin: ReturnType<typeof createAdminClient>,
+  churchId: string,
+): Promise<string | null> {
+  const { data } = await admin
+    .from("roles")
+    .select("id")
+    .eq("church_id", churchId)
+    .eq("role_type", "super_admin")
+    .maybeSingle();
+
+  return data?.id ?? null;
+}
+
+async function countActiveSuperAdmins(
+  admin: ReturnType<typeof createAdminClient>,
+  churchId: string,
+): Promise<number> {
+  const superAdminRoleId = await getSuperAdminRoleId(admin, churchId);
+  if (!superAdminRoleId) return 0;
+
+  const { count } = await admin
+    .from("user_roles")
+    .select("id", { count: "exact", head: true })
+    .eq("church_id", churchId)
+    .eq("role_id", superAdminRoleId)
+    .is("end_date", null);
+
+  return count ?? 0;
+}
+
+async function validateRolesInChurch(
+  admin: ReturnType<typeof createAdminClient>,
+  churchId: string,
+  roleIds: string[],
+): Promise<boolean> {
+  if (roleIds.length === 0) return true;
+
+  const { data: roles } = await admin
+    .from("roles")
+    .select("id")
+    .eq("church_id", churchId)
+    .in("id", roleIds);
+
+  return (roles ?? []).length === roleIds.length;
+}
+
+async function syncRoleGrants(
+  admin: ReturnType<typeof createAdminClient>,
+  churchId: string,
+  userId: string,
+  roleIds: string[],
+  assignedBy: string,
+): Promise<void> {
+  const target = new Set(roleIds);
+
+  const { data: existing } = await admin
+    .from("user_roles")
+    .select("id, role_id, end_date")
+    .eq("church_id", churchId)
+    .eq("user_id", userId);
+
+  const existingByRole = new Map<string, { id: string; role_id: string; end_date: string | null }>(
+    (existing ?? []).map((g) => [g.role_id as string, g]),
+  );
+
+  const archiveRoleIds = [...existingByRole.values()]
+    .filter((g) => g.end_date === null && !target.has(g.role_id as string))
+    .map((g) => g.role_id as string);
+
+  if (archiveRoleIds.length > 0) {
+    await admin
+      .from("user_roles")
+      .update({ end_date: toDateOnly(new Date()) })
+      .eq("church_id", churchId)
+      .eq("user_id", userId)
+      .is("end_date", null)
+      .in("role_id", archiveRoleIds);
+  }
+
+  const reactivateRoleIds = [...existingByRole.values()]
+    .filter((g) => g.end_date !== null && target.has(g.role_id as string))
+    .map((g) => g.role_id as string);
+
+  if (reactivateRoleIds.length > 0) {
+    await admin
+      .from("user_roles")
+      .update({ end_date: null })
+      .eq("church_id", churchId)
+      .eq("user_id", userId)
+      .not("end_date", "is", null)
+      .in("role_id", reactivateRoleIds);
+  }
+
+  const insertRoleIds = roleIds.filter((roleId) => !existingByRole.has(roleId));
+
+  if (insertRoleIds.length > 0) {
+    await admin.from("user_roles").insert(
+      insertRoleIds.map((roleId) => ({
+        church_id: churchId,
+        user_id: userId,
+        role_id: roleId,
+        assigned_by: assignedBy,
+        start_date: toDateOnly(new Date()),
+      })),
+    );
+  }
+}
+
 export async function assignRoles(
   supabase: SupabaseClient,
   input: AssignRolesInput,
@@ -269,21 +412,34 @@ export async function assignRoles(
       return { data: false, error: "User not found." };
     }
 
-    await supabase
-      .from("user_roles")
-      .delete()
-      .eq("user_id", input.userId)
-      .eq("church_id", profile.church_id);
+    const admin = createAdminClient();
 
-    if (input.roleIds.length > 0) {
-      const inserts = input.roleIds.map((roleId) => ({
-        church_id: profile.church_id,
-        user_id: input.userId,
-        role_id: roleId,
-        assigned_by: assignedBy,
-      }));
-      await supabase.from("user_roles").insert(inserts);
+    if (!(await isSuperAdminOfChurch(admin, assignedBy, profile.church_id))) {
+      return { data: false, error: "Only a super admin can manage roles." };
     }
+
+    if (!(await validateRolesInChurch(admin, profile.church_id, input.roleIds))) {
+      return { data: false, error: "Selected roles do not belong to this church." };
+    }
+
+    const superAdminRoleId = await getSuperAdminRoleId(admin, profile.church_id);
+    const targetIsSuperAdmin = await isSuperAdminOfChurch(
+      admin,
+      input.userId,
+      profile.church_id,
+    );
+    const targetKeepsSuperAdmin = superAdminRoleId
+      ? input.roleIds.includes(superAdminRoleId)
+      : true;
+
+    if (targetIsSuperAdmin && !targetKeepsSuperAdmin) {
+      const activeSuperAdmins = await countActiveSuperAdmins(admin, profile.church_id);
+      if (activeSuperAdmins <= 1) {
+        return { data: false, error: "Cannot remove the last super admin." };
+      }
+    }
+
+    await syncRoleGrants(admin, profile.church_id, input.userId, input.roleIds, assignedBy);
 
     return { data: true, error: null };
   } catch {
@@ -308,19 +464,27 @@ export async function assignStages(
     }
 
     await supabase
-      .from("user_stage_assignments")
+      .from("servant_stage_assignments")
       .delete()
-      .eq("user_id", input.userId)
+      .eq("servant_id", input.userId)
       .eq("church_id", profile.church_id);
 
     if (input.stageIds.length > 0) {
+      const { data: stages } = await supabase
+        .from("stages")
+        .select("id, service_id")
+        .in("id", input.stageIds);
+
+      const stageServiceMap = new Map(stages?.map((s) => [s.id, s.service_id]) ?? []);
+
       const inserts = input.stageIds.map((stageId) => ({
         church_id: profile.church_id,
-        user_id: input.userId,
+        servant_id: input.userId,
         stage_id: stageId,
+        service_id: stageServiceMap.get(stageId) ?? "",
         assigned_by: assignedBy,
       }));
-      await supabase.from("user_stage_assignments").insert(inserts);
+      await supabase.from("servant_stage_assignments").insert(inserts);
     }
 
     return { data: true, error: null };

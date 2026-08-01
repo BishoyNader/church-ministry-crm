@@ -39,9 +39,9 @@ export function StageManagementPage() {
 
   const stagesByMinistry = new Map<string, StageListItem[]>();
   for (const stage of allStages) {
-    const existing = stagesByMinistry.get(stage.ministry_id) ?? [];
+    const existing =     stagesByMinistry.get(stage.service_id) ?? [];
     existing.push(stage);
-    stagesByMinistry.set(stage.ministry_id, existing);
+    stagesByMinistry.set(stage.service_id, existing);
   }
 
   const isLoading = ministriesQuery.isLoading || stagesQuery.isLoading;
@@ -136,7 +136,7 @@ export function StageManagementPage() {
           onOpenChange={(open) => {
             if (!open) setEditStage(null);
           }}
-          ministryId={editStage.ministry_id}
+          ministryId={editStage.service_id}
           stage={editStage}
         />
       )}

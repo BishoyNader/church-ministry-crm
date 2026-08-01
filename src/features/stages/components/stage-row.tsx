@@ -65,7 +65,7 @@ export function StageRow({
       </div>
 
       <div className="flex items-center gap-1">
-         <PermissionGuard permission="users.manage">
+         <PermissionGuard permission="servants.assign">
           <Button
             variant="ghost"
             size="icon-sm"

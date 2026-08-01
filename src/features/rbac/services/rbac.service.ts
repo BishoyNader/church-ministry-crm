@@ -28,7 +28,7 @@ async function loadCurrentUserRbac(churchId?: string): Promise<{ data: Normalize
       return { data: null, error: toRbacError("unauthorized") };
     }
 
-    let query = supabase.from("user_roles").select("id, church_id, user_id, role_id, assigned_by, created_at").eq("user_id", user.id);
+    let query = supabase.from("user_roles").select("id, church_id, user_id, role_id, assigned_by, created_at").eq("user_id", user.id).is("end_date", null);
 
     if (churchId) {
       query = query.eq("church_id", churchId);
@@ -200,7 +200,7 @@ export async function checkUserPermissions(permissionCodes: readonly PermissionC
 export async function getRolesByUser(userId: string, churchId?: string): Promise<{ data: Role[] | null; error: RbacError | null }> {
   try {
     const supabase = createClient();
-    let query = supabase.from("user_roles").select("role_id").eq("user_id", userId);
+    let query = supabase.from("user_roles").select("role_id").eq("user_id", userId).is("end_date", null);
 
     if (churchId) {
       query = query.eq("church_id", churchId);

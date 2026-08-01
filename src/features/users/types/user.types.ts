@@ -7,10 +7,10 @@ export type ProfileUpdate = Database["public"]["Tables"]["profiles"]["Update"];
 export type UserRoleRow = Database["public"]["Tables"]["user_roles"]["Row"];
 export type UserRoleInsert = Database["public"]["Tables"]["user_roles"]["Insert"];
 
-export type UserStageAssignmentRow =
-  Database["public"]["Tables"]["user_stage_assignments"]["Row"];
-export type UserStageAssignmentInsert =
-  Database["public"]["Tables"]["user_stage_assignments"]["Insert"];
+export type ServantStageAssignmentRow =
+  Database["public"]["Tables"]["servant_stage_assignments"]["Row"];
+export type ServantStageAssignmentInsert =
+  Database["public"]["Tables"]["servant_stage_assignments"]["Insert"];
 
 export type RoleRow = Database["public"]["Tables"]["roles"]["Row"];
 export type StageRow = Database["public"]["Tables"]["stages"]["Row"];
@@ -23,7 +23,7 @@ export type UserListItem = ProfileRow & {
 
 export type UserDetail = ProfileRow & {
   roles: RoleRow[];
-  stageAssignments: (UserStageAssignmentRow & {
+  stageAssignments: (ServantStageAssignmentRow & {
     stages: Pick<StageRow, "id" | "name_ar" | "name_en">;
   })[];
 };

@@ -7,7 +7,7 @@ import { usePermissions } from "@/features/rbac";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 
 const ACTIONS = [
-  { key: "addChild", icon: UserPlus, href: (locale: string) => `/${locale}/children`, permission: PERMISSION_CODES.CHILDREN_CREATE },
+  { key: "addChild", icon: UserPlus, href: (locale: string) => `/${locale}/children`, permission: PERMISSION_CODES.BENEFICIARIES_CREATE },
   { key: "scheduleFollowup", icon: CalendarPlus, href: (locale: string) => `/${locale}/followups`, permission: PERMISSION_CODES.FOLLOWUPS_CREATE },
   { key: "recordAttendance", icon: ClipboardCheck, href: (locale: string) => `/${locale}/attendance`, permission: PERMISSION_CODES.ATTENDANCE_CREATE },
   { key: "viewReports", icon: BarChart3, href: (locale: string) => `/${locale}/dashboard`, permission: PERMISSION_CODES.REPORTS_READ },
