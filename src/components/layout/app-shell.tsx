@@ -63,11 +63,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       return (
         <span
           key={item.labelKey}
-          className="flex cursor-not-allowed items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-slate-400 dark:text-slate-600"
+          className="flex cursor-not-allowed items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium text-muted-foreground/60"
           title={t("nav.comingSoon")}
         >
           <Icon className="size-4 shrink-0 opacity-50" />
-          <span className="opacity-50">{t(`nav.${item.labelKey}`)}</span>
+          <span className="opacity-60">{t(`nav.${item.labelKey}`)}</span>
           <Badge variant="outline" className="ms-auto px-1.5 py-0 text-[10px] uppercase leading-none text-muted-foreground">
             {t("nav.comingSoon")}
           </Badge>
@@ -77,23 +77,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
     return (
       <Link
-          key={item.labelKey}
-          href={item.href!}
-          aria-current={isActive ? "page" : undefined}
-          onClick={handleClick}
-          className={cn(
-            "group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
-            isActive
-              ? "bg-ministry/10 text-ministry shadow-sm"
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
-          )}
-        >
-          <Icon className={cn("size-4 shrink-0 transition-transform duration-200", isActive ? "scale-110" : "group-hover:scale-105")} />
-          <span className={cn(isActive && "font-semibold")}>{t(`nav.${item.labelKey}`)}</span>
-          {isActive && (
-            <span className="ms-auto h-1.5 w-1.5 rounded-full bg-ministry" />
-          )}
-        </Link>
+        key={item.labelKey}
+        href={item.href!}
+        aria-current={isActive ? "page" : undefined}
+        onClick={handleClick}
+        className={cn(
+          "group flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+          isActive
+            ? "bg-ministry/10 text-ministry shadow-sm"
+            : "text-muted-foreground hover:bg-accent hover:text-foreground",
+        )}
+      >
+        <Icon className={cn("size-4 shrink-0 transition-transform duration-200", isActive ? "scale-110" : "group-hover:scale-105")} />
+        <span className={cn(isActive && "font-semibold")}>{t(`nav.${item.labelKey}`)}</span>
+        {isActive && (
+          <span className="ms-auto h-1.5 w-1.5 rounded-full bg-ministry" />
+        )}
+      </Link>
     );
   };
 
@@ -113,29 +113,35 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100" dir={dir}>
+    <div className="min-h-screen bg-surface-dashboard text-foreground transition-colors" dir={dir}>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-[60] focus:rounded-xl focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+      >
+        {t("nav.skipToContent")}
+      </a>
       <div className={cn("flex min-h-screen", isRtl && "flex-row-reverse")}>
-        <aside className="hidden w-72 flex-col border-e border-slate-200 bg-white/80 p-6 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 lg:flex">
+        <aside className="hidden w-72 flex-col border-e border-border-whisper bg-surface-elevated p-6 lg:flex">
           <Link href={`/${locale}/dashboard`} className="flex items-center gap-3">
-            <div className="rounded-2xl bg-emerald-600 p-2 text-white">
+            <div className="rounded-2xl bg-primary p-2 text-primary-foreground shadow-diffused-sm">
               <Church className="size-5" />
             </div>
             <div>
               <p className="text-sm font-semibold">Church CRM</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{t("nav.tagline")}</p>
+              <p className="text-xs text-muted-foreground">{t("nav.tagline")}</p>
             </div>
           </Link>
 
           {sidebarContent}
 
-          <div className="mt-auto rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="mt-auto rounded-2xl border border-border-whisper bg-muted p-4 text-sm shadow-diffused-sm">
             <p className="font-semibold">{t("nav.footerTitle")}</p>
-            <p className="mt-1 text-slate-500 dark:text-slate-400">{t("nav.footerDescription")}</p>
+            <p className="mt-1 text-muted-foreground">{t("nav.footerDescription")}</p>
           </div>
         </aside>
 
         <div className="flex flex-1 flex-col">
-          <header className="border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/80 sm:px-6">
+          <header className="border-b border-border-whisper bg-surface-elevated/80 px-4 py-4 backdrop-blur sm:px-6">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -157,12 +163,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       className="flex items-center gap-3 px-4 pt-6"
                       onClick={() => setMobileOpen(false)}
                     >
-                      <div className="rounded-2xl bg-emerald-600 p-2 text-white">
+                      <div className="rounded-2xl bg-primary p-2 text-primary-foreground shadow-diffused-sm">
                         <Church className="size-5" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold">Church CRM</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{t("nav.tagline")}</p>
+                        <p className="text-xs text-muted-foreground">{t("nav.tagline")}</p>
                       </div>
                     </Link>
                     {mobileNavContent}
@@ -171,7 +177,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
                 <div>
                   <p className="text-sm font-semibold">{t("nav.greeting")}</p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{t("nav.welcomeBack")}</p>
+                  <p className="text-sm text-muted-foreground">{t("nav.welcomeBack")}</p>
                 </div>
               </div>
 

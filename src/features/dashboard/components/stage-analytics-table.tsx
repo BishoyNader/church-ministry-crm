@@ -10,9 +10,9 @@ type StageAnalyticsTableProps = {
 };
 
 function progressColor(pct: number): string {
-  if (pct >= 80) return "bg-emerald-500";
-  if (pct >= 50) return "bg-amber-500";
-  return "bg-rose-500";
+  if (pct >= 80) return "bg-success";
+  if (pct >= 50) return "bg-warning";
+  return "bg-danger";
 }
 
 export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProps) {

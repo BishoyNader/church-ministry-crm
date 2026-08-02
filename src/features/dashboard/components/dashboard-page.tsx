@@ -13,6 +13,10 @@ import { NextFollowupsDue } from "./next-followups-due";
 import { RecentChildren } from "./recent-children";
 import { DashboardHero } from "@/components/layout/dashboard-hero";
 import { ErrorState } from "@/components/feedback/error-state";
+import { isFeatureEnabled } from "@/lib/features";
+import { AnnouncementWidget } from "@/components/widgets/announcement-widget";
+import { SponsorWidget } from "@/components/widgets/sponsor-widget";
+import { CommunityBanner } from "@/components/widgets/community-banner";
 
 export function DashboardPage() {
   const t = useTranslations("dashboard");
@@ -33,12 +37,16 @@ export function DashboardPage() {
     <section className="space-y-4 md:space-y-6">
       <DashboardHero title={t("title")} description={t("description")} />
 
+      {isFeatureEnabled("communityBanner") ? <CommunityBanner /> : null}
+
       <OverdueFollowupsHero
         overdue={dashboardData?.followupAnalytics.overdue ?? 0}
         isLoading={isLoading}
       />
 
       <QuickActions />
+
+      {isFeatureEnabled("announcements") ? <AnnouncementWidget /> : null}
 
       <AttendanceTrendChart
         title={t("attendanceTrend")}
@@ -68,6 +76,8 @@ export function DashboardPage() {
           isLoading={isLoading}
         />
       </div>
+
+      {isFeatureEnabled("sponsors") ? <SponsorWidget /> : null}
 
       <div>
         <Link

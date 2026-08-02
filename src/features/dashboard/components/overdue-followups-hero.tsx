@@ -31,7 +31,7 @@ export function OverdueFollowupsHero({ overdue, isLoading }: OverdueFollowupsHer
           "group relative overflow-hidden rounded-xl border p-6 shadow-md transition-all hover:shadow-lg sm:p-8 " +
           (hasOverdue
             ? "border-destructive/30 bg-destructive/5"
-            : "border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30")
+            : "border-success/25 bg-success/5")
         }
       >
         <div className="flex items-start justify-between">
@@ -41,7 +41,7 @@ export function OverdueFollowupsHero({ overdue, isLoading }: OverdueFollowupsHer
                 "mt-1 rounded-xl p-3 " +
                 (hasOverdue
                   ? "bg-destructive/10 text-destructive"
-                  : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400")
+                  : "bg-success/10 text-success")
               }
             >
               {hasOverdue ? (
@@ -57,7 +57,7 @@ export function OverdueFollowupsHero({ overdue, isLoading }: OverdueFollowupsHer
               <p
                 className={
                   "mt-1 text-4xl font-bold tabular-nums sm:text-5xl " +
-                  (hasOverdue ? "text-destructive" : "text-emerald-700 dark:text-emerald-400")
+                  (hasOverdue ? "text-destructive" : "text-success")
                 }
               >
                 {overdue}

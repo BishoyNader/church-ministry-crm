@@ -8,11 +8,21 @@ export const loginSchema = z.object({
 
 export const signupSchema = z
   .object({
-    churchNameAr: z.string().min(2, { message: "اسم الكنيسة مطلوب" }),
-    churchNameEn: z.string().optional(),
+    churchId: z
+      .string()
+      .uuid({ message: "Please select your church" })
+      .refine((value) => value !== "__new_church__", {
+        message: "Please select your church",
+      }),
     fullNameAr: z.string().min(2, { message: "الاسم العربي مطلوب" }),
     fullNameEn: z.string().optional(),
     email: z.string().email({ message: "Invalid email address" }),
+    phone: z
+      .string()
+      .trim()
+      .regex(/^\+?[0-9][0-9\s-]{6,}$/, { message: "Please provide a valid phone number" })
+      .optional()
+      .or(z.literal("")),
     password: z.string().min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string().min(8, { message: "Password confirmation is required" }),
   })

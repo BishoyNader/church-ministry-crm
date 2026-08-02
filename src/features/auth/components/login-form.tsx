@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/ui/form-field";
+import { Checkbox } from "@/components/ui/checkbox";
 import { loginSchema } from "../schemas/auth.schema";
 import type { LoginFormValues } from "../types/auth.types";
 import type { AuthActionResult } from "../actions/auth.actions";
@@ -25,6 +28,7 @@ export function LoginForm({
 
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormValues>({
@@ -54,38 +58,33 @@ export function LoginForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {formError ? (
-        <div className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div role="alert" className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {formError}
         </div>
       ) : null}
 
       <div className="space-y-4">
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-          {t("login.emailLabel")}
-          <input
-            type="email"
-            autoComplete="email"
-            {...register("email")}
-            className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-          />
-          {errors.email ? <p className="mt-1 text-xs text-destructive">{errors.email.message}</p> : null}
-        </label>
+        <FormField label={t("login.emailLabel")} error={errors.email?.message}>
+          <Input type="email" autoComplete="email" {...register("email")} />
+        </FormField>
 
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-          {t("login.passwordLabel")}
-          <input
-            type="password"
-            autoComplete="current-password"
-            {...register("password")}
-            className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-          />
-          {errors.password ? <p className="mt-1 text-xs text-destructive">{errors.password.message}</p> : null}
-        </label>
+        <FormField label={t("login.passwordLabel")} error={errors.password?.message}>
+          <Input type="password" autoComplete="current-password" {...register("password")} />
+        </FormField>
       </div>
 
-      <div className="flex items-center justify-between gap-4 text-sm text-slate-600 dark:text-slate-300">
-        <label className="inline-flex items-center gap-2">
-          <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary" {...register("remember")} />
+      <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
+        <label className="inline-flex cursor-pointer items-center gap-2">
+          <Controller
+            name="remember"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(checked) => field.onChange(checked)}
+              />
+            )}
+          />
           {t("login.rememberMe")}
         </label>
         <Link href={`/${locale}/forgot-password`} className="font-medium text-primary hover:underline">
@@ -97,7 +96,7 @@ export function LoginForm({
         {isLoading ? t("loading") : t("login.submit")}
       </Button>
 
-      <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-center text-sm text-muted-foreground">
         {t("login.noAccount")} <Link href={`/${locale}/signup`} className="font-semibold text-primary hover:underline">{t("login.createAccount")}</Link>
       </p>
     </form>

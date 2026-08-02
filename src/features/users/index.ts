@@ -26,7 +26,9 @@ export {
 export {
   approveServant,
   rejectServant,
+  listPendingRegistrations,
 } from "./services/approval.service";
+export type { PendingRegistration } from "./services/approval.service";
 
 export {
   listUsersAction,
@@ -41,6 +43,12 @@ export {
 } from "./actions/user.actions";
 
 export {
+  listPendingRegistrationsAction,
+  approveServantAction,
+  rejectServantAction,
+} from "./actions/approval.actions";
+
+export {
   useUserList,
   useUserDetail,
   useCreateUser,
@@ -53,7 +61,15 @@ export {
   USER_QUERY_KEYS,
 } from "./hooks/use-users";
 
+export {
+  usePendingRegistrations,
+  useApproveServant,
+  useRejectServant,
+  APPROVAL_QUERY_KEYS,
+} from "./hooks/use-approvals";
+
 export { UserListPage } from "./components/user-list-page";
 export { UserForm } from "./components/user-form";
 export { UserRoleAssignment } from "./components/user-role-assignment";
 export { UserStageAssignment } from "./components/user-stage-assignment";
+export { PendingRegistrationsQueue } from "./components/pending-registrations-queue";

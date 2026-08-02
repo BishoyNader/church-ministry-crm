@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/ui/form-field";
 import { resetPasswordSchema } from "../schemas/auth.schema";
 import type { ResetPasswordFormValues } from "../types/auth.types";
 import { createClient } from "@/lib/supabase/client";
@@ -59,7 +61,7 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
 
   if (initialized && !hasSession) {
     return (
-      <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/20 dark:text-amber-100">
+      <div className="rounded-3xl border border-warning/30 bg-warning/10 p-6 text-sm text-warning">
         {t("resetPassword.noToken")}
       </div>
     );
@@ -68,39 +70,25 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {error ? (
-        <div className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
+        <div role="alert" className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
       ) : null}
       {message ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-900/20 dark:text-emerald-200">{message}</div>
+        <div role="status" className="rounded-2xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">{message}</div>
       ) : null}
 
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-        {t("resetPassword.password")}
-        <input
-          type="password"
-          autoComplete="new-password"
-          {...register("password")}
-          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-        />
-        {errors.password ? <p className="mt-1 text-xs text-destructive">{errors.password.message}</p> : null}
-      </label>
+      <FormField label={t("resetPassword.password")} error={errors.password?.message}>
+        <Input type="password" autoComplete="new-password" {...register("password")} />
+      </FormField>
 
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
-        {t("resetPassword.confirmPassword")}
-        <input
-          type="password"
-          autoComplete="new-password"
-          {...register("confirmPassword")}
-          className="mt-2 w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-        />
-        {errors.confirmPassword ? <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p> : null}
-      </label>
+      <FormField label={t("resetPassword.confirmPassword")} error={errors.confirmPassword?.message}>
+        <Input type="password" autoComplete="new-password" {...register("confirmPassword")} />
+      </FormField>
 
       <Button type="submit" className="w-full" disabled={isLoading || !initialized}>
         {isLoading ? t("loading") : t("resetPassword.submit")}
       </Button>
 
-      <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-center text-sm text-muted-foreground">
         <Link href={`/${locale}/login`} className="font-semibold text-primary hover:underline">{t("resetPassword.login")}</Link>
       </p>
     </form>

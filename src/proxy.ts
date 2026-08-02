@@ -7,6 +7,10 @@ import { updateSession } from "./lib/supabase/middleware";
 const intlMiddleware = createMiddleware(routing);
 
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password", "/reset-password"];
+// Public pages reachable without a session.
+const PUBLIC_PAGES = ["/login", "/signup", "/church-request", "/forgot-password", "/reset-password"];
+// Pages reachable by an authenticated user in ANY onboarding state.
+const ALWAYS_ALLOWED_AUTH_PAGES = ["/church-request", "/pending-approval"];
 
 function copyCookies(source: NextResponse, target: NextResponse) {
   source.cookies.getAll().forEach((cookie) => {
@@ -15,9 +19,24 @@ function copyCookies(source: NextResponse, target: NextResponse) {
   });
 }
 
+function isPublicPath(pathname: string) {
+  return (
+    pathname === "/" ||
+    PUBLIC_PAGES.some((page) => pathname.endsWith(page))
+  );
+}
+
+function isAlwaysAllowedForAuth(pathname: string) {
+  return ALWAYS_ALLOWED_AUTH_PAGES.some((page) => pathname.endsWith(page));
+}
+
+function redirectTo(request: NextRequest, locale: string, path: string) {
+  return NextResponse.redirect(new URL(`/${locale}${path}`, request.url));
+}
+
 export async function proxy(request: NextRequest) {
   const intlResponse = intlMiddleware(request);
-  const { response, user } = await updateSession(request, intlResponse);
+  const { response, user, supabase } = await updateSession(request, intlResponse);
 
   const pathname = request.nextUrl.pathname;
   const pathParts = pathname.split("/").filter(Boolean);
@@ -29,23 +48,52 @@ export async function proxy(request: NextRequest) {
   const isAuthPage = AUTH_PAGES.some((page) => pathname.endsWith(page));
   const isResetPassword = pathname.endsWith("/reset-password");
 
-  if (user && isAuthPage && !isResetPassword) {
-    const redirectResponse = NextResponse.redirect(
-      new URL(`/${locale}/dashboard`, request.url),
-    );
+  if (!user) {
+    if (isPublicPath(pathname)) {
+      return response;
+    }
+    const redirectResponse = redirectTo(request, locale, "/login");
     copyCookies(response, redirectResponse);
     return redirectResponse;
   }
 
-  if (!user && !isAuthPage) {
-    const redirectResponse = NextResponse.redirect(
-      new URL(`/${locale}/login`, request.url),
-    );
-    copyCookies(response, redirectResponse);
-    return redirectResponse;
+  if (isResetPassword) {
+    return response;
   }
 
-  return response;
+  // The pending page always renders its own state; the church-request page is
+  // public. No access-state resolution is needed for these.
+  if (isAlwaysAllowedForAuth(pathname)) {
+    return response;
+  }
+
+  // Resolve the caller's onboarding/access state once for the redirect decision.
+  // UX-only routing — RLS remains the enforcement layer.
+  const { data: accessData } = await supabase.rpc("get_my_access_state");
+  const state = accessData?.[0] ?? null;
+  const hasAccess =
+    !!state &&
+    state.is_active &&
+    state.servant_approval_status === "approved" &&
+    state.has_roles;
+
+  if (hasAccess) {
+    if (isAuthPage) {
+      const redirectResponse = redirectTo(request, locale, "/dashboard");
+      copyCookies(response, redirectResponse);
+      return redirectResponse;
+    }
+    return response;
+  }
+
+  // Pending / rejected / no-profile: keep them on the allowed surface.
+  if (isPublicPath(pathname)) {
+    return response;
+  }
+
+  const redirectResponse = redirectTo(request, locale, "/pending-approval");
+  copyCookies(response, redirectResponse);
+  return redirectResponse;
 }
 
 export const config = {

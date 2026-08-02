@@ -25,7 +25,9 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
+import { PermissionGuard } from "@/features/rbac";
 import { useUserList, useDeactivateUser } from "../hooks/use-users";
+import { PendingRegistrationsQueue } from "./pending-registrations-queue";
 import { UserForm } from "./user-form";
 import { UserRoleAssignment } from "./user-role-assignment";
 import { UserStageAssignment } from "./user-stage-assignment";
@@ -94,6 +96,10 @@ export function UserListPage() {
           </Button>
         }
       />
+
+      <PermissionGuard permission="servants.approve">
+        <PendingRegistrationsQueue />
+      </PermissionGuard>
 
       <SectionCard className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">

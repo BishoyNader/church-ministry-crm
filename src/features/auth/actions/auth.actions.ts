@@ -2,7 +2,9 @@
 
 import { loginSchema, signupSchema, forgotPasswordSchema } from "../schemas/auth.schema";
 import type { ForgotPasswordFormValues, LoginFormValues, SignupFormValues } from "../types/auth.types";
-import { sendPasswordReset, signInWithEmail, signOut as signOutService, signUpWithEmail } from "../services/auth.service";
+import { registerExistingChurchUser, sendPasswordReset, signInWithEmail, signOut as signOutService } from "../services/auth.service";
+import { getMyAccessState } from "../services/access.service";
+import { createClient } from "@/lib/supabase/server";
 import { getTranslations } from "next-intl/server";
 import { ZodError } from "zod";
 
@@ -43,10 +45,16 @@ export async function loginAction(values: LoginFormValues, locale: string): Prom
     return { success: false, message: result.error ?? "Unable to sign in." };
   }
 
+  const access = await getMyAccessState(await createClient());
+  const hasAccess =
+    access.data?.is_active &&
+    access.data.servant_approval_status === "approved" &&
+    access.data.has_roles;
+
   return {
     success: true,
     message: "Signed in successfully.",
-    redirectTo: `/${locale}/dashboard`,
+    redirectTo: hasAccess ? `/${locale}/dashboard` : `/${locale}/pending-approval`,
   };
 }
 
@@ -66,23 +74,33 @@ export async function signupAction(values: SignupFormValues, locale: string): Pr
     throw error;
   }
 
-  const result = await signUpWithEmail(
-    values.churchNameAr,
-    values.churchNameEn,
+  const result = await registerExistingChurchUser(
+    values.churchId,
     values.fullNameAr,
     values.fullNameEn,
     values.email,
+    values.phone,
     values.password,
   );
 
   if (!result.success) {
+    if (result.error === "EMAIL_ALREADY_REGISTERED" || result.error === "CHURCH_NOT_AVAILABLE") {
+      const t = await getTranslations({ locale, namespace: "auth" });
+      const message =
+        result.error === "EMAIL_ALREADY_REGISTERED"
+          ? t("signup.emailAlreadyRegistered")
+          : t("signup.churchNotAvailable");
+      return { success: false, message };
+    }
     return { success: false, message: result.error ?? "Unable to create account." };
   }
 
   return {
     success: true,
-    message: "Account created. Please check your inbox to confirm your email.",
-    redirectTo: `/${locale}/login?signup=success`,
+    message: "Registration submitted for approval.",
+    redirectTo: result.isProd
+      ? `/${locale}/login?signup=pending`
+      : `/${locale}/pending-approval`,
   };
 }
 

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuthCard } from "@/features/auth/components/auth-card";
+import { AuthPage } from "@/components/layout/auth-page";
 import { LoginForm } from "@/features/auth/components/login-form";
 import { loginAction } from "@/features/auth/actions/auth.actions";
 import { routing } from "@/i18n/routing";
@@ -25,18 +26,24 @@ export default async function LoginPage({
 
   setRequestLocale(locale);
   const t = await getTranslations("auth");
+  const signupPending = resolvedSearchParams.signup === "pending";
   const signupSuccess = resolvedSearchParams.signup === "success";
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-20 dark:bg-slate-950">
+    <AuthPage locale={locale}>
       <AuthCard title={t("login.title")} description={t("login.description")}>
+        {signupPending ? (
+          <div className="mb-6 rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning" role="status">
+            {t("signup.pendingMessage")}
+          </div>
+        ) : null}
         {signupSuccess ? (
-          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-900/20 dark:text-emerald-200">
+          <div className="mb-6 rounded-2xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success" role="status">
             {t("signup.successMessage")}
           </div>
         ) : null}
         <LoginForm action={loginAction} locale={locale} />
       </AuthCard>
-    </main>
+    </AuthPage>
   );
 }

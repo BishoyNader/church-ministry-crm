@@ -3,8 +3,11 @@
     "badge": "Church Ministry CRM",
     "title": "A calmer way to run ministries, outreach, and member care.",
     "description": "This starter app gives your team a modern foundation for managing volunteers, events, and communication from a single workspace.",
-    "primaryAction": "Explore features",
-    "secondaryAction": "Read Next.js docs"
+    "primaryAction": "Create your account",
+    "secondaryAction": "Sign in",
+    "signIn": "Sign in",
+    "getStarted": "Get started",
+    "footerTagline": "Built for church ministry teams."
   },
   "features": {
     "volunteerCoordination": {
@@ -38,7 +41,8 @@
     "mainNavigation": "Main navigation",
     "toggleMenu": "Toggle navigation menu",
     "toggleTheme": "Toggle theme",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "skipToContent": "Skip to main content"
   },
   "auth": {
     "loading": "Processing…",
@@ -58,18 +62,49 @@
     },
     "signup": {
       "title": "Create an account",
-      "description": "Start using the CRM with an email and password.",
+      "description": "Join your church's ministry workspace.",
       "successMessage": "Account created successfully. Please check your inbox to confirm your email.",
-      "churchNameAr": "Church name (Arabic)",
-      "churchNameEn": "Church name (English, optional)",
+      "church": "Church",
+      "loadingChurches": "Loading churches…",
+      "selectChurch": "Select your church",
+      "noChurches": "No churches available yet.",
+      "requestNewChurch": "Request a new church",
+      "churchHint": "Can't find your church? Choose “Request a new church” below.",
       "fullNameAr": "Arabic name",
       "fullNameEn": "English name (optional)",
       "email": "Email address",
+      "phone": "Phone (optional)",
       "password": "Password",
       "confirmPassword": "Confirm password",
       "submit": "Create account",
       "haveAccount": "Already have an account?",
-      "signIn": "Sign in"
+      "signIn": "Sign in",
+      "emailAlreadyRegistered": "An account with this email already exists. Please sign in instead.",
+      "churchNotAvailable": "This church is not accepting new members right now.",
+      "pendingMessage": "Your account was created and is awaiting approval from your church administrator. You'll be able to sign in once it's approved."
+    },
+    "pending": {
+      "title": "Account pending approval",
+      "loading": "Checking your access…",
+      "status": {
+        "pending": "Pending approval",
+        "approved": "Approved",
+        "rejected": "Request declined",
+        "noProfile": "No account found"
+      },
+      "instructions": {
+        "pending": "An administrator from your church will review your request. You'll get access as soon as it's approved.",
+        "approved": "Your request has been approved.",
+        "rejected": "Your request was declined. Please contact your church administrator for details.",
+        "noProfile": "We couldn't find an account linked to this session. Please sign up first."
+      },
+      "submittedOn": "Awaiting approval by the church administrator",
+      "badge": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Declined"
+      },
+      "goToSignup": "Go to signup"
     },
     "forgotPassword": {
       "title": "Reset your password",
@@ -89,6 +124,32 @@
       "success": "Your password has been updated successfully.",
       "noToken": "The reset link appears to be invalid. Please request a new link.",
       "generalError": "Unable to complete password reset."
+    }
+  },
+  "churches": {
+    "request": {
+      "title": "Request a new church",
+      "description": "Tell us about your church and we'll get back to you with the next steps.",
+      "churchNameAr": "Church name (Arabic)",
+      "catechistName": "Catechist name",
+      "applicantName": "Applicant name",
+      "email": "Email address",
+      "phone": "Phone (optional)",
+      "notes": "Notes (optional)",
+      "submit": "Submit request",
+      "submitting": "Submitting…",
+      "backToSignup": "Back to signup",
+      "success": {
+        "title": "Request received",
+        "description": "Thank you! Your request has been sent. Our team will review it and contact you with the next steps.",
+        "backToSignup": "Return to signup"
+      },
+      "errors": {
+        "emailAlreadyRegistered": "An account with this email already exists. Please sign in instead.",
+        "requestAlreadyPending": "A request for this church is already pending review.",
+        "churchNameExists": "A church with this name already exists.",
+        "general": "Something went wrong. Please try again."
+      }
     }
   },
   "users": {
@@ -157,6 +218,35 @@
     },
     "actions": {
       "edit": "Edit user"
+    },
+    "approvalQueue": {
+      "title": "Pending Registrations",
+      "description": "Review and approve new members waiting to join your church.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "empty": {
+        "title": "No pending registrations",
+        "description": "New member requests will appear here for approval."
+      },
+      "table": {
+        "applicant": "Applicant",
+        "email": "Email",
+        "phone": "Phone",
+        "requestedOn": "Requested",
+        "actions": "Actions"
+      },
+      "errors": {
+        "general": "Something went wrong. Please try again."
+      },
+      "rejectDialog": {
+        "title": "Reject registration",
+        "description": "Are you sure you want to reject {name}? They will be notified that their request was declined.",
+        "reasonLabel": "Reason (optional)",
+        "reasonPlaceholder": "Tell the applicant why the request was declined…",
+        "confirm": "Reject request",
+        "cancel": "Cancel",
+        "processing": "Rejecting…"
+      }
     }
   },
   "stages": {
@@ -544,5 +634,74 @@
     },
     "noData": "No data available.",
     "loadError": "Failed to load dashboard data."
+  },
+  "admin": {
+    "churchRequests": {
+      "title": "Church Requests",
+      "description": "Review church creation requests from the public signup flow.",
+      "tabs": {
+        "pending": "Pending",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "empty": {
+        "title": "No requests",
+        "description": "New church requests will appear here.",
+        "searchTitle": "No matches",
+        "searchDescription": "Try a different search term."
+      },
+      "searchPlaceholder": "Search by church, applicant, or email…",
+      "searchLabel": "Search church requests",
+      "resultsCount": "{count, plural, =0 {No results} =1 {1 result} other {# results}}",
+      "table": {
+        "catechist": "Catechist: {name}",
+        "submitted": "Submitted {date}",
+        "notes": "Notes",
+        "reason": "Reason: {reason}"
+      },
+      "approve": "Approve",
+      "reject": "Reject",
+      "errors": {
+        "general": "Something went wrong. Please try again."
+      },
+      "rejectDialog": {
+        "title": "Reject church request",
+        "description": "Are you sure you want to reject {name}? The applicant will not be able to retry with the same church name.",
+        "reasonLabel": "Reason (optional)",
+        "reasonPlaceholder": "Tell the applicant why the request was declined…",
+        "confirm": "Reject request",
+        "cancel": "Cancel",
+        "processing": "Rejecting…"
+      },
+      "approveDialog": {
+        "successTitle": "Request approved",
+        "successDescription": "The church has been created and the applicant's account provisioned.",
+        "errorTitle": "Approval failed",
+        "close": "Done",
+        "closeError": "Close"
+      }
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you requested could not be found. It may have moved or no longer exists.",
+    "goHome": "Go home"
+  },
+  "widgets": {
+    "announcements": {
+      "title": "Announcements",
+      "description": "Share church-wide announcements with your congregation.",
+      "badge": "Coming soon"
+    },
+    "sponsors": {
+      "title": "Sponsors",
+      "description": "Highlight supporters and partners of your ministry.",
+      "badge": "Coming soon"
+    },
+    "community": {
+      "title": "Community",
+      "description": "A space to connect your church community.",
+      "badge": "Coming soon"
+    }
   }
 }

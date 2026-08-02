@@ -5,11 +5,11 @@ export type LoginFormValues = {
 };
 
 export type SignupFormValues = {
-  churchNameAr: string;
-  churchNameEn?: string;
+  churchId: string;
   fullNameAr: string;
   fullNameEn?: string;
   email: string;
+  phone?: string;
   password: string;
   confirmPassword: string;
 };
