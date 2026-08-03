@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, Phone, HandHeart, BadgeCheck, Bell, BookOpen } from "lucide-react";
+import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,10 +26,11 @@ const navItems = [
   { labelKey: "approvals", href: "/approvals", icon: BadgeCheck, permission: PERMISSION_CODES.SERVANTS_APPROVE, disabled: false },
   { labelKey: "spiritualJournal", href: "/spiritual-journal", icon: BookOpen, permission: PERMISSION_CODES.SPIRITUAL_READ, disabled: false },
   { labelKey: "notifications", href: "/notifications", icon: Bell, permission: PERMISSION_CODES.NOTIFICATIONS_READ, disabled: false },
+  { labelKey: "importExport", href: "/import-export", icon: ArrowLeftRight, permission: PERMISSION_CODES.IMPORT_EXECUTE, disabled: false },
   { labelKey: "stages", href: "/stages", icon: Layers, permission: PERMISSION_CODES.STAGES_READ, disabled: false },
   { labelKey: "users", href: "/users", icon: Users, permission: PERMISSION_CODES.USERS_READ, disabled: false },
   { labelKey: "events", href: null, icon: CalendarDays, permission: undefined as PermissionCode | undefined, disabled: true },
-  { labelKey: "settings", href: null, icon: Settings, permission: undefined as PermissionCode | undefined, disabled: true },
+  { labelKey: "settings", href: "/settings", icon: Settings, permission: PERMISSION_CODES.SETTINGS_READ, disabled: false },
 ] as const;
 
 function getActivePath(pathname: string): string {

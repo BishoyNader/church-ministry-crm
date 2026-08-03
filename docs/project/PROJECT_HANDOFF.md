@@ -79,7 +79,7 @@ Completed:
 
 Migrations applied conceptually through:
 
-001 → 028
+001 → 030
 
 Critical migrations already completed:
 
@@ -208,18 +208,27 @@ Notification types:
 * followup_reminder
 * system
 
-Important:
-Notifications are EVENT-DRIVEN only.
+## Notification Automation (Vercel Cron)
 
-There is NO:
+Completed:
 
-* cron
-* scheduler
-* pg_cron
-* edge function
-* background worker
+* Route: /api/cron/notifications
+* Protected by CRON_SECRET (Authorization: Bearer)
+* Scheduled via vercel.json (daily 06:00 UTC)
+* Birthday scan
+* Repeated absence scan (3 consecutive absences)
+* Followup due reminders
+* Approval reminders (configurable threshold)
+* Deduplication via notifications.dedupe_key (migration 030)
+* Tenant-scoped scans
+* Audit logging of every cron run
 
-Automation not implemented yet.
+Files:
+
+* src/features/notifications/cron/* (scans + scheduler)
+* src/app/api/cron/notifications/route.ts
+* supabase/migrations/030_notification_automation.sql
+* vercel.json
 
 ## Reports Module
 
@@ -241,16 +250,13 @@ Completed:
 
 # Known Missing Modules
 
-1. Spiritual Journal
-2. Settings
-3. Excel Import
-4. Excel Export enhancements
-5. Notification Scheduler
-6. Audit Viewer
-7. Services Management
-8. Classes Management
-9. Platform Analytics
-10. Subscription/Billing
+1. Settings
+2. Excel Import/Export enhancements
+3. Audit Viewer
+4. Services Management
+5. Classes Management
+6. Platform Analytics
+7. Subscription/Billing
 
 ---
 
@@ -258,23 +264,7 @@ Completed:
 
 ## P1
 
-Spiritual Journal
-
-Requirements:
-
-* Private servant journal
-* Daily spiritual tracking
-* Prayer
-* Bible reading
-* Liturgy attendance
-* Confession
-* Notes
-
-Security:
-
-* Owner-only visibility
-* No servant-to-servant access
-* Respect migration 022/026 privacy model
+Spiritual Journal — COMPLETED (route: /spiritual-journal, migration 029)
 
 ---
 
@@ -308,18 +298,14 @@ Requirements:
 
 ## P4
 
-Notification Automation
-
-Requirements:
-
-* Birthday scan
-* Repeated absence scan
-* Followup due reminders
-* Approval reminders
+Notification Automation — COMPLETED (see Notification Automation section)
 
 Implementation:
 
-* Vercel Cron preferred
+* Vercel Cron
+* /api/cron/notifications
+* Birthday / absence / followup / approval scans
+* Deduplication + audit
 
 ---
 
@@ -361,7 +347,7 @@ Never claim success without command output.
 * Do not modify migration 001-028 behavior without explicit justification
 
 Current project completion estimate:
-~80% MVP complete
+~88% MVP complete
 
 Next recommended task:
-Spiritual Journal Module
+Settings Module

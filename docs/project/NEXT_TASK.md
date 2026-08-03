@@ -1,10 +1,8 @@
 Current Priority
 
-1. Spiritual Journal Module
-2. Settings Module
-3. Excel Import
-4. Notification Automation
-5. Final QA
+1. Settings Module
+2. Excel Import
+3. Final QA
 
 Current Status
 
@@ -18,6 +16,8 @@ Completed:
 - Servants
 - Approval Center
 - Notifications Center
+- Notification Automation (Vercel Cron)
+- Spiritual Journal
 - Reports
 
 Rules
