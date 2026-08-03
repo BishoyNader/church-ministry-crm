@@ -1404,8 +1404,10 @@ export type Database = {
           created_at: string
           entry_date: string
           id: string
+          liturgy_attendance: boolean
           morning_prayer: boolean
           ninth_hour_prayer: boolean
+          prayer_completed: boolean
           servant_id: string
           sixth_hour_prayer: boolean
           sleep_prayer: boolean
@@ -1422,8 +1424,10 @@ export type Database = {
           created_at?: string
           entry_date: string
           id?: string
+          liturgy_attendance?: boolean
           morning_prayer?: boolean
           ninth_hour_prayer?: boolean
+          prayer_completed?: boolean
           servant_id: string
           sixth_hour_prayer?: boolean
           sleep_prayer?: boolean
@@ -1440,8 +1444,10 @@ export type Database = {
           created_at?: string
           entry_date?: string
           id?: string
+          liturgy_attendance?: boolean
           morning_prayer?: boolean
           ninth_hour_prayer?: boolean
+          prayer_completed?: boolean
           servant_id?: string
           sixth_hour_prayer?: boolean
           sleep_prayer?: boolean
