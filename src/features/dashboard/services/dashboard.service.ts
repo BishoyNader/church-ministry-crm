@@ -14,18 +14,22 @@ import type {
 
 type ServiceResult<T> = { data: T | null; error: string | null };
 
+// PostgREST returns the FK embed attendance_sessions as a single object for
+// this many-to-one relationship (attendance_records.session_id → sessions.id).
+// The generated types mark it isOneToOne=false (array), so we type it explicitly
+// to match runtime.
+type AttendanceWithSession = {
+  status: string;
+  attendance_sessions?: {
+    session_date: string;
+    stage_id: string;
+  } | null;
+};
+
 const ATTENDANCE_MONTHS = 12;
 const NEW_CHILDREN_WINDOW_DAYS = 30;
 
 const OPEN_STATUSES = new Set(["open", "in_progress"]);
-
-const PIPELINE_STAGES: string[] = [
-  "new_visitor",
-  "first_followup",
-  "regular_attendee",
-  "active_member",
-  "leader_candidate",
-];
 
 function getISOWeek(date: Date): string {
   const d = new Date(date);
@@ -78,7 +82,7 @@ export async function getDashboardData(
     ] = await Promise.all([
       supabase
         .from("beneficiaries")
-        .select("id, name, full_name_ar, status, created_at")
+        .select("id, full_name_ar, status, created_at")
         .eq("church_id", churchId)
         .is("deleted_at", null),
       supabase
@@ -124,7 +128,8 @@ export async function getDashboardData(
 
     const children = childrenResult.data ?? [];
     const followups = followupsResult.data ?? [];
-    const attendance = attendanceResult.data ?? [];
+    const attendance = (attendanceResult.data ??
+      []) as unknown as AttendanceWithSession[];
     const stages = stagesResult.data ?? [];
     const beneficiaryAssignments = assignmentsResult.data ?? [];
 
@@ -149,7 +154,9 @@ export async function getDashboardData(
           f.updated_at >= monthStartISO,
       ).length,
       attendanceThisMonth: attendance.filter(
-        (a) => a.attendance_sessions?.[0]?.session_date >= monthStartStr,
+        (a) =>
+          a.attendance_sessions?.session_date != null &&
+          a.attendance_sessions.session_date >= monthStartStr,
       ).length,
       activeStages: stages.length,
     };
@@ -169,7 +176,7 @@ export async function getDashboardData(
     >();
 
     for (const a of attendance) {
-      const session = a.attendance_sessions?.[0];
+      const session = a.attendance_sessions;
       if (!session) continue;
       const date = new Date(session.session_date);
       const wk = getISOWeek(date);
@@ -235,7 +242,7 @@ export async function getDashboardData(
       { present: number; absent: number; excused: number }
     >();
     for (const a of attendance) {
-      const sid = a.attendance_sessions?.[0]?.stage_id;
+      const sid = a.attendance_sessions?.stage_id;
       if (!sid) continue;
       const b = stageAttMap.get(sid) ?? {
         present: 0,
@@ -287,19 +294,9 @@ export async function getDashboardData(
 
     const followupAnalytics: FollowupAnalytics = { statusCounts, overdue };
 
-    // ── Pipeline analytics ──
-    const pipelineAnalytics: PipelineStageCount[] = PIPELINE_STAGES.map(
-      (stage) => ({
-        stage,
-        count: 0,
-      }),
-    );
-
-    // ── Stage analytics ──
-    // TODO:
-    // For large datasets migrate stage aggregation
-    // to SQL-side queries with COUNT(*)
-    // and LEFT JOINs to avoid loading all rows into JS.
+    // ── Pipeline / children-per-stage analytics ──
+    // The legacy pipeline_stage enum was removed (migration 013); the stage
+    // funnel is now derived from current beneficiary_assignments.
     const childrenPerStage = new Map<string, number>();
     for (const a of beneficiaryAssignments) {
       childrenPerStage.set(
@@ -308,12 +305,27 @@ export async function getDashboardData(
       );
     }
 
+    const pipelineAnalytics: PipelineStageCount[] = stages.map((s) => {
+      const names = stageNames.get(s.id);
+      return {
+        stageId: s.id,
+        stageNameAr: names?.nameAr ?? s.name_ar,
+        stageNameEn: names?.nameEn ?? s.name_en ?? null,
+        count: childrenPerStage.get(s.id) ?? 0,
+      };
+    });
+
+    // ── Stage analytics ──
+    // TODO:
+    // For large datasets migrate stage aggregation
+    // to SQL-side queries with COUNT(*)
+    // and LEFT JOINs to avoid loading all rows into JS.
     const attPerStageThisMonth = new Map<
       string,
       { present: number; total: number }
     >();
     for (const a of attendance) {
-      const session = a.attendance_sessions?.[0];
+      const session = a.attendance_sessions;
       if (!session || session.session_date < monthStartStr) continue;
       const b = attPerStageThisMonth.get(session.stage_id) ?? {
         present: 0,
@@ -343,7 +355,7 @@ export async function getDashboardData(
 
     // ── Next followups due ──
     const childNameMap = new Map(
-      children.map((c) => [c.id, c.full_name_ar ?? c.name ?? ""]),
+      children.map((c) => [c.id, c.full_name_ar ?? ""]),
     );
     const nowDate = new Date();
     const nextFollowupsDue: ScheduledFollowupItem[] = followups
@@ -364,7 +376,7 @@ export async function getDashboardData(
 
     // ── Recent children ──
     const recentChildren: RecentChildItem[] = activeChildren
-      .filter((c) => c.name)
+      .filter((c) => c.full_name_ar)
       .sort(
         (a, b) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -372,7 +384,7 @@ export async function getDashboardData(
       .slice(0, 5)
       .map((c) => ({
         id: c.id,
-        name: c.full_name_ar ?? c.name ?? "",
+        name: c.full_name_ar ?? "",
         pipelineStage: "",
         createdAt: c.created_at,
       }));

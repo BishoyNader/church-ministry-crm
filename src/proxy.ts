@@ -19,10 +19,22 @@ function copyCookies(source: NextResponse, target: NextResponse) {
   });
 }
 
+// Strips the leading locale segment so routing checks are locale-agnostic.
+// The landing page lives at the locale root (e.g. "/ar", "/en") under
+// localePrefix: "always", so both bare "/" and the locale root must be public.
+function stripLocale(pathname: string): string {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts[0] === "ar" || parts[0] === "en") {
+    return "/" + parts.slice(1).join("/");
+  }
+  return pathname;
+}
+
 function isPublicPath(pathname: string) {
+  const stripped = stripLocale(pathname);
   return (
-    pathname === "/" ||
-    PUBLIC_PAGES.some((page) => pathname.endsWith(page))
+    stripped === "/" ||
+    PUBLIC_PAGES.some((page) => stripped.endsWith(page))
   );
 }
 

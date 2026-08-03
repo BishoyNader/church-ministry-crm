@@ -1,27 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, Phone } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, Phone, HandHeart, BadgeCheck, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "next-themes";
-import { usePathname, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { logoutAction } from "@/features/auth/actions/auth.actions";
+import { useAccessState, PERMISSION_CODES } from "@/features/rbac";
+import { useNotificationSummary } from "@/features/notifications/hooks/use-notifications";
+import type { PermissionCode } from "@/features/rbac/constants/permissions";
 import { cn } from "@/lib/utils";
 import { useDirection } from "@/lib/direction";
 
 const navItems = [
-  { labelKey: "dashboard", href: "/dashboard", icon: BarChart3, disabled: false },
-  { labelKey: "children", href: "/children", icon: UserRound, disabled: false },
-  { labelKey: "attendance", href: "/attendance", icon: ClipboardCheck, disabled: false },
-  { labelKey: "followups", href: "/followups", icon: Phone, disabled: false },
-  { labelKey: "stages", href: "/stages", icon: Layers, disabled: false },
-  { labelKey: "users", href: "/users", icon: Users, disabled: false },
-  { labelKey: "events", href: null, icon: CalendarDays, disabled: true },
-  { labelKey: "settings", href: null, icon: Settings, disabled: true },
+  { labelKey: "dashboard", href: "/dashboard", icon: BarChart3, permission: PERMISSION_CODES.REPORTS_READ, disabled: false },
+  { labelKey: "reports", href: "/reports", icon: BarChart3, permission: PERMISSION_CODES.REPORTS_READ, disabled: false },
+  { labelKey: "children", href: "/children", icon: UserRound, permission: PERMISSION_CODES.BENEFICIARIES_READ, disabled: false },
+  { labelKey: "attendance", href: "/attendance", icon: ClipboardCheck, permission: PERMISSION_CODES.ATTENDANCE_READ, disabled: false },
+  { labelKey: "followups", href: "/followups", icon: Phone, permission: PERMISSION_CODES.FOLLOWUPS_READ, disabled: false },
+  { labelKey: "servants", href: "/servants", icon: HandHeart, permission: PERMISSION_CODES.SERVANTS_READ, disabled: false },
+  { labelKey: "approvals", href: "/approvals", icon: BadgeCheck, permission: PERMISSION_CODES.SERVANTS_APPROVE, disabled: false },
+  { labelKey: "notifications", href: "/notifications", icon: Bell, permission: PERMISSION_CODES.NOTIFICATIONS_READ, disabled: false },
+  { labelKey: "stages", href: "/stages", icon: Layers, permission: PERMISSION_CODES.STAGES_READ, disabled: false },
+  { labelKey: "users", href: "/users", icon: Users, permission: PERMISSION_CODES.USERS_READ, disabled: false },
+  { labelKey: "events", href: null, icon: CalendarDays, permission: undefined as PermissionCode | undefined, disabled: true },
+  { labelKey: "settings", href: null, icon: Settings, permission: undefined as PermissionCode | undefined, disabled: true },
 ] as const;
 
 function getActivePath(pathname: string): string {
@@ -43,7 +50,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isRtl = dir === "rtl";
 
   const activePath = getActivePath(pathname);
-  const locale = pathname.startsWith("/ar") ? "ar" : "en";
+  const locale = useLocale();
+
+  const { data: accessState, isLoading: isAccessLoading } = useAccessState();
+  const permissionSet = useMemo(
+    () => new Set((accessState?.permissions ?? []).map((permission) => permission.code)),
+    [accessState?.permissions],
+  );
+  const canViewNotifications = permissionSet.has(PERMISSION_CODES.NOTIFICATIONS_READ);
+  const { data: notificationSummary } = useNotificationSummary(canViewNotifications);
+
+  const visibleNavItems = useMemo(() => {
+    return navItems.filter((item) => {
+      if (item.disabled) {
+        return true;
+      }
+      return item.permission ? permissionSet.has(item.permission) : true;
+    });
+  }, [permissionSet]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -51,7 +75,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setIsSigningOut(false);
 
     if (result.success && result.redirectTo) {
-      router.push(result.redirectTo);
+      router.push("/login");
     }
   };
 
@@ -99,16 +123,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const sidebarContent = (
     <nav className="mt-8 space-y-1" aria-label={t("nav.mainNavigation")}>
-      {navItems.map((item) => renderNavLink(item))}
+      {visibleNavItems.map((item) => renderNavLink(item))}
     </nav>
   );
 
   const mobileNavContent = (
     <nav className="flex flex-col gap-1 p-4" aria-label={t("nav.mainNavigation")}>
-      {navItems.map((item) => {
+      {visibleNavItems.map((item) => {
         if (item.disabled) return null;
         return renderNavLink(item, () => setMobileOpen(false));
       })}
+    </nav>
+  );
+
+  const navSkeleton = (
+    <nav className="mt-8 space-y-2 px-3" aria-label={t("nav.mainNavigation")}>
+      {Array.from({ length: 6 }).map((_, index) => (
+        <Skeleton key={index} className="h-10 w-full rounded-2xl" />
+      ))}
     </nav>
   );
 
@@ -122,7 +154,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
       <div className={cn("flex min-h-screen", isRtl && "flex-row-reverse")}>
         <aside className="hidden w-72 flex-col border-e border-border-whisper bg-surface-elevated p-6 lg:flex">
-          <Link href={`/${locale}/dashboard`} className="flex items-center gap-3">
+          <Link href="/dashboard" className="flex items-center gap-3">
             <div className="rounded-2xl bg-primary p-2 text-primary-foreground shadow-diffused-sm">
               <Church className="size-5" />
             </div>
@@ -132,7 +164,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
 
-          {sidebarContent}
+          {isAccessLoading ? navSkeleton : sidebarContent}
 
           <div className="mt-auto rounded-2xl border border-border-whisper bg-muted p-4 text-sm shadow-diffused-sm">
             <p className="font-semibold">{t("nav.footerTitle")}</p>
@@ -159,7 +191,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </SheetTrigger>
                   <SheetContent side={isRtl ? "right" : "left"} showCloseButton={false} id="mobile-navigation">
                     <Link
-                      href={`/${locale}/dashboard`}
+                      href="/dashboard"
                       className="flex items-center gap-3 px-4 pt-6"
                       onClick={() => setMobileOpen(false)}
                     >
@@ -171,7 +203,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                         <p className="text-xs text-muted-foreground">{t("nav.tagline")}</p>
                       </div>
                     </Link>
-                    {mobileNavContent}
+                    {isAccessLoading ? null : mobileNavContent}
                   </SheetContent>
                 </Sheet>
 
@@ -182,6 +214,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </div>
 
               <div className="flex items-center gap-2">
+                {canViewNotifications ? (
+                  <Link href="/notifications" className="relative">
+                    <Button variant="ghost" size="icon" aria-label={t("nav.notifications")}>
+                      <Bell className="size-4" />
+                    </Button>
+                    {(notificationSummary?.unreadCount ?? 0) > 0 ? (
+                      <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                        {notificationSummary?.unreadCount ?? 0}
+                      </span>
+                    ) : null}
+                  </Link>
+                ) : null}
                 <Button
                   variant="ghost"
                   size="icon"

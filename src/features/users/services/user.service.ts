@@ -123,7 +123,9 @@ export async function getUserById(
     const { data: stageAssignments } = await supabase
       .from("servant_stage_assignments")
       .select("*, stages(id, name_ar, name_en)")
-      .eq("servant_id", userId);
+      .eq("servant_id", userId)
+      .eq("is_active", true)
+      .is("end_date", null);
 
     return {
       data: {
@@ -196,10 +198,23 @@ export async function createUser(
     }
 
     if (input.stageIds.length > 0) {
-      const { data: stages } = await admin
+      const { data: stages, error: stagesError } = await admin
         .from("stages")
         .select("id, service_id")
+        .eq("church_id", profile.church_id)
         .in("id", input.stageIds);
+
+      if (stagesError) {
+        await admin.auth.admin.deleteUser(userId);
+        return { data: null, error: stagesError.message };
+      }
+
+      if ((stages?.length ?? 0) !== input.stageIds.length) {
+        await admin.auth.admin.deleteUser(userId);
+        return { data: null, error: "Selected stages do not belong to this church." };
+      }
+
+      const now = new Date().toISOString();
 
       const stageServiceMap = new Map(stages?.map((s) => [s.id, s.service_id]) ?? []);
 
@@ -208,6 +223,9 @@ export async function createUser(
         servant_id: userId,
         stage_id: stageId,
         service_id: stageServiceMap.get(stageId) ?? "",
+        is_active: true,
+        start_date: now,
+        end_date: null,
         assigned_by: assignedBy,
       }));
       await admin.from("servant_stage_assignments").insert(stageInserts);
@@ -463,17 +481,30 @@ export async function assignStages(
       return { data: false, error: "User not found." };
     }
 
+    const now = new Date().toISOString();
+
     await supabase
       .from("servant_stage_assignments")
-      .delete()
+      .update({ is_active: false, end_date: now })
       .eq("servant_id", input.userId)
-      .eq("church_id", profile.church_id);
+      .eq("church_id", profile.church_id)
+      .eq("is_active", true)
+      .is("end_date", null);
 
     if (input.stageIds.length > 0) {
-      const { data: stages } = await supabase
+      const { data: stages, error: stagesError } = await supabase
         .from("stages")
         .select("id, service_id")
+        .eq("church_id", profile.church_id)
         .in("id", input.stageIds);
+
+      if (stagesError) {
+        return { data: false, error: stagesError.message };
+      }
+
+      if ((stages?.length ?? 0) !== input.stageIds.length) {
+        return { data: false, error: "Some stages are not valid for this church." };
+      }
 
       const stageServiceMap = new Map(stages?.map((s) => [s.id, s.service_id]) ?? []);
 
@@ -482,6 +513,9 @@ export async function assignStages(
         servant_id: input.userId,
         stage_id: stageId,
         service_id: stageServiceMap.get(stageId) ?? "",
+        is_active: true,
+        start_date: now,
+        end_date: null,
         assigned_by: assignedBy,
       }));
       await supabase.from("servant_stage_assignments").insert(inserts);

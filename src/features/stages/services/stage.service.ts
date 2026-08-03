@@ -98,11 +98,13 @@ export async function getMinistryById(
             .eq("status", "active")
         : { data: [] as { stage_id: string }[] },
       stageIds.length
-        ? supabase
+          ? supabase
             .from("servant_stage_assignments")
             .select("stage_id")
             .eq("church_id", churchId)
             .in("stage_id", stageIds)
+            .eq("is_active", true)
+            .is("end_date", null)
         : { data: [] as { stage_id: string }[] },
     ]);
 
@@ -302,11 +304,13 @@ export async function listStages(
             .eq("status", "active")
         : { data: [] as { stage_id: string }[] },
       stageIds.length
-        ? supabase
+          ? supabase
             .from("servant_stage_assignments")
             .select("stage_id")
             .eq("church_id", churchId)
             .in("stage_id", stageIds)
+            .eq("is_active", true)
+            .is("end_date", null)
         : { data: [] as { stage_id: string }[] },
     ]);
 
@@ -367,7 +371,9 @@ export async function getStageById(
         .from("servant_stage_assignments")
         .select("id", { count: "exact", head: true })
         .eq("church_id", churchId)
-        .eq("stage_id", stageId),
+        .eq("stage_id", stageId)
+        .eq("is_active", true)
+        .is("end_date", null),
     ]);
 
     return {
@@ -509,7 +515,9 @@ export async function getStageUsers(
       .from("servant_stage_assignments")
       .select("user_id, profiles:user_id(id, full_name_ar, full_name_en, email, avatar_url)")
       .eq("stage_id", stageId)
-      .eq("church_id", churchId);
+      .eq("church_id", churchId)
+      .eq("is_active", true)
+      .is("end_date", null);
 
     if (error) {
       return { data: null, error: error.message };

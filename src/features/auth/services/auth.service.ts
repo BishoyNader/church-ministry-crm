@@ -228,7 +228,7 @@ async function notifyChurchSuperAdmins(
 
     const payload = {
       churchId,
-      notificationType: "approval_required",
+      notificationType: "servant_pending",
       titleAr: "طلب انضمام جديد",
       titleEn: "New registration request",
       bodyAr: `${applicantName} قدم طلب انضمام`,

@@ -3,6 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { useDashboardData } from "../hooks/use-dashboard";
+import { KpiCards } from "./kpi-cards";
 import { AttendanceTrendChart } from "./attendance-trend-chart";
 import { FollowupStatusChart } from "./followup-status-chart";
 import { PipelineChart } from "./pipeline-chart";
@@ -14,6 +15,7 @@ import { RecentChildren } from "./recent-children";
 import { DashboardHero } from "@/components/layout/dashboard-hero";
 import { ErrorState } from "@/components/feedback/error-state";
 import { isFeatureEnabled } from "@/lib/features";
+import { useAccessState } from "@/features/rbac";
 import { AnnouncementWidget } from "@/components/widgets/announcement-widget";
 import { SponsorWidget } from "@/components/widgets/sponsor-widget";
 import { CommunityBanner } from "@/components/widgets/community-banner";
@@ -23,6 +25,11 @@ export function DashboardPage() {
   const locale = useLocale();
   const { data, isLoading, error } = useDashboardData();
   const dashboardData = data?.data;
+  const { data: accessState } = useAccessState();
+
+  const roles = accessState?.roles ?? [];
+  const isScopedServant =
+    roles.length > 0 && roles.every((role) => role.role_type === "servant");
 
   if (error) {
     return (
@@ -38,6 +45,18 @@ export function DashboardPage() {
       <DashboardHero title={t("title")} description={t("description")} />
 
       {isFeatureEnabled("communityBanner") ? <CommunityBanner /> : null}
+
+      {isScopedServant ? (
+        <div
+          role="status"
+          className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm"
+        >
+          <span className="font-semibold">{t("scopeNotice.title")}</span>{" "}
+          <span className="text-muted-foreground">{t("scopeNotice.description")}</span>
+        </div>
+      ) : null}
+
+      <KpiCards data={dashboardData} isLoading={isLoading} />
 
       <OverdueFollowupsHero
         overdue={dashboardData?.followupAnalytics.overdue ?? 0}

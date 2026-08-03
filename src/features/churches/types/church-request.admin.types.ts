@@ -1,7 +1,6 @@
 export type ChurchRequestRow = {
   id: string;
   church_name_ar: string;
-  church_name_en: string | null;
   catechist_name: string;
   applicant_name: string;
   email: string;

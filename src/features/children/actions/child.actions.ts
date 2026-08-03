@@ -32,6 +32,7 @@ import type {
   PaginatedResult,
 } from "../types/child.types";
 import * as childService from "../services/child.service";
+import { sendNotification } from "@/features/notifications/services/notification.service";
 import { ZodError } from "zod";
 
 export type ChildActionResult<T = unknown> = {
@@ -194,6 +195,33 @@ export async function createChildAction(
   }
 
   if (result.data) {
+    const birthdayToday = typeof values.date_of_birth === "string" && values.date_of_birth.length >= 10
+      ? (() => {
+          const [year, month, day] = values.date_of_birth.split("-").map(Number);
+          const now = new Date();
+          return Number.isFinite(year) && Number.isFinite(month) && Number.isFinite(day)
+            ? now.getMonth() + 1 === month && now.getDate() === day
+            : false;
+        })()
+      : false;
+
+    if (birthdayToday) {
+      await sendNotification({
+        churchId: null,
+        recipientId: user.id,
+        notificationType: "birthday",
+        titleAr: "عيد ميلاد اليوم",
+        titleEn: "Birthday today",
+        bodyAr: `نتمنى لك عيد ميلاد سعيد، ${values.full_name_ar}`,
+        bodyEn: `Happy birthday, ${values.full_name_ar}`,
+        data: {
+          type: "birthday",
+          beneficiary_id: result.data.id,
+          beneficiary_name: values.full_name_ar,
+        },
+      });
+    }
+
     await writeAuditLog(supabase, "create", "child", result.data.id, undefined, {
       full_name_ar: values.full_name_ar,
     });
@@ -273,9 +301,30 @@ export async function updateChildAction(
     return { success: false, message: result.error };
   }
 
+  // Service/stage live on beneficiary_assignments, not beneficiaries. When the
+  // edit form changed them, close the old current assignment and open a new one
+  // through the transfer RPC (the table is RLS-immutable for direct writes).
+  const movedStage =
+    existing.data &&
+    values.service_id &&
+    values.stage_id &&
+    (existing.data.serviceId !== values.service_id ||
+      existing.data.stageId !== values.stage_id);
+
+  if (movedStage) {
+    const transferResult = await childService.transferChild(supabase, childId, profile.church_id, {
+      service_id: values.service_id,
+      stage_id: values.stage_id,
+    });
+    if (transferResult.error) {
+      return { success: false, message: transferResult.error };
+    }
+  }
+
   await writeAuditLog(supabase, "update", "child", childId, oldValues, {
     full_name_ar: values.full_name_ar,
     status: values.status,
+    ...(movedStage ? { service_id: values.service_id, stage_id: values.stage_id } : {}),
   });
 
   return { success: true, message: "Child updated successfully." };
@@ -465,6 +514,24 @@ export async function batchAttendanceAction(
     return { success: false, message: result.error };
   }
 
+  if (values.records.some((record) => record.status === "absent")) {
+    await sendNotification({
+      churchId: null,
+      recipientId: user.id,
+      notificationType: "attendance_absence",
+      titleAr: "غياب تم تسجيله",
+      titleEn: "Absence recorded",
+      bodyAr: `تم تسجيل ${values.records.filter((record) => record.status === "absent").length} غياب في الحضور اليومي.`,
+      bodyEn: `${values.records.filter((record) => record.status === "absent").length} absences were recorded during the attendance session.`,
+      data: {
+        type: "attendance_absence",
+        stage_id: values.stage_id,
+        service_id: values.service_id,
+        attendance_date: values.attendance_date,
+      },
+    });
+  }
+
   await writeAuditLog(supabase, "create", "attendance", values.stage_id, undefined, {
     stage_id: values.stage_id,
     date: values.attendance_date,
@@ -555,6 +622,24 @@ export async function createFollowupAction(
   }
 
   if (result.data) {
+    if (values.assigned_to) {
+      await sendNotification({
+        churchId: null,
+        recipientId: values.assigned_to,
+        notificationType: "followup_reminder",
+        titleAr: "تذكير بمتابعة جديدة",
+        titleEn: "New follow-up reminder",
+        bodyAr: `تم تخصيص متابعة جديدة لك.`,
+        bodyEn: `A new follow-up has been assigned to you.`,
+        data: {
+          type: "followup_reminder",
+          followup_id: result.data.id,
+          beneficiary_id: values.beneficiary_id,
+          scheduled_at: values.scheduled_at ?? null,
+        },
+      });
+    }
+
     await writeAuditLog(supabase, "create", "followup", result.data.id, undefined, {
       beneficiary_id: values.beneficiary_id,
       type: values.type,

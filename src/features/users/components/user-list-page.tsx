@@ -34,12 +34,10 @@ import { UserStageAssignment } from "./user-stage-assignment";
 import type { UserListItem } from "../types/user.types";
 
 const ROLE_FILTER_OPTIONS = [
-  { value: "all", label: "All Roles" },
-  { value: "super_admin", label: "Super Admin" },
-  { value: "church_admin", label: "Church Admin" },
-  { value: "stage_leader", label: "Stage Leader" },
-  { value: "servant", label: "Servant" },
-  { value: "viewer", label: "Viewer" },
+  { value: "all", labelKey: "roleFilter.all" },
+  { value: "super_admin", labelKey: "roleFilter.superAdmin" },
+  { value: "admin", labelKey: "roleFilter.admin" },
+  { value: "servant", labelKey: "roleFilter.servant" },
 ] as const;
 
 const PAGE_SIZE = 20;
@@ -123,7 +121,7 @@ export function UserListPage() {
             <SelectContent>
               {ROLE_FILTER_OPTIONS.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </SelectItem>
               ))}
             </SelectContent>

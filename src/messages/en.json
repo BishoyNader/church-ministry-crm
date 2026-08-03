@@ -25,11 +25,14 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "reports": "Reports",
     "children": "Beneficiaries",
     "attendance": "Attendance",
     "followups": "Follow-ups",
     "stages": "Stages",
     "users": "Users",
+    "servants": "Servants",
+    "notifications": "Notifications",
     "events": "Events",
     "settings": "Settings",
     "comingSoon": "Soon",
@@ -57,7 +60,7 @@
       "submit": "Sign in",
       "accountInactive": "Your account has been deactivated. Please contact an administrator.",
       "profileNotFound": "Your account could not be found. Please contact an administrator.",
-      "noAccount": "Don\u2019t have an account?",
+      "noAccount": "Don’t have an account?",
       "createAccount": "Create one"
     },
     "signup": {
@@ -108,7 +111,7 @@
     },
     "forgotPassword": {
       "title": "Reset your password",
-      "description": "Enter your email and we\u2019ll send a reset link.",
+      "description": "Enter your email and we’ll send a reset link.",
       "email": "Email address",
       "submit": "Send reset link",
       "sent": "Password reset email sent. Check your inbox.",
@@ -156,6 +159,12 @@
     "title": "User Management",
     "description": "Manage church members, roles, and stage assignments.",
     "createUser": "Add User",
+    "roleFilter": {
+      "all": "All Roles",
+      "superAdmin": "Ministry Admin",
+      "admin": "Admin",
+      "servant": "Servant"
+    },
     "searchPlaceholder": "Search by name or email…",
     "search": "Search",
     "emptyState": "No users found.",
@@ -201,7 +210,91 @@
       "cancel": "Cancel",
       "processing": "Saving…"
     },
-    "stages": {
+  "servants": {
+    "title": "Servant Management",
+    "description": "Manage church servants, ministry assignments, and approvals.",
+    "searchPlaceholder": "Search by name or email…",
+    "search": "Search",
+    "emptyState": "No servants found.",
+    "approvalFilter": {
+      "all": "All Approvals",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "roles": "Roles",
+      "stages": "Stages",
+      "approval": "Approval",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "actions": {
+      "edit": "Edit servant",
+      "assign": "Assign stages",
+      "archive": "Archive servant"
+    },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "errors": {
+      "general": "Something went wrong. Please try again."
+    },
+    "edit": {
+      "title": "Edit Servant",
+      "description": "Update the servant's details for {name}.",
+      "confessionFatherName": "Confession Father Name",
+      "confessionFatherPlaceholder": "Optional",
+      "joinDate": "Join Date",
+      "notes": "Notes",
+      "notesPlaceholder": "Optional notes…",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "processing": "Saving…",
+      "errors": {
+        "general": "Something went wrong. Please try again."
+      }
+    },
+    "assign": {
+      "title": "Assign Stages",
+      "description": "Select the stages this servant serves in for {name}.",
+      "empty": "No active stages available.",
+      "save": "Save assignments",
+      "cancel": "Cancel",
+      "processing": "Saving…",
+      "errors": {
+        "general": "Something went wrong. Please try again."
+      }
+    },
+    "rejectDialog": {
+      "title": "Reject servant",
+      "description": "Are you sure you want to reject {name}? They will be notified that their request was declined.",
+      "reasonLabel": "Reason (optional)",
+      "reasonPlaceholder": "Tell the servant why the request was declined…",
+      "confirm": "Reject request",
+      "cancel": "Cancel",
+      "processing": "Rejecting…"
+    },
+    "archiveDialog": {
+      "title": "Archive servant",
+      "description": "Are you sure you want to archive {name}? Their profile will be hidden from active lists but preserved in the system.",
+      "confirm": "Archive",
+      "cancel": "Cancel",
+      "processing": "Archiving…"
+    }
+  },
+  "stages": {
       "title": "Manage Stage Assignments",
       "description": "Assign stages for {name}.",
       "empty": "No active stages available.",
@@ -366,13 +459,6 @@
       "inactive": "Inactive",
       "transferred": "Transferred",
       "graduated": "Graduated"
-    },
-    "pipeline": {
-      "new_visitor": "New Visitor",
-      "first_followup": "First Follow-up",
-      "regular_attendee": "Regular Attendee",
-      "active_member": "Active Member",
-      "leader_candidate": "Leader Candidate"
     },
     "pagination": {
       "showing": "Showing {from}–{to} of {total}",
@@ -597,7 +683,7 @@
     "stageAnalytics": {
       "title": "Stage Analytics",
       "stage": "Stage",
-    "children": "Beneficiaries",
+      "children": "Beneficiaries",
       "followups": "Follow-ups",
       "attendance": "Attendance",
       "attendanceRate": "Rate"
@@ -613,12 +699,9 @@
       "completed": "Completed",
       "cancelled": "Cancelled"
     },
-    "pipeline": {
-      "new_visitor": "New Visitor",
-      "first_followup": "First Follow-up",
-      "regular_attendee": "Regular Attendee",
-      "active_member": "Active Member",
-      "leader_candidate": "Leader Candidate"
+    "scopeNotice": {
+      "title": "Ministry scope",
+      "description": "Showing data for the stages assigned to you."
     },
     "quickActions": {
       "addChild": "Add Beneficiary",
@@ -634,6 +717,90 @@
     },
     "noData": "No data available.",
     "loadError": "Failed to load dashboard data."
+  },
+  "approvals": {
+    "title": "Approval Center",
+    "description": "Review pending servant applications, user approvals, and church request decisions.",
+    "tabs": {
+      "servants": "Servants",
+      "users": "Users",
+      "churches": "Church Requests"
+    },
+    "stats": {
+      "pendingServants": {
+        "label": "Pending Servants"
+      },
+      "approved30d": {
+        "label": "Approved (30d)"
+      },
+      "rejected": {
+        "label": "Rejected"
+      },
+      "pendingChurchRequests": {
+        "label": "Pending Church Requests"
+      }
+    },
+    "queue": {
+      "title": "Servant approvals",
+      "description": "Review new servant requests waiting for approval.",
+      "review": "Review",
+      "approve": "Approve",
+      "reject": "Reject",
+      "empty": {
+        "title": "No pending servant approvals",
+        "description": "New servant requests will appear here for review."
+      },
+      "table": {
+        "applicant": "Applicant",
+        "email": "Email",
+        "phone": "Phone",
+        "requestedOn": "Requested",
+        "actions": "Actions"
+      },
+      "errors": {
+        "general": "Something went wrong. Please try again."
+      },
+      "rejectDialog": {
+        "title": "Reject registration",
+        "description": "Are you sure you want to reject {name}? They will be notified that their request was declined.",
+        "reasonLabel": "Reason (optional)",
+        "reasonPlaceholder": "Tell the applicant why the request was declined…",
+        "confirm": "Reject request",
+        "cancel": "Cancel",
+        "processing": "Rejecting…"
+      }
+    },
+    "users": {
+      "title": "User approvals",
+      "description": "Review pending user approvals in your church.",
+      "review": "Review",
+      "empty": {
+        "title": "No pending user approvals",
+        "description": "Pending user approvals will appear here."
+      }
+    },
+    "drawer": {
+      "email": "Email",
+      "phone": "Phone",
+      "requestedOn": "Requested on",
+      "rolesTitle": "Roles",
+      "rolesHint": "Choose the roles to grant during approval.",
+      "rolesEmpty": "No roles are available for this church.",
+      "stagesTitle": "Stages",
+      "stagesHint": "Choose the stage/service assignments to enable during approval.",
+      "stagesEmpty": "No active stages are available for this church.",
+      "rejectReasonLabel": "Reason (optional)",
+      "rejectReasonPlaceholder": "Tell the applicant why the request was declined…",
+      "confirmReject": "Confirm reject",
+      "cancelReject": "Cancel",
+      "reject": "Reject",
+      "approve": "Approve",
+      "rejecting": "Rejecting…",
+      "approving": "Approving…",
+      "errors": {
+        "general": "Something went wrong. Please try again."
+      }
+    }
   },
   "admin": {
     "churchRequests": {
@@ -702,6 +869,13 @@
       "title": "Community",
       "description": "A space to connect your church community.",
       "badge": "Coming soon"
+    }
+  },
+  "rbac": {
+    "accessDenied": {
+      "title": "Access required",
+      "description": "You do not have permission to view this page. Contact your ministry admin if you believe this is a mistake.",
+      "backToDashboard": "Back to dashboard"
     }
   }
 }

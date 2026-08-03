@@ -25,11 +25,14 @@
   },
   "nav": {
     "dashboard": "لوحة المعلومات",
+    "reports": "التقارير",
     "children": "المخدومون",
     "attendance": "الحضور",
     "followups": "المتابعات",
     "stages": "المراحل",
     "users": "المستخدمين",
+    "servants": "الخدام",
+    "notifications": "الإشعارات",
     "events": "الأحداث",
     "settings": "الإعدادات",
     "comingSoon": "قريباً",
@@ -156,6 +159,12 @@
     "title": "إدارة المستخدمين",
     "description": "إدارة أعضاء الكنيسة والأدوار ومهام المراحل.",
     "createUser": "إضافة مستخدم",
+    "roleFilter": {
+      "all": "جميع الأدوار",
+      "superAdmin": "مدير الخدمة",
+      "admin": "مشرف",
+      "servant": "خادم"
+    },
     "searchPlaceholder": "بحث بالاسم أو البريد الإلكتروني…",
     "search": "بحث",
     "emptyState": "لم يتم العثور على مستخدمين.",
@@ -201,7 +210,91 @@
       "cancel": "إلغاء",
       "processing": "جارٍ الحفظ…"
     },
-    "stages": {
+  "servants": {
+    "title": "إدارة الخدام",
+    "description": "إدارة الخدام وتعيينات الخدمة والموافقات.",
+    "searchPlaceholder": "ابحث بالاسم أو البريد الإلكتروني…",
+    "search": "بحث",
+    "emptyState": "لا يوجد خدام.",
+    "approvalFilter": {
+      "all": "كل الموافقات",
+      "pending": "قيد الانتظار",
+      "approved": "تمت الموافقة",
+      "rejected": "مرفوض"
+    },
+    "table": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "roles": "الأدوار",
+      "stages": "المراحل",
+      "approval": "الموافقة",
+      "joined": "تاريخ الانضمام",
+      "actions": "إجراءات"
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "approved": "تمت الموافقة",
+      "rejected": "مرفوض"
+    },
+    "approve": "موافقة",
+    "reject": "رفض",
+    "actions": {
+      "edit": "تعديل الخادم",
+      "assign": "تعيين المراحل",
+      "archive": "أرشفة الخادم"
+    },
+    "pagination": {
+      "showing": "عرض {from}–{to} من {total}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "errors": {
+      "general": "حدث خطأ ما. حاول مرة أخرى."
+    },
+    "edit": {
+      "title": "تعديل الخادم",
+      "description": "قم بتحديث تفاصيل الخادم {name}.",
+      "confessionFatherName": "اسم أب الاعتراف",
+      "confessionFatherPlaceholder": "اختياري",
+      "joinDate": "تاريخ الانضمام",
+      "notes": "ملاحظات",
+      "notesPlaceholder": "ملاحظات اختيارية…",
+      "save": "حفظ التغييرات",
+      "cancel": "إلغاء",
+      "processing": "جارٍ الحفظ…",
+      "errors": {
+        "general": "حدث خطأ ما. حاول مرة أخرى."
+      }
+    },
+    "assign": {
+      "title": "تعيين المراحل",
+      "description": "اختر المراحل التي يخدم فيها {name}.",
+      "empty": "لا توجد مراحل نشطة.",
+      "save": "حفظ التعيينات",
+      "cancel": "إلغاء",
+      "processing": "جارٍ الحفظ…",
+      "errors": {
+        "general": "حدث خطأ ما. حاول مرة أخرى."
+      }
+    },
+    "rejectDialog": {
+      "title": "رفض الخادم",
+      "description": "هل أنت متأكد من رفض {name}؟ سيتم إخطاره بأن طلبه تم رفضه.",
+      "reasonLabel": "السبب (اختياري)",
+      "reasonPlaceholder": "أخبر الخادم بسبب رفض الطلب…",
+      "confirm": "رفض الطلب",
+      "cancel": "إلغاء",
+      "processing": "جارٍ الرفض…"
+    },
+    "archiveDialog": {
+      "title": "أرشفة الخادم",
+      "description": "هل أنت متأكد من أرشفة {name}؟ سيتم إخفاء ملفه من القوائم النشطة مع الاحتفاظ بسجله في النظام.",
+      "confirm": "أرشفة",
+      "cancel": "إلغاء",
+      "processing": "جارٍ الأرشفة…"
+    }
+  },
+  "stages": {
       "title": "إدارة تعيين المراحل",
       "description": "تعيين مراحل {name}.",
       "empty": "لا توجد مراحل نشطة متاحة.",
@@ -366,13 +459,6 @@
       "inactive": "غير نشط",
       "transferred": "منقول",
       "graduated": "تخرج"
-    },
-    "pipeline": {
-      "new_visitor": "زائر جديد",
-      "first_followup": "متابعة أولى",
-      "regular_attendee": "حاضر منتظم",
-      "active_member": "عضو نشط",
-      "leader_candidate": "مرشح للقيادة"
     },
     "pagination": {
       "showing": "عرض {from}–{to} من {total}",
@@ -597,7 +683,7 @@
     "stageAnalytics": {
       "title": "تحليلات المراحل",
       "stage": "المرحلة",
-    "children": "المخدومين",
+      "children": "المخدومين",
       "followups": "المتابعات",
       "attendance": "الحضور",
       "attendanceRate": "النسبة"
@@ -613,12 +699,9 @@
       "completed": "مكتمل",
       "cancelled": "ملغي"
     },
-    "pipeline": {
-      "new_visitor": "زائر جديد",
-      "first_followup": "متابعة أولى",
-      "regular_attendee": "حضور منتظم",
-      "active_member": "عضو نشط",
-      "leader_candidate": "مرشح قيادي"
+    "scopeNotice": {
+      "title": "نطاق خدمتك",
+      "description": "يتم عرض بيانات المراحل المخصصة لك فقط."
     },
     "quickActions": {
       "addChild": "إضافة مخدوم",
@@ -634,6 +717,90 @@
     },
     "noData": "لا توجد بيانات متاحة.",
     "loadError": "فشل تحميل بيانات لوحة المعلومات."
+  },
+  "approvals": {
+    "title": "مركز الموافقات",
+    "description": "راجع طلبات الخدام والموظفين الجدد وطلبات إنشاء الكنائس.",
+    "tabs": {
+      "servants": "الخدام",
+      "users": "المستخدمين",
+      "churches": "طلبات الكنائس"
+    },
+    "stats": {
+      "pendingServants": {
+        "label": "الخدام قيد الانتظار"
+      },
+      "approved30d": {
+        "label": "الموافق عليها (30 يوم)"
+      },
+      "rejected": {
+        "label": "المرفوضة"
+      },
+      "pendingChurchRequests": {
+        "label": "طلبات الكنائس المعلقة"
+      }
+    },
+    "queue": {
+      "title": "موافقات الخدام",
+      "description": "راجع طلبات الخدام الجديدة التي تنتظر الموافقة.",
+      "review": "مراجعة",
+      "approve": "موافقة",
+      "reject": "رفض",
+      "empty": {
+        "title": "لا توجد طلبات خدام معلقة",
+        "description": "ستظهر طلبات الخدام الجديدة هنا للمراجعة."
+      },
+      "table": {
+        "applicant": "المتقدم",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "requestedOn": "تاريخ الطلب",
+        "actions": "الإجراءات"
+      },
+      "errors": {
+        "general": "حدث خطأ. الرجاء المحاولة مرة أخرى."
+      },
+      "rejectDialog": {
+        "title": "رفض الطلب",
+        "description": "هل أنت متأكد من رفض {name}؟ سيتم إشعارهم بأن طلبهم تم رفضه.",
+        "reasonLabel": "السبب (اختياري)",
+        "reasonPlaceholder": "أخبر مقدم الطلب بسبب رفض الطلب…",
+        "confirm": "رفض الطلب",
+        "cancel": "إلغاء",
+        "processing": "جارٍ الرفض…"
+      }
+    },
+    "users": {
+      "title": "موافقات المستخدمين",
+      "description": "راجع طلبات المستخدمين المعلقة في كنيستك.",
+      "review": "مراجعة",
+      "empty": {
+        "title": "لا توجد طلبات مستخدمين معلقة",
+        "description": "ستظهر طلبات المستخدمين المعلقة هنا."
+      }
+    },
+    "drawer": {
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "requestedOn": "تاريخ الطلب",
+      "rolesTitle": "الأدوار",
+      "rolesHint": "اختر الأدوار المراد منحها أثناء الموافقة.",
+      "rolesEmpty": "لا توجد أدوار متاحة لهذه الكنيسة.",
+      "stagesTitle": "المراحل",
+      "stagesHint": "اختر تعيينات المرحلة/الخدمة التي سيتم تفعيلها خلال الموافقة.",
+      "stagesEmpty": "لا توجد مراحل نشطة متاحة لهذه الكنيسة.",
+      "rejectReasonLabel": "السبب (اختياري)",
+      "rejectReasonPlaceholder": "أخبر مقدم الطلب بسبب رفض الطلب…",
+      "confirmReject": "تأكيد الرفض",
+      "cancelReject": "إلغاء",
+      "reject": "رفض",
+      "approve": "موافقة",
+      "rejecting": "جارٍ الرفض…",
+      "approving": "جارٍ الموافقة…",
+      "errors": {
+        "general": "حدث خطأ. الرجاء المحاولة مرة أخرى."
+      }
+    }
   },
   "admin": {
     "churchRequests": {
@@ -702,6 +869,13 @@
       "title": "المجتمع",
       "description": "مساحة لربط مجتمع كنيستك.",
       "badge": "قريبًا"
+    }
+  },
+  "rbac": {
+    "accessDenied": {
+      "title": "الوصول مطلوب",
+      "description": "ليست لديك صلاحية لعرض هذه الصفحة. تواصل مع مدير الخدمة إذا كنت تعتقد أن هذا خطأ.",
+      "backToDashboard": "العودة إلى لوحة التحكم"
     }
   }
 }

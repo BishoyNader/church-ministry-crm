@@ -37,8 +37,12 @@ export async function listChildren(
 
     let query = supabase
       .from("beneficiaries")
-      .select("*, services!inner(name_ar), stages!inner(name_ar)", { count: "exact" })
+      .select(
+        "*, beneficiary_assignments!inner(service_id, stage_id, services(name_ar), stages(name_ar))",
+        { count: "exact" },
+      )
       .eq("church_id", churchId)
+      .eq("beneficiary_assignments.is_current", true)
       .is("deleted_at", null)
       .order("full_name_ar");
 
@@ -50,11 +54,14 @@ export async function listChildren(
     }
 
     if (filters?.service_id) {
-      query = query.eq("service_id", filters.service_id);
+      query = query.eq(
+        "beneficiary_assignments.service_id",
+        filters.service_id,
+      );
     }
 
     if (filters?.stage_id) {
-      query = query.eq("stage_id", filters.stage_id);
+      query = query.eq("beneficiary_assignments.stage_id", filters.stage_id);
     }
 
     if (filters?.status) {
@@ -71,10 +78,13 @@ export async function listChildren(
 
     const result: ChildListItem[] = (data ?? []).map((row) => {
       const joined = row as ChildRowWithNames;
+      const current = joined.beneficiary_assignments?.[0];
       return {
         ...row,
-        serviceNameAr: joined.services?.name_ar ?? "",
-        stageNameAr: joined.stages?.name_ar ?? "",
+        serviceId: current?.service_id ?? "",
+        stageId: current?.stage_id ?? "",
+        serviceNameAr: current?.services?.name_ar ?? "",
+        stageNameAr: current?.stages?.name_ar ?? "",
       } as ChildListItem;
     });
 
@@ -103,9 +113,12 @@ export async function getChildById(
   try {
     const { data: child, error } = await supabase
       .from("beneficiaries")
-      .select("*, services!inner(name_ar), stages!inner(name_ar)")
+      .select(
+        "*, beneficiary_assignments(service_id, stage_id, services(name_ar), stages(name_ar))",
+      )
       .eq("id", childId)
       .eq("church_id", churchId)
+      .eq("beneficiary_assignments.is_current", true)
       .is("deleted_at", null)
       .single();
 
@@ -123,7 +136,7 @@ export async function getChildById(
         .limit(50),
       supabase
         .from("followups")
-        .select("*, profiles:assigned_to(full_name_ar)")
+        .select("*, servants:assigned_to(profiles(full_name_ar))")
         .eq("church_id", churchId)
         .eq("beneficiary_id", childId)
         .order("created_at", { ascending: false })
@@ -133,13 +146,16 @@ export async function getChildById(
     /* eslint-disable @typescript-eslint/no-explicit-any */
     type ChildRowWithJoins = any;
     const typedChild = child as ChildRowWithJoins;
+    const currentAssignment = typedChild.beneficiary_assignments?.[0];
     /* eslint-enable @typescript-eslint/no-explicit-any */
 
     return {
       data: {
         ...(typedChild as Record<string, unknown>),
-        serviceNameAr: typedChild.services?.name_ar ?? "",
-        stageNameAr: typedChild.stages?.name_ar ?? "",
+        serviceId: currentAssignment?.service_id ?? "",
+        stageId: currentAssignment?.stage_id ?? "",
+        serviceNameAr: currentAssignment?.services?.name_ar ?? "",
+        stageNameAr: currentAssignment?.stages?.name_ar ?? "",
         attendance: attendanceResult.data ?? [],
         followups: followupsResult.data ?? [],
       } as ChildDetail,
@@ -162,47 +178,33 @@ export async function createChild(
       return { data: null, error: "You must be logged in." };
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("church_id")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile) {
-      return { data: null, error: "Profile not found." };
-    }
-
-    // NOTE: church_id is explicitly set here as defense-in-depth.
-    // Supabase RLS policies (002_rls_policies.sql) also enforce
-    // church_id = get_user_church_id() on INSERT/UPDATE/DELETE for
-    // children, attendance, and followups tables.
-
-    const { data, error } = await supabase
-      .from("beneficiaries")
-      .insert({
-        church_id: profile.church_id,
-        full_name_ar: input.full_name_ar,
-        full_name_en: input.full_name_en ?? null,
-        date_of_birth: input.date_of_birth ?? null,
-        gender: input.gender ?? null,
-        father_mobile: input.father_mobile ?? null,
-        mother_mobile: input.mother_mobile ?? null,
-        mobile: input.mobile ?? null,
-        whatsapp: input.whatsapp ?? null,
-        address: input.address ?? null,
-        school: input.school ?? null,
-        confession_father: input.confession_father ?? null,
-        notes: input.notes ?? null,
-        photo_url: input.photo_url ?? null,
-      })
-      .select("id")
-      .single();
+    // NOTE: creating a beneficiary + its current beneficiary_assignments row is
+    // done through a single SECURITY DEFINER RPC (024). beneficiary_assignments
+    // is RLS-immutable (UPDATE/DELETE denied) and its INSERT policy only allows
+    // admins, so the app-layer cannot perform the two writes atomically.
+    const { data, error } = await supabase.rpc("create_beneficiary_with_assignment", {
+      p_full_name_ar: input.full_name_ar,
+      p_full_name_en: input.full_name_en ?? null,
+      p_date_of_birth: input.date_of_birth ?? null,
+      p_gender: input.gender ?? null,
+      p_service_id: input.service_id,
+      p_stage_id: input.stage_id,
+      p_mobile: input.mobile ?? null,
+      p_father_mobile: input.father_mobile ?? null,
+      p_mother_mobile: input.mother_mobile ?? null,
+      p_whatsapp: input.whatsapp ?? null,
+      p_address: input.address ?? null,
+      p_school: input.school ?? null,
+      p_confession_father: input.confession_father ?? null,
+      p_notes: input.notes ?? null,
+      p_photo_url: input.photo_url ?? null,
+    });
 
     if (error) {
       return { data: null, error: error.message };
     }
 
-    return { data: { id: data.id }, error: null };
+    return { data: { id: data as string }, error: null };
   } catch {
     return { data: null, error: "Failed to create child." };
   }
@@ -260,18 +262,15 @@ export async function transferChild(
       return { data: null, error: "You must be logged in." };
     }
 
-    const { error } = await supabase
-      .from("beneficiary_assignments")
-      .insert({
-        church_id: churchId,
-        beneficiary_id: childId,
-        service_id: input.service_id,
-        stage_id: input.stage_id,
-        assigned_by: user.id,
-        servant_id: user.id,
-        start_date: new Date().toISOString().slice(0, 10),
-        is_current: true,
-      });
+    // NOTE: transfers run through the SECURITY DEFINER RPC (024). The old
+    // current assignment must be closed (is_current=false) and a new one
+    // inserted atomically, but beneficiary_assignments is RLS-immutable
+    // (immutable_update/immutable_delete) — only the RPC can do this.
+    const { error } = await supabase.rpc("transfer_beneficiary", {
+      p_beneficiary_id: childId,
+      p_new_service_id: input.service_id,
+      p_new_stage_id: input.stage_id,
+    });
 
     if (error) {
       return { data: null, error: error.message };
@@ -474,7 +473,9 @@ export async function listAttendance(
   try {
     let query = supabase
       .from("attendance_records")
-      .select("*, attendance_sessions!inner(session_date, stage_id, service_id), beneficiaries!inner(full_name_ar), stages!inner(name_ar)")
+      .select(
+        "*, attendance_sessions!inner(session_date, stage_id, service_id, stages(name_ar)), beneficiaries(full_name_ar)",
+      )
       .eq("church_id", churchId)
       .order("created_at", { ascending: false });
 
@@ -506,7 +507,7 @@ export async function listAttendance(
     const result: AttendanceListItem[] = rows.map((row) => ({
       ...row,
       childFullNameAr: row.beneficiaries?.full_name_ar ?? "",
-      stageNameAr: row.stages?.name_ar ?? "",
+      stageNameAr: row.attendance_sessions?.stages?.name_ar ?? "",
     } as AttendanceListItem));
     /* eslint-enable @typescript-eslint/no-explicit-any */
 
@@ -609,7 +610,9 @@ export async function listFollowups(
   try {
     let query = supabase
       .from("followups")
-      .select("*, beneficiaries!inner(full_name_ar), stages!inner(name_ar), profiles:assigned_to(full_name_ar)")
+      .select(
+        "*, beneficiaries!inner(full_name_ar, beneficiary_assignments(stage_id, stages(name_ar))), servants:assigned_to(profiles(full_name_ar))",
+      )
       .eq("church_id", churchId)
       .order("created_at", { ascending: false });
 
@@ -637,8 +640,9 @@ export async function listFollowups(
     const result: FollowupListItem[] = rows.map((row) => ({
       ...row,
       childFullNameAr: row.beneficiaries?.full_name_ar ?? "",
-      stageNameAr: row.stages?.name_ar ?? "",
-      assignedToNameAr: row.profiles?.full_name_ar ?? null,
+      stageNameAr:
+        row.beneficiaries?.beneficiary_assignments?.[0]?.stages?.name_ar ?? "",
+      assignedToNameAr: row.servants?.profiles?.full_name_ar ?? null,
     } as FollowupListItem));
     /* eslint-enable @typescript-eslint/no-explicit-any */
 

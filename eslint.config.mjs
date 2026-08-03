@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Non-app code (skills/tooling/backups) that never needs linting.
+    ".opencode/**",
+    ".agents/**",
+    ".claude/**",
+    "backups/**",
   ]),
 ]);
 

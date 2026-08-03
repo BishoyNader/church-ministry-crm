@@ -13,7 +13,6 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type NormalizedChurchRequest = {
   p_church_name_ar: string;
-  p_church_name_en: string | null;
   p_catechist_name: string;
   p_applicant_name: string;
   p_email: string;
@@ -30,7 +29,6 @@ function normalize(input: SubmitChurchRequestInput): NormalizeResult {
   const catechistName = input.catechistName?.trim();
   const applicantName = input.applicantName?.trim();
   const email = input.email?.trim();
-  const churchNameEn = input.churchNameEn?.trim() || null;
   const phone = input.phone?.trim() || null;
   const notes = input.notes?.trim() || null;
 
@@ -54,7 +52,6 @@ function normalize(input: SubmitChurchRequestInput): NormalizeResult {
     ok: true,
     data: {
       p_church_name_ar: churchNameAr,
-      p_church_name_en: churchNameEn,
       p_catechist_name: catechistName,
       p_applicant_name: applicantName,
       p_email: email.toLowerCase(),

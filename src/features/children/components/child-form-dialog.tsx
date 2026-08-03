@@ -136,14 +136,13 @@ export function ChildFormDialog({
 
   useEffect(() => {
     if (isEdit && child) {
-      const c = child as Record<string, unknown>;
       updateForm.reset({
         full_name_ar: child.full_name_ar,
         full_name_en: child.full_name_en ?? "",
         date_of_birth: child.date_of_birth ?? "",
         gender: child.gender ?? undefined,
-        service_id: (c.service_id as string) ?? "",
-        stage_id: (c.stage_id as string) ?? "",
+        service_id: child.serviceId ?? "",
+        stage_id: child.stageId ?? "",
         status: child.status,
         father_mobile: child.father_mobile ?? "",
         mother_mobile: child.mother_mobile ?? "",

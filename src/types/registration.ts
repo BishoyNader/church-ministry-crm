@@ -27,6 +27,8 @@ export type RegistrationErrorCode =
   | "servant_not_pending"
   | "servant_role_not_found"
   | "not_platform_owner"
+  | "platform_owner_already_exists"
+  | "platform_owner_role_not_found"
   | "auth_user_not_found"
   | "auth_user_email_mismatch"
   | "invalid_slug"
@@ -52,7 +54,6 @@ export type RpcResult<T> = {
 export type ListChurchesForSignupResult = {
   id: string;
   name_ar: string;
-  name_en: string | null;
   slug: string;
 };
 
@@ -71,7 +72,6 @@ export type MyAccessStateResult = {
 
 export type SubmitChurchRequestInput = {
   churchNameAr: string;
-  churchNameEn?: string | null;
   catechistName: string;
   applicantName: string;
   email: string;
@@ -103,7 +103,6 @@ export type RegistrationFunctions = {
   submit_church_request: {
     Args: {
       p_church_name_ar: string;
-      p_church_name_en: string | null;
       p_catechist_name: string;
       p_applicant_name: string;
       p_email: string;
@@ -131,6 +130,15 @@ export type RegistrationFunctions = {
   reject_church_request: {
     Args: { p_request_id: string; p_reason?: string | null };
     Returns: undefined;
+  };
+  bootstrap_platform_owner: {
+    Args: {
+      p_auth_user_id: string;
+      p_full_name_ar: string;
+      p_email: string;
+      p_phone?: string | null;
+    };
+    Returns: string;
   };
   send_notification: {
     Args: {
@@ -167,6 +175,8 @@ const KNOWN_REGISTRATION_ERROR_CODES = new Set<RegistrationErrorCode>([
   "servant_not_pending",
   "servant_role_not_found",
   "not_platform_owner",
+  "platform_owner_already_exists",
+  "platform_owner_role_not_found",
   "auth_user_not_found",
   "auth_user_email_mismatch",
   "invalid_slug",

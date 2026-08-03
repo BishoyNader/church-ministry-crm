@@ -1,5 +1,5 @@
 import type { PermissionCode } from "../constants/permissions";
-import { checkUserPermissions } from "../services/rbac.service";
+import { checkUserPermissions } from "../services/rbac.server";
 
 export async function hasPermission(permission: PermissionCode): Promise<boolean> {
   const { data, error } = await checkUserPermissions([permission]);

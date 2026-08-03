@@ -37,7 +37,9 @@ export type FollowupAnalytics = {
 };
 
 export type PipelineStageCount = {
-  stage: string;
+  stageId: string;
+  stageNameAr: string;
+  stageNameEn: string | null;
   count: number;
 };
 

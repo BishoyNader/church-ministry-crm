@@ -68,7 +68,7 @@ export async function listChurchRequestsAction(
   const { data, error } = await supabase
     .from("church_requests")
     .select(
-      "id, church_name_ar, church_name_en, catechist_name, applicant_name, email, phone, notes, status, reviewed_by, reviewed_at, decision_notes, created_at, updated_at",
+      "id, church_name_ar, catechist_name, applicant_name, email, phone, notes, status, reviewed_by, reviewed_at, decision_notes, created_at, updated_at",
     )
     .eq("status", status)
     .order("created_at", { ascending: false });

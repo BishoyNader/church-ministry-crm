@@ -16,7 +16,7 @@ import type { AuthActionResult } from "../actions/auth.actions";
 import type { SignupFormValues } from "../types/auth.types";
 import { useChurchesForSignup } from "@/features/churches/hooks/use-churches";
 
-type ChurchOption = { id: string; name_ar: string; name_en?: string | null };
+type ChurchOption = { id: string; name_ar: string };
 
 export function SignupForm({
   action,
@@ -85,7 +85,7 @@ export function SignupForm({
                 itemToStringLabel={(value) => value.name_ar}
                 itemToStringValue={(value) => value.id}
                 filter={(church, query) =>
-                  `${church.name_ar} ${church.name_en ?? ""}`
+                  church.name_ar
                     .toLocaleLowerCase()
                     .includes(query.toLocaleLowerCase())
                 }
@@ -127,11 +127,6 @@ export function SignupForm({
                                 className="flex cursor-default select-none items-baseline gap-2 rounded-lg px-3 py-2 text-sm outline-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
                               >
                                 <span className="truncate">{church.name_ar}</span>
-                                {church.name_en ? (
-                                  <span className="truncate text-xs text-muted-foreground">
-                                    — {church.name_en}
-                                  </span>
-                                ) : null}
                               </Combobox.Item>
                             )}
                           </Combobox.List>

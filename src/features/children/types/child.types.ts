@@ -16,9 +16,15 @@ export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export type MinistryRow = Database["public"]["Tables"]["services"]["Row"];
 export type StageRow = Database["public"]["Tables"]["stages"]["Row"];
 
-export type ChildRowWithNames = ChildRow & {
+export type ChildAssignmentName = {
+  service_id: string;
+  stage_id: string;
   services?: Pick<MinistryRow, "name_ar"> | null;
   stages?: Pick<StageRow, "name_ar"> | null;
+};
+
+export type ChildRowWithNames = ChildRow & {
+  beneficiary_assignments?: ChildAssignmentName[] | null;
 };
 
 export type AttendanceRecordWithSession = AttendanceRecordRow & {
@@ -41,15 +47,19 @@ export type PaginatedResult<T> = {
 };
 
 export type ChildListItem = ChildRow & {
+  serviceId: string;
+  stageId: string;
   serviceNameAr: string;
   stageNameAr: string;
 };
 
 export type ChildDetailFollowup = FollowupRow & {
-  profiles?: { full_name_ar: string | null } | null;
+  servants?: { profiles?: { full_name_ar: string | null } | null } | null;
 };
 
 export type ChildDetail = ChildRow & {
+  serviceId: string;
+  stageId: string;
   serviceNameAr: string;
   stageNameAr: string;
   attendance: AttendanceRecordRow[];

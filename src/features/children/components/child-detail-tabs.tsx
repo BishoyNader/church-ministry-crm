@@ -183,7 +183,7 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
                           : "\u2014"}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {record.profiles?.full_name_ar ?? "\u2014"}
+                        {record.servants?.profiles?.full_name_ar ?? "\u2014"}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {record.outcome ?? "\u2014"}

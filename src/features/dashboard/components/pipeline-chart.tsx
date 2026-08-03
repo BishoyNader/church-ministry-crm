@@ -20,7 +20,7 @@ export function PipelineChart({ data, isLoading }: PipelineChartProps) {
 
   const chartData = data?.map((d) => ({
     ...d,
-    label: t(`pipeline.${d.stage}`),
+    label: locale === "ar" ? d.stageNameAr : (d.stageNameEn ?? d.stageNameAr),
   }));
 
   return (
