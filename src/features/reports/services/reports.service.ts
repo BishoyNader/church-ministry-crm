@@ -265,10 +265,17 @@ export async function getReportsData(
       total: followups.length,
     };
 
+    const nowISO = new Date().toISOString();
     for (const followup of followups) {
-      if (followup.status === "completed") followupCounts.completed += 1;
-      else if (followup.status === "overdue") followupCounts.overdue += 1;
-      else followupCounts.open += 1;
+      if (followup.status === "completed") {
+        followupCounts.completed += 1;
+      } else if (followup.status === "cancelled") {
+        continue;
+      } else if (followup.scheduled_at != null && followup.scheduled_at < nowISO) {
+        followupCounts.overdue += 1;
+      } else {
+        followupCounts.open += 1;
+      }
     }
 
     const stageComparison = Array.from(stageBuckets.entries()).map(([stageId, bucket]) => ({

@@ -34,6 +34,7 @@
     "servants": "Servants",
     "spiritualJournal": "Spiritual Journal",
     "notifications": "Notifications",
+    "importExport": "Import / Export",
     "events": "Events",
     "settings": "Settings",
     "comingSoon": "Soon",
@@ -73,6 +74,46 @@
     "pageInfo": "Page {page} of {totalPages}",
     "prev": "Previous",
     "next": "Next"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your profile, church, and security preferences.",
+    "loadError": "Failed to load settings.",
+    "profile": {
+      "title": "Profile",
+      "description": "View and update your personal information.",
+      "email": "Email",
+      "phone": "Phone",
+      "roles": "Roles",
+      "church": "Church",
+      "fullNameAr": "Arabic name",
+      "fullNameEn": "English name",
+      "preferredLocale": "Preferred language",
+      "save": "Save changes",
+      "processing": "Saving…"
+    },
+    "church": {
+      "title": "Church Settings",
+      "description": "Manage your church contact details and metadata.",
+      "nameAr": "Church name (Arabic)",
+      "nameEn": "Church name (English)",
+      "contactEmail": "Contact email",
+      "contactPhone": "Contact phone",
+      "addressAr": "Address (Arabic)",
+      "addressEn": "Address (English)",
+      "logoUrl": "Logo URL",
+      "save": "Save changes",
+      "processing": "Saving…"
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Update your account password.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "save": "Update password",
+      "processing": "Updating…"
+    }
   },
   "auth": {
     "loading": "Processing…",
@@ -182,61 +223,6 @@
       }
     }
   },
-  "users": {
-    "title": "User Management",
-    "description": "Manage church members, roles, and stage assignments.",
-    "createUser": "Add User",
-    "roleFilter": {
-      "all": "All Roles",
-      "superAdmin": "Ministry Admin",
-      "admin": "Admin",
-      "servant": "Servant"
-    },
-    "searchPlaceholder": "Search by name or email…",
-    "search": "Search",
-    "emptyState": "No users found.",
-    "table": {
-      "name": "Name",
-      "email": "Email",
-      "roles": "Roles",
-      "status": "Status",
-      "joined": "Joined",
-      "actions": "Actions"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive"
-    },
-    "pagination": {
-      "showing": "Showing {from}–{to} of {total}",
-      "prev": "Previous",
-      "next": "Next"
-    },
-    "form": {
-      "createTitle": "Add User",
-      "editTitle": "Edit User",
-      "description": "Fill in the user details below.",
-      "email": "Email address",
-      "password": "Password",
-      "fullNameAr": "Arabic name",
-      "fullNameEn": "English name",
-      "phone": "Phone",
-      "locale": "Preferred language",
-      "active": "Active account",
-      "roles": "Roles",
-      "stages": "Stage assignments",
-      "create": "Create user",
-      "save": "Save changes",
-      "cancel": "Cancel",
-      "processing": "Processing…"
-    },
-    "roles": {
-      "title": "Manage Roles",
-      "description": "Assign roles for {name}.",
-      "save": "Save roles",
-      "cancel": "Cancel",
-      "processing": "Saving…"
-    },
   "servants": {
     "title": "Servant Management",
     "description": "Manage church servants, ministry assignments, and approvals.",
@@ -321,6 +307,61 @@
       "processing": "Archiving…"
     }
   },
+  "users": {
+    "title": "User Management",
+    "description": "Manage church members, roles, and stage assignments.",
+    "createUser": "Add User",
+    "roleFilter": {
+      "all": "All Roles",
+      "superAdmin": "Ministry Admin",
+      "admin": "Admin",
+      "servant": "Servant"
+    },
+    "searchPlaceholder": "Search by name or email…",
+    "search": "Search",
+    "emptyState": "No users found.",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "roles": "Roles",
+      "status": "Status",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "form": {
+      "createTitle": "Add User",
+      "editTitle": "Edit User",
+      "description": "Fill in the user details below.",
+      "email": "Email address",
+      "password": "Password",
+      "fullNameAr": "Arabic name",
+      "fullNameEn": "English name",
+      "phone": "Phone",
+      "locale": "Preferred language",
+      "active": "Active account",
+      "roles": "Roles",
+      "stages": "Stage assignments",
+      "create": "Create user",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "processing": "Processing…"
+    },
+    "roles": {
+      "title": "Manage Roles",
+      "description": "Assign roles for {name}.",
+      "save": "Save roles",
+      "cancel": "Cancel",
+      "processing": "Saving…"
+    },
   "stages": {
       "title": "Manage Stage Assignments",
       "description": "Assign stages for {name}.",
@@ -896,6 +937,71 @@
       "title": "Community",
       "description": "A space to connect your church community.",
       "badge": "Coming soon"
+    }
+  },
+  "importExport": {
+    "title": "Import / Export",
+    "description": "Bulk import beneficiaries and export church data.",
+    "invalidFileType": "Please select a .xlsx or .csv file.",
+    "previewError": "Failed to preview the file.",
+    "importError": "Failed to import beneficiaries.",
+    "errors": {
+      "fileTooLarge": "File exceeds the 10 MB size limit.",
+      "invalidFileType": "Only .csv and .xlsx files are allowed."
+    },
+    "import": {
+      "title": "Import Beneficiaries",
+      "description": "Upload a CSV or XLSX file to bulk import beneficiaries.",
+      "uploadLabel": "Upload file",
+      "chooseFile": "Choose file",
+      "supportedFormats": "Supported formats: .xlsx, .csv",
+      "validCount": "{count} valid",
+      "invalidCount": "{count} invalid",
+      "validationReport": "Validation Report",
+      "duplicateNames": "{count} duplicate name(s) found",
+      "duplicatePhones": "{count} duplicate phone number(s) found",
+      "missingRequired": "{count} row(s) missing required fields",
+      "invalidDates": "{count} row(s) with invalid dates",
+      "invalidGenders": "{count} row(s) with an invalid gender value",
+      "importButton": "Import valid rows",
+      "cancel": "Cancel",
+      "importSummary": "Imported {imported} beneficiary(ies). Skipped {skipped} duplicate(s).",
+      "showingFirst": "Showing first 10 rows. {count} more not shown.",
+      "failure": {
+        "title": "Import failures",
+        "row": "Row {row} · {name}",
+        "more": "{count} more not shown",
+        "duplicate": "Duplicate beneficiary",
+        "servantNotFound": "No servant profile for the current user",
+        "stageNotFound": "Stage or service not found",
+        "invalidChurchScope": "Insufficient permissions or church scope",
+        "rpcFailure": "Import operation failed",
+        "insertFailure": "Could not save the row"
+      },
+      "table": {
+        "row": "Row",
+        "name": "Name",
+        "phone": "Phone",
+        "birthDate": "Birth Date",
+        "gender": "Gender",
+        "stage": "Stage",
+        "class": "Class",
+        "errors": "Errors"
+      }
+    },
+    "export": {
+      "title": "Export Data",
+      "description": "Export church data to CSV or XLSX.",
+      "entity": "Data type",
+      "format": "Format",
+      "exportButton": "Export",
+      "error": "Failed to export data.",
+      "entities": {
+        "beneficiaries": "Beneficiaries",
+        "attendance": "Attendance",
+        "followups": "Follow-ups",
+        "servants": "Servants"
+      }
     }
   },
   "rbac": {

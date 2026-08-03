@@ -73,8 +73,8 @@ export async function markNotificationReadAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.NOTIFICATIONS_MANAGE))) {
-    return { success: false, message: "You do not have permission to manage notifications." };
+  if (!(await hasPermission(PERMISSION_CODES.NOTIFICATIONS_READ))) {
+    return { success: false, message: "You do not have permission to view notifications." };
   }
 
   const now = new Date().toISOString();
@@ -106,8 +106,8 @@ export async function markAllNotificationsReadAction(): Promise<NotificationActi
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.NOTIFICATIONS_MANAGE))) {
-    return { success: false, message: "You do not have permission to manage notifications." };
+  if (!(await hasPermission(PERMISSION_CODES.NOTIFICATIONS_READ))) {
+    return { success: false, message: "You do not have permission to view notifications." };
   }
 
   const now = new Date().toISOString();

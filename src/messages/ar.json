@@ -34,6 +34,7 @@
     "servants": "الخدام",
     "spiritualJournal": "اليوميات الروحية",
     "notifications": "الإشعارات",
+    "importExport": "استيراد / تصدير",
     "events": "الأحداث",
     "settings": "الإعدادات",
     "comingSoon": "قريباً",
@@ -73,6 +74,46 @@
     "pageInfo": "صفحة {page} من {totalPages}",
     "prev": "السابق",
     "next": "التالي"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "description": "إدارة ملفك الشخصي والكنيسة وخيارات الأمان.",
+    "loadError": "فشل تحميل الإعدادات.",
+    "profile": {
+      "title": "الملف الشخصي",
+      "description": "عرض وتحديث معلوماتك الشخصية.",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "roles": "الأدوار",
+      "church": "الكنيسة",
+      "fullNameAr": "الاسم العربي",
+      "fullNameEn": "الاسم الإنجليزي",
+      "preferredLocale": "اللغة المفضلة",
+      "save": "حفظ التغييرات",
+      "processing": "جارٍ الحفظ…"
+    },
+    "church": {
+      "title": "إعدادات الكنيسة",
+      "description": "إدارة بيانات التواصل والبيانات الوصفية للكنيسة.",
+      "nameAr": "اسم الكنيسة (عربي)",
+      "nameEn": "اسم الكنيسة (إنجليزي)",
+      "contactEmail": "بريد التواصل",
+      "contactPhone": "هاتف التواصل",
+      "addressAr": "العنوان (عربي)",
+      "addressEn": "العنوان (إنجليزي)",
+      "logoUrl": "رابط الشعار",
+      "save": "حفظ التغييرات",
+      "processing": "جارٍ الحفظ…"
+    },
+    "password": {
+      "title": "تغيير كلمة المرور",
+      "description": "تحديث كلمة مرور حسابك.",
+      "currentPassword": "كلمة المرور الحالية",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور الجديدة",
+      "save": "تحديث كلمة المرور",
+      "processing": "جارٍ التحديث…"
+    }
   },
   "auth": {
     "loading": "جارٍ المعالجة…",
@@ -182,61 +223,6 @@
       }
     }
   },
-  "users": {
-    "title": "إدارة المستخدمين",
-    "description": "إدارة أعضاء الكنيسة والأدوار ومهام المراحل.",
-    "createUser": "إضافة مستخدم",
-    "roleFilter": {
-      "all": "جميع الأدوار",
-      "superAdmin": "مدير الخدمة",
-      "admin": "مشرف",
-      "servant": "خادم"
-    },
-    "searchPlaceholder": "بحث بالاسم أو البريد الإلكتروني…",
-    "search": "بحث",
-    "emptyState": "لم يتم العثور على مستخدمين.",
-    "table": {
-      "name": "الاسم",
-      "email": "البريد الإلكتروني",
-      "roles": "الأدوار",
-      "status": "الحالة",
-      "joined": "تاريخ الانضمام",
-      "actions": "الإجراءات"
-    },
-    "status": {
-      "active": "نشط",
-      "inactive": "غير نشط"
-    },
-    "pagination": {
-      "showing": "عرض {from}–{to} من {total}",
-      "prev": "السابق",
-      "next": "التالي"
-    },
-    "form": {
-      "createTitle": "إضافة مستخدم",
-      "editTitle": "تعديل المستخدم",
-      "description": "املأ بيانات المستخدم أدناه.",
-      "email": "البريد الإلكتروني",
-      "password": "كلمة المرور",
-      "fullNameAr": "الاسم العربي",
-      "fullNameEn": "الاسم الإنجليزي",
-      "phone": "رقم الهاتف",
-      "locale": "اللغة المفضلة",
-      "active": "حساب نشط",
-      "roles": "الأدوار",
-      "stages": "تعيين المراحل",
-      "create": "إنشاء مستخدم",
-      "save": "حفظ التغييرات",
-      "cancel": "إلغاء",
-      "processing": "جارٍ المعالجة…"
-    },
-    "roles": {
-      "title": "إدارة الأدوار",
-      "description": "تعيين أدوار {name}.",
-      "save": "حفظ الأدوار",
-      "cancel": "إلغاء",
-      "processing": "جارٍ الحفظ…"
-    },
   "servants": {
     "title": "إدارة الخدام",
     "description": "إدارة الخدام وتعيينات الخدمة والموافقات.",
@@ -321,6 +307,61 @@
       "processing": "جارٍ الأرشفة…"
     }
   },
+  "users": {
+    "title": "إدارة المستخدمين",
+    "description": "إدارة أعضاء الكنيسة والأدوار ومهام المراحل.",
+    "createUser": "إضافة مستخدم",
+    "roleFilter": {
+      "all": "جميع الأدوار",
+      "superAdmin": "مدير الخدمة",
+      "admin": "مشرف",
+      "servant": "خادم"
+    },
+    "searchPlaceholder": "بحث بالاسم أو البريد الإلكتروني…",
+    "search": "بحث",
+    "emptyState": "لم يتم العثور على مستخدمين.",
+    "table": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "roles": "الأدوار",
+      "status": "الحالة",
+      "joined": "تاريخ الانضمام",
+      "actions": "الإجراءات"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "pagination": {
+      "showing": "عرض {from}–{to} من {total}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "form": {
+      "createTitle": "إضافة مستخدم",
+      "editTitle": "تعديل المستخدم",
+      "description": "املأ بيانات المستخدم أدناه.",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "fullNameAr": "الاسم العربي",
+      "fullNameEn": "الاسم الإنجليزي",
+      "phone": "رقم الهاتف",
+      "locale": "اللغة المفضلة",
+      "active": "حساب نشط",
+      "roles": "الأدوار",
+      "stages": "تعيين المراحل",
+      "create": "إنشاء مستخدم",
+      "save": "حفظ التغييرات",
+      "cancel": "إلغاء",
+      "processing": "جارٍ المعالجة…"
+    },
+    "roles": {
+      "title": "إدارة الأدوار",
+      "description": "تعيين أدوار {name}.",
+      "save": "حفظ الأدوار",
+      "cancel": "إلغاء",
+      "processing": "جارٍ الحفظ…"
+    },
   "stages": {
       "title": "إدارة تعيين المراحل",
       "description": "تعيين مراحل {name}.",
@@ -896,6 +937,71 @@
       "title": "المجتمع",
       "description": "مساحة لربط مجتمع كنيستك.",
       "badge": "قريبًا"
+    }
+  },
+  "importExport": {
+    "title": "استيراد / تصدير",
+    "description": "استيراد المخدومين بالجملة وتصدير بيانات الكنيسة.",
+    "invalidFileType": "يرجى اختيار ملف .xlsx أو .csv.",
+    "previewError": "فشل معاينة الملف.",
+    "importError": "فشل استيراد المخدومين.",
+    "errors": {
+      "fileTooLarge": "الملف يتجاوز الحد الأقصى 10 ميجابايت.",
+      "invalidFileType": "يُسمح فقط بملفات .csv و .xlsx."
+    },
+    "import": {
+      "title": "استيراد المخدومين",
+      "description": "ارفع ملف CSV أو XLSX لاستيراد المخدومين بالجملة.",
+      "uploadLabel": "رفع ملف",
+      "chooseFile": "اختر ملفًا",
+      "supportedFormats": "الصيغ المدعومة: .xlsx, .csv",
+      "validCount": "{count} صالح",
+      "invalidCount": "{count} غير صالح",
+      "validationReport": "تقرير التحقق",
+      "duplicateNames": "تم العثور على {count} اسم مكرر",
+      "duplicatePhones": "تم العثور على {count} رقم هاتف مكرر",
+      "missingRequired": "{count} صف(وف) ينقصها حقول مطلوبة",
+      "invalidDates": "{count} صف(وف) بتواريخ غير صالحة",
+      "invalidGenders": "{count} صفوف بقيمة جنس غير صالحة",
+      "importButton": "استيراد الصفوف الصالحة",
+      "cancel": "إلغاء",
+    "importSummary": "تم استيراد {imported} مخدوم. تم تخطي {skipped} مكرر.",
+    "showingFirst": "عرض أول 10 صفوف. {count} أخرى غير معروضة.",
+    "failure": {
+      "title": "أخطاء الاستيراد",
+      "row": "الصف {row} · {name}",
+      "more": "{count} أخرى غير معروضة",
+      "duplicate": "مخدوم مكرر",
+      "servantNotFound": "لا يوجد ملف خادم للمستخدم الحالي",
+      "stageNotFound": "المرحلة أو الخدمة غير موجودة",
+      "invalidChurchScope": "صلاحيات غير كافية أو نطاق كنيسة غير صالح",
+      "rpcFailure": "فشلت عملية الاستيراد",
+      "insertFailure": "تعذر حفظ الصف"
+    },
+      "table": {
+        "row": "الصف",
+        "name": "الاسم",
+        "phone": "الهاتف",
+        "birthDate": "تاريخ الميلاد",
+        "gender": "الجنس",
+        "stage": "المرحلة",
+        "class": "الفصل",
+        "errors": "الأخطاء"
+      }
+    },
+    "export": {
+      "title": "تصدير البيانات",
+      "description": "تصدير بيانات الكنيسة إلى CSV أو XLSX.",
+      "entity": "نوع البيانات",
+      "format": "الصيغة",
+      "exportButton": "تصدير",
+      "error": "فشل تصدير البيانات.",
+      "entities": {
+        "beneficiaries": "المخدومون",
+        "attendance": "الحضور",
+        "followups": "المتابعات",
+        "servants": "الخدام"
+      }
     }
   },
   "rbac": {

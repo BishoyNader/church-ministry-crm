@@ -954,6 +954,7 @@ export type Database = {
           church_id: string
           created_at: string
           data: Json | null
+          dedupe_key: string | null
           id: string
           is_read: boolean
           notification_type: string
@@ -970,6 +971,7 @@ export type Database = {
           church_id: string
           created_at?: string
           data?: Json | null
+          dedupe_key?: string | null
           id?: string
           is_read?: boolean
           notification_type?: string
@@ -986,6 +988,7 @@ export type Database = {
           church_id?: string
           created_at?: string
           data?: Json | null
+          dedupe_key?: string | null
           id?: string
           is_read?: boolean
           notification_type?: string
@@ -1606,6 +1609,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_beneficiary_with_assignment: {
+        Args: {
+          p_address?: string
+          p_confession_father?: string
+          p_date_of_birth?: string
+          p_father_mobile?: string
+          p_full_name_ar: string
+          p_full_name_en?: string
+          p_gender?: string
+          p_mobile?: string
+          p_mother_mobile?: string
+          p_notes?: string
+          p_photo_url?: string
+          p_school?: string
+          p_service_id: string
+          p_stage_id: string
+          p_whatsapp?: string
+        }
+        Returns: string
+      }
       get_user_church_id: { Args: never; Returns: string }
       get_user_role_types: {
         Args: never
