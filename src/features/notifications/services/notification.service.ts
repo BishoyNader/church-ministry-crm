@@ -59,3 +59,75 @@ export async function sendNotification(
     return { data: null, error: "Failed to send notification." };
   }
 }
+
+export type SendScheduledNotificationInput = SendNotificationInput & {
+  /**
+   * Deterministic dedupe key scoped per recipient, e.g.
+   * `birthday:{beneficiary_id}:{YYYY-MM-DD}`. Backed by the
+   * uq_notifications_recipient_dedupe unique index (migration 030); the same
+   * (recipient_id, dedupe_key) can never be inserted twice. Used by the
+   * Vercel Cron automation to keep daily scans idempotent.
+   */
+  dedupeKey?: string | null;
+};
+
+export type SendScheduledNotificationResult = {
+  status: "inserted" | "duplicate" | "error";
+  id?: string | null;
+  error?: string | null;
+};
+
+/**
+ * sendScheduledNotification(input) — idempotent scheduled-notification write.
+ *
+ * Same privileged service-role insert model as `sendNotification` (S11-1 /
+ * 3C.2A.3) plus a deterministic dedupe key. A unique violation on
+ * (recipient_id, dedupe_key) is not an error: it means the cron already
+ * emitted this notification for the entity/day, so the write is reported as a
+ * no-op duplicate. Only import from server contexts.
+ */
+export async function sendScheduledNotification(
+  input: SendScheduledNotificationInput,
+): Promise<SendScheduledNotificationResult> {
+  if (!UUID_PATTERN.test(input.recipientId ?? "")) {
+    return { status: "error", error: "Invalid recipient id." };
+  }
+  if (!input.notificationType?.trim()) {
+    return { status: "error", error: "Notification type is required." };
+  }
+  if (!input.titleAr?.trim()) {
+    return { status: "error", error: "Notification title is required." };
+  }
+
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("notifications")
+      .insert({
+        church_id: input.churchId,
+        recipient_id: input.recipientId,
+        notification_type: input.notificationType,
+        title_ar: input.titleAr,
+        title_en: input.titleEn ?? null,
+        body_ar: input.bodyAr?.trim() || "",
+        body_en: input.bodyEn ?? null,
+        data: input.data ?? null,
+        channel: input.channel ?? "in_app",
+        dedupe_key: input.dedupeKey ?? null,
+      })
+      .select("id")
+      .maybeSingle();
+
+    if (error) {
+      // 23505 = unique_violation on uq_notifications_recipient_dedupe.
+      if (error.code === "23505") {
+        return { status: "duplicate", error: null };
+      }
+      return { status: "error", error: error.message };
+    }
+
+    return { status: "inserted", id: data?.id ?? null, error: null };
+  } catch {
+    return { status: "error", error: "Failed to send scheduled notification." };
+  }
+}
