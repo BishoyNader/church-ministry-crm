@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
+import { Link } from "@/i18n/navigation";
 import { useChurchList, useActivateChurch, useDeactivateChurch } from "../hooks/use-churches";
 import { ChurchFormDialog } from "./church-form-dialog";
 import type { ChurchListItem, ChurchFilters } from "../types/church.types";
@@ -112,10 +113,17 @@ export function ChurchesPage() {
         description={t("description")}
         actions={
           <PermissionGuard permission="tenants.create">
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="size-4" />
-              {t("addChurch")}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/admin/churches/create">
+                <Button type="button" variant="outline">
+                  {t("provisionChurch")}
+                </Button>
+              </Link>
+              <Button onClick={() => setCreateOpen(true)}>
+                <Plus className="size-4" />
+                {t("addChurch")}
+              </Button>
+            </div>
           </PermissionGuard>
         }
       />

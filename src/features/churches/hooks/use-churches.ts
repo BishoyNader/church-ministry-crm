@@ -11,7 +11,9 @@ import {
   listChurchesAction,
   updateChurchAction,
 } from "../actions/church-admin.actions";
+import { provisionChurchWizardAction } from "../actions/church-provisioning.actions";
 import type { ChurchFilters } from "../types/church.types";
+import type { ProvisionChurchWizardValues } from "../schemas/provisioning.schema";
 
 export const CHURCHES_QUERY_KEYS = {
   all: ["churches"] as const,
@@ -118,6 +120,20 @@ export function useDeactivateChurch() {
     mutationFn: (churchId: string) => deactivateChurchAction(churchId, locale),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CHURCHES_QUERY_KEYS.all });
+    },
+  });
+}
+
+export function useProvisionChurchWizard() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (values: ProvisionChurchWizardValues) =>
+      provisionChurchWizardAction(values),
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: CHURCHES_QUERY_KEYS.all });
+      }
     },
   });
 }

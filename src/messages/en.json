@@ -1310,6 +1310,7 @@
     "title": "Churches",
     "description": "Manage churches and tenants across the platform.",
     "addChurch": "Add Church",
+    "provisionChurch": "Provision church",
     "searchPlaceholder": "Search by name or slug…",
     "statusFilterPlaceholder": "Filter by status",
     "statusAll": "All",
@@ -1347,6 +1348,76 @@
       "updateFailed": "Failed to update the church.",
       "notFound": "Church not found.",
       "statsFailed": "Failed to load church statistics."
+    },
+    "wizard": {
+      "title": "Provision a new church",
+      "description": "Create a church and provision its first administrator in one flow.",
+      "stepperLabel": "Provisioning steps",
+      "step1": "Church details",
+      "step2": "Administrator",
+      "step3": "Review and confirm",
+      "back": "Back",
+      "next": "Next",
+      "church": {
+        "churchNameAr": "Church name (Arabic)",
+        "churchNameArPlaceholder": "e.g. كنيسة العائلة المقدسة",
+        "churchNameEn": "Church name (English)",
+        "churchNameEnPlaceholder": "e.g. Holy Family Church",
+        "slug": "Church slug",
+        "slugHint": "Used in the church URL. Auto-generated and made unique when saving.",
+        "regenerateSlug": "Regenerate slug",
+        "contactEmail": "Contact email",
+        "contactPhone": "Contact phone",
+        "addressAr": "Address (Arabic)",
+        "addressArPlaceholder": "e.g. القاهرة - مصر الجديدة"
+      },
+      "admin": {
+        "fullNameAr": "Administrator name (Arabic)",
+        "fullNameArPlaceholder": "e.g. مينا كمال",
+        "fullNameEn": "Administrator name (English)",
+        "fullNameEnPlaceholder": "e.g. Mina Kamal",
+        "email": "Administrator email",
+        "phone": "Phone number",
+        "password": "Password (optional)",
+        "passwordHint": "Leave empty to send an email invitation instead.",
+        "passwordPlaceholder": "Minimum 8 characters"
+      },
+      "summary": {
+        "churchDetails": "Church details",
+        "adminDetails": "Administrator details",
+        "confirm": "Provision church",
+        "inviteLinkNote": "Email invitation will be sent"
+      },
+      "progress": {
+        "creatingChurch": "Creating the church",
+        "provisioningAdmin": "Provisioning the administrator",
+        "finalizing": "Finalizing"
+      },
+      "success": {
+        "title": "Church provisioned successfully",
+        "description": "The church and its administrator are ready to use.",
+        "inviteLinkLabel": "Invitation link",
+        "inviteLinkDescription": "Send this link to the administrator to set up their account.",
+        "copied": "Copied",
+        "copyInviteLink": "Copy invitation link",
+        "viewChurch": "View church",
+        "backToChurches": "Back to churches",
+        "provisionAnother": "Provision another church"
+      },
+      "errors": {
+        "notPlatformOwner": "Only a platform owner can provision churches.",
+        "notAuthenticated": "You must be logged in to provision a church.",
+        "authUserExists": "An account already exists for this email address.",
+        "churchNameExists": "A church with this name already exists.",
+        "authUserMismatch": "The administrator account could not be provisioned.",
+        "invalidSlug": "The church slug is invalid.",
+        "superAdminRoleNotFound": "The administrator role could not be created.",
+        "validation": "Please fix the highlighted fields.",
+        "missingServiceRole": "Server configuration error. Please try again later.",
+        "provisionFailed": "Provisioning failed. Please try again.",
+        "backToReview": "Back to review",
+        "tryAgain": "Try again"
+      }
     }
   }
 }
