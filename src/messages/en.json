@@ -199,32 +199,6 @@
       "generalError": "Unable to complete password reset."
     }
   },
-  "churches": {
-    "request": {
-      "title": "Request a new church",
-      "description": "Tell us about your church and we'll get back to you with the next steps.",
-      "churchNameAr": "Church name (Arabic)",
-      "catechistName": "Catechist name",
-      "applicantName": "Applicant name",
-      "email": "Email address",
-      "phone": "Phone (optional)",
-      "notes": "Notes (optional)",
-      "submit": "Submit request",
-      "submitting": "Submitting…",
-      "backToSignup": "Back to signup",
-      "success": {
-        "title": "Request received",
-        "description": "Thank you! Your request has been sent. Our team will review it and contact you with the next steps.",
-        "backToSignup": "Return to signup"
-      },
-      "errors": {
-        "emailAlreadyRegistered": "An account with this email already exists. Please sign in instead.",
-        "requestAlreadyPending": "A request for this church is already pending review.",
-        "churchNameExists": "A church with this name already exists.",
-        "general": "Something went wrong. Please try again."
-      }
-    }
-  },
   "servants": {
     "title": "Servant Management",
     "description": "Manage church servants, ministry assignments, and approvals.",
@@ -1306,6 +1280,73 @@
       "archiveDenied": "You do not have permission to delete classes.",
       "restoreDenied": "You do not have permission to restore classes.",
       "notFound": "Class not found."
+    }
+  },
+  "churches": {
+    "request": {
+      "title": "Request a new church",
+      "description": "Tell us about your church and we'll get back to you with the next steps.",
+      "churchNameAr": "Church name (Arabic)",
+      "catechistName": "Catechist name",
+      "applicantName": "Applicant name",
+      "email": "Email address",
+      "phone": "Phone (optional)",
+      "notes": "Notes (optional)",
+      "submit": "Submit request",
+      "submitting": "Submitting…",
+      "backToSignup": "Back to signup",
+      "success": {
+        "title": "Request received",
+        "description": "Thank you! Your request has been sent. Our team will review it and contact you with the next steps.",
+        "backToSignup": "Return to signup"
+      },
+      "errors": {
+        "emailAlreadyRegistered": "An account with this email already exists. Please sign in instead.",
+        "requestAlreadyPending": "A request for this church is already pending review.",
+        "churchNameExists": "A church with this name already exists.",
+        "general": "Something went wrong. Please try again."
+      }
+    },
+    "title": "Churches",
+    "description": "Manage churches and tenants across the platform.",
+    "addChurch": "Add Church",
+    "searchPlaceholder": "Search by name or slug…",
+    "statusFilterPlaceholder": "Filter by status",
+    "statusAll": "All",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "clearFilters": "Clear filters",
+    "emptyState": "No churches found.",
+    "paginationLabel": "{total, plural, =0 {No results} =1 {1 result} other {# results}} — page {page} of {totalPages}",
+    "previous": "Previous",
+    "next": "Next",
+    "back": "Back",
+    "edit": "Edit",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "members": "Members",
+    "servants": "Servants",
+    "services": "Services",
+    "stages": "Stages",
+    "slug": "Slug",
+    "status": "Status",
+    "contactEmail": "Contact email",
+    "contactPhone": "Contact phone",
+    "addressAr": "Address (Arabic)",
+    "addressEn": "Address (English)",
+    "subscriptionTier": "Subscription tier",
+    "subscriptionStatus": "Subscription status",
+    "locale": "Locale",
+    "createdAt": "Created at",
+    "errors": {
+      "listFailed": "Failed to load churches.",
+      "readDenied": "You do not have permission to view churches.",
+      "createDenied": "You do not have permission to create churches.",
+      "updateDenied": "You do not have permission to update churches.",
+      "createFailed": "Failed to create the church.",
+      "updateFailed": "Failed to update the church.",
+      "notFound": "Church not found.",
+      "statsFailed": "Failed to load church statistics."
     }
   }
 }
