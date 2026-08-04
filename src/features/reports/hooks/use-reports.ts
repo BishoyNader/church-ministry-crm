@@ -17,7 +17,13 @@ export const REPORTS_QUERY_KEYS = {
 export function useReportsData(filters: ReportsFilters = {}) {
   return useQuery({
     queryKey: REPORTS_QUERY_KEYS.data(filters),
-    queryFn: () => getReportsDataAction(filters),
+    queryFn: async () => {
+      const result = await getReportsDataAction(filters);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load reports.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }
@@ -25,7 +31,13 @@ export function useReportsData(filters: ReportsFilters = {}) {
 export function useReportsFilterOptions() {
   return useQuery({
     queryKey: REPORTS_QUERY_KEYS.filterOptions(),
-    queryFn: () => getReportsFilterOptionsAction(),
+    queryFn: async () => {
+      const result = await getReportsFilterOptionsAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load report filters.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }

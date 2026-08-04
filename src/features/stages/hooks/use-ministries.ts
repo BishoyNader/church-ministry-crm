@@ -22,7 +22,13 @@ export const MINISTRY_QUERY_KEYS = {
 export function useMinistryList() {
   return useQuery({
     queryKey: MINISTRY_QUERY_KEYS.list(),
-    queryFn: () => listMinistriesAction(),
+    queryFn: async () => {
+      const result = await listMinistriesAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load ministries.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }
@@ -30,7 +36,13 @@ export function useMinistryList() {
 export function useMinistryDetail(ministryId: string | null) {
   return useQuery({
     queryKey: MINISTRY_QUERY_KEYS.detail(ministryId ?? ""),
-    queryFn: () => getMinistryByIdAction(ministryId!),
+    queryFn: async () => {
+      const result = await getMinistryByIdAction(ministryId!);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load ministry.");
+      }
+      return result;
+    },
     enabled: !!ministryId,
     staleTime: 30_000,
   });

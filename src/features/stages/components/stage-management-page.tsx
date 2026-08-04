@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
+import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
 import { useMinistryList } from "../hooks/use-ministries";
 import { useStageList } from "../hooks/use-stages";
@@ -45,6 +46,13 @@ export function StageManagementPage() {
   }
 
   const isLoading = ministriesQuery.isLoading || stagesQuery.isLoading;
+  const loadError = ministriesQuery.error ?? stagesQuery.error;
+
+  if (loadError) {
+    return (
+      <ErrorState title={t("errors.listFailed")} message={loadError.message} />
+    );
+  }
 
   return (
     <section className="space-y-6">

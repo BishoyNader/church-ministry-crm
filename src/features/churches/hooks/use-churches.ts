@@ -11,7 +11,13 @@ export const CHURCH_QUERY_KEYS = {
 export function useChurchesForSignup() {
   return useQuery({
     queryKey: CHURCH_QUERY_KEYS.signup,
-    queryFn: () => listChurchesForSignupAction(),
+    queryFn: async () => {
+      const result = await listChurchesForSignupAction();
+      if (result.error) {
+        throw new Error(result.error ?? "Failed to load churches.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }

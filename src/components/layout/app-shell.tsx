@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight } from "lucide-react";
+import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -28,7 +28,10 @@ const navItems = [
   { labelKey: "notifications", href: "/notifications", icon: Bell, permission: PERMISSION_CODES.NOTIFICATIONS_READ, disabled: false },
   { labelKey: "importExport", href: "/import-export", icon: ArrowLeftRight, permission: PERMISSION_CODES.IMPORT_EXECUTE, disabled: false },
   { labelKey: "stages", href: "/stages", icon: Layers, permission: PERMISSION_CODES.STAGES_READ, disabled: false },
+  { labelKey: "services", href: "/services", icon: Building2, permission: PERMISSION_CODES.SERVICES_READ, disabled: false },
+  { labelKey: "classes", href: "/classes", icon: School, permission: PERMISSION_CODES.CLASSES_READ, disabled: false },
   { labelKey: "users", href: "/users", icon: Users, permission: PERMISSION_CODES.USERS_READ, disabled: false },
+  { labelKey: "audit", href: "/audit", icon: ScrollText, permission: PERMISSION_CODES.AUDIT_READ, disabled: false },
   { labelKey: "events", href: null, icon: CalendarDays, permission: undefined as PermissionCode | undefined, disabled: true },
   { labelKey: "settings", href: "/settings", icon: Settings, permission: PERMISSION_CODES.SETTINGS_READ, disabled: false },
 ] as const;
@@ -192,6 +195,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </Button>
                   </SheetTrigger>
                   <SheetContent side={isRtl ? "right" : "left"} showCloseButton={false} id="mobile-navigation">
+                    <SheetTitle className="sr-only">{t("nav.mainNavigation")}</SheetTitle>
                     <Link
                       href="/dashboard"
                       className="flex items-center gap-3 px-4 pt-6"
@@ -222,7 +226,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <Bell className="size-4" />
                     </Button>
                     {(notificationSummary?.unreadCount ?? 0) > 0 ? (
-                      <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                      <span
+                        className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground"
+                        aria-label={t("nav.notifications") + ": " + (notificationSummary?.unreadCount ?? 0)}
+                      >
                         {notificationSummary?.unreadCount ?? 0}
                       </span>
                     ) : null}

@@ -73,7 +73,7 @@ export function SignupForm({
       ) : null}
 
       <div className="space-y-4">
-        <FormField label={t("signup.church")} required error={errors.churchId?.message} hint={t("signup.churchHint")}>
+        <FormField label={t("signup.church")} required error={errors.churchId?.message} hint={t("signup.churchHint")} htmlFor="signup-church">
           <Controller
             control={control}
             name="churchId"
@@ -101,6 +101,7 @@ export function SignupForm({
               >
                 <div className="relative">
                   <Combobox.Input
+                    id="signup-church"
                     placeholder={t("signup.selectChurch")}
                     onClick={() => setComboboxOpen(true)}
                     className="h-11 w-full rounded-xl border border-input bg-transparent pe-9 ps-4 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50"

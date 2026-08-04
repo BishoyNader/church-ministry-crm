@@ -29,6 +29,8 @@
     "children": "Beneficiaries",
     "attendance": "Attendance",
     "followups": "Follow-ups",
+    "services": "Services",
+    "classes": "Classes",
     "stages": "Stages",
     "users": "Users",
     "servants": "Servants",
@@ -310,6 +312,10 @@
   "users": {
     "title": "User Management",
     "description": "Manage church members, roles, and stage assignments.",
+    "errors": {
+      "listFailed": "Failed to load users.",
+      "loadFailed": "Failed to load the user."
+    },
     "createUser": "Add User",
     "roleFilter": {
       "all": "All Roles",
@@ -413,6 +419,11 @@
   "stages": {
     "title": "Stage Management",
     "description": "Manage ministry groups, stages, and user assignments.",
+    "errors": {
+      "listFailed": "Failed to load stages.",
+      "loadFailed": "Failed to load the ministry.",
+      "stageListFailed": "Failed to load stages for the ministry."
+    },
     "addMinistry": "Add Ministry",
     "emptyState": {
       "title": "No ministries found",
@@ -495,6 +506,13 @@
   "children": {
     "title": "Beneficiary Management",
     "description": "Register, track, and manage beneficiaries across ministries and stages.",
+    "errors": {
+      "listFailed": "Failed to load beneficiaries.",
+      "loadFailed": "Failed to load the beneficiary.",
+      "servicesFailed": "Failed to load services.",
+      "attendanceFailed": "Failed to load attendance records.",
+      "followupsFailed": "Failed to load follow-ups."
+    },
     "addChild": "Add Beneficiary",
     "searchPlaceholder": "Search by name, phone, or mobile…",
     "search": "Search",
@@ -789,9 +807,13 @@
   "approvals": {
     "title": "Approval Center",
     "description": "Review pending servant applications, user approvals, and church request decisions.",
+    "errors": {
+      "statsFailed": "Failed to load approval statistics."
+    },
     "tabs": {
       "servants": "Servants",
-      "users": "Users",
+    "users": "Users",
+    "audit": "Audit Log",
       "churches": "Church Requests"
     },
     "stats": {
@@ -841,6 +863,9 @@
     "users": {
       "title": "User approvals",
       "description": "Review pending user approvals in your church.",
+      "errors": {
+        "listFailed": "Failed to load pending user approvals."
+      },
       "review": "Review",
       "empty": {
         "title": "No pending user approvals",
@@ -897,7 +922,8 @@
       "approve": "Approve",
       "reject": "Reject",
       "errors": {
-        "general": "Something went wrong. Please try again."
+        "general": "Something went wrong. Please try again.",
+        "listFailed": "Failed to load church requests."
       },
       "rejectDialog": {
         "title": "Reject church request",
@@ -1009,6 +1035,277 @@
       "title": "Access required",
       "description": "You do not have permission to view this page. Contact your ministry admin if you believe this is a mistake.",
       "backToDashboard": "Back to dashboard"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Review and act on your latest alerts.",
+    "filterByType": "Filter by type",
+    "markAllRead": "Mark all read",
+    "markRead": "Mark read",
+    "noNotifications": "No notifications",
+    "noNotificationsDescription": "Your inbox is clear for the selected filter.",
+    "pageInfo": "Page {page} of {totalPages}",
+    "prev": "Previous",
+    "next": "Next",
+    "loadError": "Failed to load notifications.",
+    "markReadError": "Failed to mark notification as read.",
+    "markAllReadError": "Failed to mark all notifications as read.",
+    "unreadCount": "{count} unread notification(s)"
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Church-scoped analytics across attendance and followups.",
+    "exportCsv": "Export CSV",
+    "filters": "Filters",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "service": "Service",
+    "allServices": "All services",
+    "stage": "Stage",
+    "allStages": "All stages",
+    "servant": "Servant",
+    "allServants": "All servants",
+    "attendanceRate": "Attendance Rate",
+    "servantsTracked": "Servants Tracked",
+    "beneficiariesTracked": "Beneficiaries Tracked",
+    "followupCompletion": "Followup Completion",
+    "attendanceSummary": "Attendance Summary",
+    "present": "Present",
+    "absent": "Absent",
+    "excused": "Excused",
+    "totalRecords": "Total records",
+    "followupCompletionTitle": "Followup Completion",
+    "completed": "Completed",
+    "open": "Open",
+    "overdue": "Overdue",
+    "stageComparison": "Stage Comparison",
+    "loadError": "Reports failed to load.",
+    "exportError": "Failed to export reports."
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "message": "The requested page could not be rendered. You can retry now or return to the dashboard.",
+    "tryAgain": "Try again",
+    "goToDashboard": "Go to dashboard"
+  },
+  "audit": {
+    "title": "Audit Log",
+    "description": "Church-scoped trail of user actions and system events.",
+    "export": "Export CSV",
+    "exporting": "Exporting…",
+    "exportFailed": "Failed to export the audit log.",
+    "loadFailed": "Failed to load the audit log.",
+    "searchPlaceholder": "Search by actor name or entity ID",
+    "filters": {
+      "from": "From date",
+      "to": "To date",
+      "allActions": "All actions",
+      "allEntityTypes": "All entity types",
+      "allActors": "All users",
+      "clearFilters": "Clear filters"
+    },
+    "table": {
+      "time": "Time",
+      "action": "Action",
+      "entityType": "Entity",
+      "entityId": "Entity ID",
+      "actor": "User",
+      "details": "Details",
+      "viewDetails": "View details"
+    },
+    "actions": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "read": "Read",
+      "login": "Login",
+      "logout": "Logout",
+      "import": "Import",
+      "export": "Export",
+      "cron": "Scheduled"
+    },
+    "entityTypes": {
+      "session": "Session",
+      "user": "User",
+      "servant": "Servant",
+      "child": "Beneficiary",
+      "children": "Beneficiary",
+      "beneficiaries": "Beneficiary",
+      "attendance": "Attendance",
+      "attendance_sessions": "Attendance Session",
+      "attendance_records": "Attendance Record",
+      "followups": "Follow-up",
+      "notification": "Notification",
+      "spiritual_journal_entry": "Journal Entry",
+      "profile": "Profile",
+      "password": "Password",
+      "church": "Church",
+      "ministry": "Ministry",
+      "service": "Service",
+      "stage": "Stage",
+      "church_request": "Church Request",
+      "notification_automation": "Notification Automation",
+      "user_roles": "Role Assignment",
+      "beneficiary_assignments": "Stage Assignment"
+    },
+    "detail": {
+      "title": "Audit Entry",
+      "time": "Time",
+      "action": "Action",
+      "entityType": "Entity type",
+      "entityId": "Entity ID",
+      "actor": "User",
+      "oldValues": "Previous values",
+      "newValues": "New values",
+      "metadata": "Metadata",
+      "noChanges": "No data changes recorded for this entry.",
+      "close": "Close"
+    },
+    "empty": {
+      "title": "No audit entries",
+      "description": "No events match the current filters. Try widening the date range or clearing the filters."
+    },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    }
+  },
+  "services": {
+    "title": "Services",
+    "description": "Manage the services (ministries) of your church.",
+    "addService": "Add Service",
+    "searchPlaceholder": "Search by service name",
+    "filters": {
+      "allStatuses": "All statuses",
+      "clearFilters": "Clear filters"
+    },
+    "table": {
+      "name": "Name",
+      "stages": "Stages",
+      "stageCount": "{count}",
+      "status": "Status",
+      "sortOrder": "Sort order",
+      "actions": "Actions",
+      "edit": "Edit service",
+      "archive": "Archive service",
+      "restore": "Restore service"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "form": {
+      "createTitle": "Add Service",
+      "editTitle": "Edit Service",
+      "description": "Fill in the service details below.",
+      "nameAr": "Arabic name",
+      "nameEn": "English name",
+      "descriptionAr": "Description (Arabic)",
+      "descriptionEn": "Description (English)",
+      "sortOrder": "Sort order",
+      "isActive": "Active service",
+      "save": "Save",
+      "cancel": "Cancel",
+      "processing": "Processing…"
+    },
+    "archive": {
+      "title": "Archive Service",
+      "description": "Are you sure you want to archive {name}? It will be hidden from active lists but can be restored later.",
+      "confirm": "Archive",
+      "cancel": "Cancel",
+      "processing": "Archiving…"
+    },
+    "empty": {
+      "title": "No services found",
+      "description": "No services match the current filters. Try a different search or clear the filters."
+    },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "errors": {
+      "listFailed": "Failed to load services.",
+      "createFailed": "Failed to create the service.",
+      "updateFailed": "Failed to update the service.",
+      "archiveFailed": "Failed to archive the service.",
+      "restoreFailed": "Failed to restore the service.",
+      "createDenied": "You do not have permission to create services.",
+      "updateDenied": "You do not have permission to update services.",
+      "archiveDenied": "You do not have permission to archive services.",
+      "restoreDenied": "You do not have permission to restore services.",
+      "notFound": "Service not found."
+    }
+  },
+  "classes": {
+    "title": "Classes",
+    "description": "Manage the classes of your church.",
+    "addClass": "Add Class",
+    "searchPlaceholder": "Search by class name",
+    "filters": {
+      "allStatuses": "All statuses",
+      "clearFilters": "Clear filters"
+    },
+    "table": {
+      "name": "Name",
+      "service": "Service",
+      "stage": "Stage",
+      "status": "Status",
+      "sortOrder": "Sort order",
+      "actions": "Actions",
+      "edit": "Edit class",
+      "archive": "Archive class",
+      "restore": "Restore class"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "form": {
+      "createTitle": "Add Class",
+      "editTitle": "Edit Class",
+      "description": "Fill in the class details below.",
+      "stage": "Stage",
+      "selectStage": "Select a stage",
+      "noStages": "No stages available",
+      "nameAr": "Arabic name",
+      "nameEn": "English name",
+      "sortOrder": "Sort order",
+      "isActive": "Active class",
+      "save": "Save",
+      "cancel": "Cancel",
+      "processing": "Processing…"
+    },
+    "archive": {
+      "title": "Archive Class",
+      "description": "Are you sure you want to archive {name}? It will be hidden from active lists but can be restored later.",
+      "confirm": "Archive",
+      "cancel": "Cancel",
+      "processing": "Archiving…"
+    },
+    "empty": {
+      "title": "No classes found",
+      "description": "No classes match the current filters. Try a different search or clear the filters."
+    },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total}",
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "errors": {
+      "listFailed": "Failed to load classes.",
+      "stageOptionsFailed": "Failed to load stages.",
+      "createFailed": "Failed to create the class.",
+      "updateFailed": "Failed to update the class.",
+      "archiveFailed": "Failed to archive the class.",
+      "restoreFailed": "Failed to restore the class.",
+      "createDenied": "You do not have permission to create classes.",
+      "updateDenied": "You do not have permission to update classes.",
+      "archiveDenied": "You do not have permission to delete classes.",
+      "restoreDenied": "You do not have permission to restore classes.",
+      "notFound": "Class not found."
     }
   }
 }

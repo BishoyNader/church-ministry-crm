@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
 import { EmptyState } from "@/components/feedback/empty-state";
+import { ErrorState } from "@/components/feedback/error-state";
 import { usePendingRegistrations } from "@/features/users";
 import type { PendingRegistration } from "@/features/users/services/approval.service";
 
@@ -16,9 +17,20 @@ type UserApprovalsTabProps = {
 
 export function UserApprovalsTab({ onReview }: UserApprovalsTabProps) {
   const t = useTranslations("approvals.users");
-  const { data, isLoading } = usePendingRegistrations();
+  const { data, isLoading, error } = usePendingRegistrations();
 
   const registrations = data?.data ?? [];
+
+  if (error) {
+    return (
+      <SectionCard className="p-6">
+        <ErrorState
+          title={t("errors.listFailed")}
+          message={error.message}
+        />
+      </SectionCard>
+    );
+  }
 
   if (isLoading) {
     return (

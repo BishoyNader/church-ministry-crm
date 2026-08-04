@@ -16,7 +16,13 @@ export const APPROVAL_QUERY_KEYS = {
 export function usePendingRegistrations() {
   return useQuery({
     queryKey: APPROVAL_QUERY_KEYS.pending,
-    queryFn: () => listPendingRegistrationsAction(),
+    queryFn: async () => {
+      const result = await listPendingRegistrationsAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load pending registrations.");
+      }
+      return result;
+    },
     staleTime: 15_000,
   });
 }

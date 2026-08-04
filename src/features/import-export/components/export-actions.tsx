@@ -56,8 +56,9 @@ export function ExportActions() {
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div>
-            <label className="mb-1.5 block text-sm font-medium">{t("export.entity")}</label>
+            <label htmlFor="export-entity" className="mb-1.5 block text-sm font-medium">{t("export.entity")}</label>
             <Select
+              id="export-entity"
               value={entity}
               onValueChange={(value) => setEntity(value as ExportEntityType)}
             >
@@ -74,8 +75,9 @@ export function ExportActions() {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">{t("export.format")}</label>
+            <label htmlFor="export-format" className="mb-1.5 block text-sm font-medium">{t("export.format")}</label>
             <Select
+              id="export-format"
               value={format}
               onValueChange={(value) => setFormat(value as ExportFileFormat)}
             >

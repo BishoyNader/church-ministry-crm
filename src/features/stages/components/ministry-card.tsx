@@ -41,6 +41,8 @@ export function MinistryCard({
             type="button"
             onClick={() => setExpanded((prev) => !prev)}
             className="shrink-0 text-muted-foreground transition hover:text-foreground"
+            aria-label={t("toggleStages")}
+            aria-expanded={expanded}
           >
             {expanded ? (
               <ChevronDown className="size-4" />

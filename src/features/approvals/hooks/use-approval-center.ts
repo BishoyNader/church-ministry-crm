@@ -12,7 +12,13 @@ export const APPROVAL_CENTER_QUERY_KEYS = {
 export function useApprovalCenterStats() {
   return useQuery({
     queryKey: APPROVAL_CENTER_QUERY_KEYS.stats,
-    queryFn: () => getApprovalCenterStatsAction(),
+    queryFn: async () => {
+      const result = await getApprovalCenterStatsAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load approval stats.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }

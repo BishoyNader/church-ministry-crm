@@ -11,7 +11,13 @@ export const DASHBOARD_QUERY_KEYS = {
 export function useDashboardData() {
   return useQuery({
     queryKey: DASHBOARD_QUERY_KEYS.data(),
-    queryFn: () => getDashboardDataAction(),
+    queryFn: async () => {
+      const result = await getDashboardDataAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load the dashboard.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }

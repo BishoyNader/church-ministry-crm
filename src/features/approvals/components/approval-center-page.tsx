@@ -12,6 +12,7 @@ import { UserApprovalsTab } from "./user-approvals-tab";
 import { ApprovalDetailDrawer } from "./approval-detail-drawer";
 import { useApprovalCenterStats } from "../hooks/use-approval-center";
 import type { PendingRegistration } from "@/features/users/services/approval.service";
+import { ErrorState } from "@/components/feedback/error-state";
 
 export function ApprovalCenterPage() {
   const t = useTranslations("approvals");
@@ -23,6 +24,12 @@ export function ApprovalCenterPage() {
   );
 
   const [reviewTarget, setReviewTarget] = useState<PendingRegistration | null>(null);
+
+  if (statsQuery.error) {
+    return (
+      <ErrorState title={t("errors.statsFailed")} message={statsQuery.error.message} />
+    );
+  }
 
   return (
     <section className="space-y-6">

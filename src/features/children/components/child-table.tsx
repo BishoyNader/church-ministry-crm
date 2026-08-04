@@ -31,13 +31,14 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
     <div className="rounded-xl border bg-card shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
+          <caption className="sr-only">{t("table.caption")}</caption>
           <thead>
             <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              <th className="px-4 py-3">{t("table.name")}</th>
-              <th className="px-4 py-3">{t("table.stage")}</th>
-              <th className="px-4 py-3">{t("table.status")}</th>
-              <th className="px-4 py-3">{t("table.mobile")}</th>
-              <th className="px-4 py-3 text-end">{t("table.actions")}</th>
+              <th scope="col" className="px-4 py-3">{t("table.name")}</th>
+              <th scope="col" className="px-4 py-3">{t("table.stage")}</th>
+              <th scope="col" className="px-4 py-3">{t("table.status")}</th>
+              <th scope="col" className="px-4 py-3">{t("table.mobile")}</th>
+              <th scope="col" className="px-4 py-3 text-end">{t("table.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -83,7 +84,7 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
                           variant="ghost"
                           size="icon-sm"
                           onClick={() => router.push(`/children/${child.id}`)}
-                          aria-label={t("table.actions")}
+                          aria-label={t("table.view")}
                         >
                           <Eye className="size-4" />
                         </Button>
@@ -92,7 +93,7 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => onEdit(child)}
-                            aria-label={t("table.actions")}
+                            aria-label={t("table.edit")}
                           >
                             <Pencil className="size-4" />
                           </Button>
@@ -102,7 +103,7 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => onDelete(child)}
-                            aria-label={t("table.actions")}
+                            aria-label={t("table.delete")}
                           >
                             <Trash2 className="size-4" />
                           </Button>

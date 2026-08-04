@@ -72,12 +72,12 @@ export function ChildDetailPage({ childId }: ChildDetailPageProps) {
 
   return (
     <section className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => router.push("/children")}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => router.push("/children")} aria-label={t("backToList")}>
             <ArrowLeft className="size-4" />
           </Button>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="truncate text-2xl font-semibold tracking-tight">
             {childName}
           </h1>
           <Badge variant={STATUS_VARIANT[child.status] ?? "secondary"}>

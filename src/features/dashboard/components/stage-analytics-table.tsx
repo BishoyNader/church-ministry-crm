@@ -24,13 +24,14 @@ export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProp
     <div className="rounded-xl border bg-card shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
+          <caption className="sr-only">{t("stageAnalytics.caption")}</caption>
           <thead>
             <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              <th className="px-4 py-3">{t("stageAnalytics.stage")}</th>
-              <th className="px-4 py-3">{t("stageAnalytics.children")}</th>
-              <th className="px-4 py-3">{t("stageAnalytics.followups")}</th>
-              <th className="px-4 py-3">{t("stageAnalytics.attendance")}</th>
-              <th className="px-4 py-3">{t("stageAnalytics.attendanceRate")}</th>
+              <th scope="col" className="px-4 py-3">{t("stageAnalytics.stage")}</th>
+              <th scope="col" className="px-4 py-3">{t("stageAnalytics.children")}</th>
+              <th scope="col" className="px-4 py-3">{t("stageAnalytics.followups")}</th>
+              <th scope="col" className="px-4 py-3">{t("stageAnalytics.attendance")}</th>
+              <th scope="col" className="px-4 py-3">{t("stageAnalytics.attendanceRate")}</th>
             </tr>
           </thead>
           <tbody>

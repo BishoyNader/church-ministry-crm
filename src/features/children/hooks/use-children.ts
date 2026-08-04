@@ -45,7 +45,13 @@ export function useChildList(
 ) {
   return useQuery({
     queryKey: CHILD_QUERY_KEYS.list(filters, pagination),
-    queryFn: () => listChildrenAction(filters, pagination),
+    queryFn: async () => {
+      const result = await listChildrenAction(filters, pagination);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load children.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }
@@ -53,7 +59,13 @@ export function useChildList(
 export function useChildDetail(childId: string | null) {
   return useQuery({
     queryKey: CHILD_QUERY_KEYS.detail(childId ?? ""),
-    queryFn: () => getChildByIdAction(childId!),
+    queryFn: async () => {
+      const result = await getChildByIdAction(childId!);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load child.");
+      }
+      return result;
+    },
     enabled: !!childId,
     staleTime: 30_000,
   });
@@ -127,7 +139,13 @@ export function useDeactivateChild() {
 export function useChildStages(serviceId?: string) {
   return useQuery({
     queryKey: CHILD_QUERY_KEYS.stages(serviceId),
-    queryFn: () => listStagesAction(serviceId),
+    queryFn: async () => {
+      const result = await listStagesAction(serviceId);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load stages.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }
@@ -135,7 +153,13 @@ export function useChildStages(serviceId?: string) {
 export function useChildServices() {
   return useQuery({
     queryKey: CHILD_QUERY_KEYS.services(),
-    queryFn: () => listServicesAction(),
+    queryFn: async () => {
+      const result = await listServicesAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load services.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }

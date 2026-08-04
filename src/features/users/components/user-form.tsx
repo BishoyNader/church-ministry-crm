@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormField } from "@/components/ui/form-field";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
@@ -297,25 +298,3 @@ export function UserForm({ open, onOpenChange, userId }: UserFormProps) {
   );
 }
 
-function FormField({
-  label,
-  error,
-  required,
-  children,
-}: {
-  label: string;
-  error?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1">
-      <Label>
-        {label}
-        {required ? <span className="text-destructive"> *</span> : null}
-      </Label>
-      {children}
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
-    </div>
-  );
-}

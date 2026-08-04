@@ -31,8 +31,18 @@ export function useUserList(params: {
 }) {
   return useQuery({
     queryKey: USER_QUERY_KEYS.list(params),
-    queryFn: () =>
-      listUsersAction(params.page, params.pageSize, params.search, params.roleFilter),
+    queryFn: async () => {
+      const result = await listUsersAction(
+        params.page,
+        params.pageSize,
+        params.search,
+        params.roleFilter,
+      );
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load users.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }
@@ -40,7 +50,13 @@ export function useUserList(params: {
 export function useUserDetail(userId: string | null) {
   return useQuery({
     queryKey: USER_QUERY_KEYS.detail(userId ?? ""),
-    queryFn: () => getUserAction(userId!),
+    queryFn: async () => {
+      const result = await getUserAction(userId!);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load user.");
+      }
+      return result;
+    },
     enabled: !!userId,
     staleTime: 30_000,
   });
@@ -116,7 +132,13 @@ export function useAssignStages() {
 export function useRoles(churchId: string | null) {
   return useQuery({
     queryKey: USER_QUERY_KEYS.roles(churchId ?? ""),
-    queryFn: () => getRolesAction(churchId!),
+    queryFn: async () => {
+      const result = await getRolesAction(churchId!);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load roles.");
+      }
+      return result;
+    },
     enabled: !!churchId,
     staleTime: 60_000,
   });
@@ -125,7 +147,13 @@ export function useRoles(churchId: string | null) {
 export function useStages(churchId: string | null) {
   return useQuery({
     queryKey: USER_QUERY_KEYS.stages(churchId ?? ""),
-    queryFn: () => getStagesAction(churchId!),
+    queryFn: async () => {
+      const result = await getStagesAction(churchId!);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load stages.");
+      }
+      return result;
+    },
     enabled: !!churchId,
     staleTime: 60_000,
   });

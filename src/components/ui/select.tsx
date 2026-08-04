@@ -1,10 +1,50 @@
 import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { Check, ChevronDown } from "lucide-react"
+import * as React from "react"
+import { Children, cloneElement, isValidElement } from "react"
 
 import { cn } from "@/lib/utils"
 
-function Select({ ...props }: SelectPrimitive.Root.Props<unknown>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+function Select(props: SelectPrimitive.Root.Props<unknown>) {
+  const {
+    id,
+    "aria-invalid": ariaInvalid,
+    "aria-describedby": ariaDescribedby,
+    children,
+    ...rest
+  } = props as SelectPrimitive.Root.Props<unknown> & {
+    id?: string;
+    "aria-invalid"?: boolean;
+    "aria-describedby"?: string;
+  };
+
+  const childrenWithLabel = Children.map(children, (child) => {
+    if (isValidElement(child) && child.type === SelectTrigger) {
+      return cloneElement(
+        child as React.ReactElement<
+          SelectPrimitive.Trigger.Props & {
+            id?: string;
+            "aria-invalid"?: boolean;
+            "aria-describedby"?: string;
+          }
+        >,
+        {
+          id,
+          "aria-invalid": ariaInvalid,
+          "aria-describedby": ariaDescribedby,
+        },
+      );
+    }
+    return child;
+  });
+  return (
+    <SelectPrimitive.Root
+      data-slot="select"
+      {...(rest as SelectPrimitive.Root.Props<unknown>)}
+    >
+      {childrenWithLabel}
+    </SelectPrimitive.Root>
+  );
 }
 
 function SelectTrigger({
