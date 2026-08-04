@@ -29,6 +29,8 @@
     "children": "المخدومون",
     "attendance": "الحضور",
     "followups": "المتابعات",
+    "services": "الخدمات",
+    "classes": "الفصول",
     "stages": "المراحل",
     "users": "المستخدمين",
     "servants": "الخدام",
@@ -791,7 +793,8 @@
     "description": "راجع طلبات الخدام والموظفين الجدد وطلبات إنشاء الكنائس.",
     "tabs": {
       "servants": "الخدام",
-      "users": "المستخدمين",
+    "users": "المستخدمين",
+    "audit": "سجل المراجعة",
       "churches": "طلبات الكنائس"
     },
     "stats": {
@@ -1009,6 +1012,225 @@
       "title": "الوصول مطلوب",
       "description": "ليست لديك صلاحية لعرض هذه الصفحة. تواصل مع مدير الخدمة إذا كنت تعتقد أن هذا خطأ.",
       "backToDashboard": "العودة إلى لوحة التحكم"
+    }
+  },
+  "audit": {
+    "title": "سجل المراجعة",
+    "description": "سجل كامل لتتبع التعديلات والأحداث ضمن نطاق الكنيسة.",
+    "export": "تصدير CSV",
+    "exporting": "جارٍ التصدير…",
+    "exportFailed": "فشل تصدير سجل المراجعة.",
+    "loadFailed": "تعذر تحميل سجل المراجعة.",
+    "searchPlaceholder": "ابحث باسم المستخدم أو معرّف السجل",
+    "filters": {
+      "from": "من تاريخ",
+      "to": "إلى تاريخ",
+      "allActions": "كل الأحداث",
+      "allEntityTypes": "كل أنواع السجلات",
+      "allActors": "كل المستخدمين",
+      "clearFilters": "مسح الفلاتر"
+    },
+    "table": {
+      "time": "الوقت",
+      "action": "الحدث",
+      "entityType": "السجل",
+      "entityId": "معرّف السجل",
+      "actor": "المستخدم",
+      "details": "التفاصيل",
+      "viewDetails": "عرض التفاصيل"
+    },
+    "actions": {
+      "create": "إنشاء",
+      "update": "تعديل",
+      "delete": "حذف",
+      "read": "قراءة",
+      "login": "تسجيل دخول",
+      "logout": "تسجيل خروج",
+      "import": "استيراد",
+      "export": "تصدير",
+      "cron": "مجدول"
+    },
+    "entityTypes": {
+      "session": "جلسة",
+      "user": "مستخدم",
+      "servant": "خادم",
+      "child": "منتفع",
+      "children": "منتفع",
+      "beneficiaries": "منتفع",
+      "attendance": "حضور",
+      "attendance_sessions": "جلسة حضور",
+      "attendance_records": "سجل حضور",
+      "followups": "متابعة",
+      "notification": "إشعار",
+      "spiritual_journal_entry": "قيد مذكرات",
+      "profile": "ملف شخصي",
+      "password": "كلمة المرور",
+      "church": "كنيسة",
+      "ministry": "خدمة",
+      "service": "الخدمة",
+      "stage": "مرحلة",
+      "church_request": "طلب كنيسة",
+      "notification_automation": "أتمتة الإشعارات",
+      "user_roles": "تعيين دور",
+      "beneficiary_assignments": "تعيين مرحلة"
+    },
+    "detail": {
+      "title": "سجل مراجعة",
+      "time": "الوقت",
+      "action": "الحدث",
+      "entityType": "نوع السجل",
+      "entityId": "معرّف السجل",
+      "actor": "المستخدم",
+      "oldValues": "القيم السابقة",
+      "newValues": "القيم الجديدة",
+      "metadata": "بيانات إضافية",
+      "noChanges": "لا توجد تغييرات بيانات مسجلة لهذا الإدخال.",
+      "close": "إغلاق"
+    },
+    "empty": {
+      "title": "لا توجد سجلات مراجعة",
+      "description": "لا توجد أحداث تطابق الفلاتر الحالية. جرّب توسيع نطاق التاريخ أو مسح الفلاتر."
+    },
+    "pagination": {
+      "showing": "عرض {from}–{to} من {total}",
+      "prev": "السابق",
+      "next": "التالي"
+    }
+  },
+  "services": {
+    "title": "الخدمات",
+    "description": "إدارة الخدمات في الكنيسة.",
+    "addService": "إضافة خدمة",
+    "searchPlaceholder": "ابحث باسم الخدمة",
+    "filters": {
+      "allStatuses": "كل الحالات",
+      "clearFilters": "مسح الفلاتر"
+    },
+    "table": {
+      "name": "الاسم",
+      "stages": "المراحل",
+      "stageCount": "{count}",
+      "status": "الحالة",
+      "sortOrder": "ترتيب العرض",
+      "actions": "إجراءات",
+      "edit": "تعديل الخدمة",
+      "archive": "أرشفة الخدمة",
+      "restore": "استعادة الخدمة"
+    },
+    "status": {
+      "active": "نشطة",
+      "inactive": "موقوفة"
+    },
+    "form": {
+      "createTitle": "إضافة خدمة",
+      "editTitle": "تعديل خدمة",
+      "description": "أدخل تفاصيل الخدمة في الأسفل.",
+      "nameAr": "الاسم بالعربية",
+      "nameEn": "الاسم بالإنجليزية",
+      "descriptionAr": "الوصف (عربي)",
+      "descriptionEn": "الوصف (إنجليزي)",
+      "sortOrder": "ترتيب العرض",
+      "isActive": "خدمة نشطة",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "processing": "جاري المعالجة…"
+    },
+    "archive": {
+      "title": "أرشفة الخدمة",
+      "description": "هل أنت متأكد من أرشفة {name}؟ ستُخفى من القوائم النشطة ويمكن استعادتها لاحقاً.",
+      "confirm": "أرشفة",
+      "cancel": "إلغاء",
+      "processing": "جاري الأرشفة…"
+    },
+    "empty": {
+      "title": "لا توجد خدمات",
+      "description": "لا توجد خدمات تطابق الفلاتر الحالية. جرّب بحثاً مختلفاً أو امسح الفلاتر."
+    },
+    "pagination": {
+      "showing": "عرض {from}–{to} من {total}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "errors": {
+      "listFailed": "تعذّر تحميل الخدمات.",
+      "createFailed": "تعذّر إنشاء الخدمة.",
+      "updateFailed": "تعذّر تحديث الخدمة.",
+      "archiveFailed": "تعذّرت أرشفة الخدمة.",
+      "restoreFailed": "تعذّرت استعادة الخدمة.",
+      "createDenied": "ليست لديك صلاحية إنشاء الخدمات.",
+      "updateDenied": "ليست لديك صلاحية تعديل الخدمات.",
+      "archiveDenied": "ليست لديك صلاحية أرشفة الخدمات.",
+      "restoreDenied": "ليست لديك صلاحية استعادة الخدمات.",
+      "notFound": "الخدمة غير موجودة."
+    }
+  },
+  "classes": {
+    "title": "الفصول",
+    "description": "إدارة فصول الكنيسة.",
+    "addClass": "إضافة فصل",
+    "searchPlaceholder": "ابحث باسم الفصل",
+    "filters": {
+      "allStatuses": "كل الحالات",
+      "clearFilters": "مسح الفلاتر"
+    },
+    "table": {
+      "name": "الاسم",
+      "service": "الخدمة",
+      "stage": "المرحلة",
+      "status": "الحالة",
+      "sortOrder": "ترتيب العرض",
+      "actions": "إجراءات",
+      "edit": "تعديل الفصل",
+      "archive": "أرشفة الفصل",
+      "restore": "استعادة الفصل"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "موقوف"
+    },
+    "form": {
+      "createTitle": "إضافة فصل",
+      "editTitle": "تعديل فصل",
+      "description": "أدخل تفاصيل الفصل في الأسفل.",
+      "stage": "المرحلة",
+      "selectStage": "اختر مرحلة",
+      "noStages": "لا توجد مراحل متاحة",
+      "nameAr": "الاسم بالعربية",
+      "nameEn": "الاسم بالإنجليزية",
+      "sortOrder": "ترتيب العرض",
+      "isActive": "فصل نشط",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "processing": "جاري المعالجة…"
+    },
+    "archive": {
+      "title": "أرشفة الفصل",
+      "description": "هل أنت متأكد من أرشفة {name}؟ سيُخفى من القوائم النشطة ويمكن استعادته لاحقاً.",
+      "confirm": "أرشفة",
+      "cancel": "إلغاء",
+      "processing": "جاري الأرشفة…"
+    },
+    "empty": {
+      "title": "لا توجد فصول",
+      "description": "لا توجد فصول تطابق الفلاتر الحالية. جرّب بحثاً مختلفاً أو امسح الفلاتر."
+    },
+    "pagination": {
+      "showing": "عرض {from}–{to} من {total}",
+      "prev": "السابق",
+      "next": "التالي"
+    },
+    "errors": {
+      "listFailed": "تعذّر تحميل الفصول.",
+      "stageOptionsFailed": "تعذّر تحميل المراحل.",
+      "createFailed": "تعذّر إنشاء الفصل.",
+      "updateFailed": "تعذّر تحديث الفصل.",
+      "archiveFailed": "تعذّرت أرشفة الفصل.",
+      "restoreFailed": "تعذّرت استعادة الفصل.",
+      "createDenied": "ليست لديك صلاحية إنشاء الفصول.",
+      "updateDenied": "ليست لديك صلاحية تعديل الفصول.",
+      "archiveDenied": "ليست لديك صلاحية حذف الفصول.",
+      "restoreDenied": "ليست لديك صلاحية استعادة الفصول.",
+      "notFound": "الفصل غير موجود."
     }
   }
 }
