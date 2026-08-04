@@ -23,7 +23,13 @@ export const SETTINGS_QUERY_KEYS = {
 export function useProfileSettings() {
   return useQuery({
     queryKey: SETTINGS_QUERY_KEYS.profile,
-    queryFn: () => getProfileSettingsAction(),
+    queryFn: async () => {
+      const result = await getProfileSettingsAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load profile settings.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }
@@ -39,7 +45,13 @@ export function useUpdateProfile() {
 export function useChurchSettings(enabled = true) {
   return useQuery({
     queryKey: SETTINGS_QUERY_KEYS.church,
-    queryFn: () => getChurchSettingsAction(),
+    queryFn: async () => {
+      const result = await getChurchSettingsAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load church settings.");
+      }
+      return result;
+    },
     enabled,
     staleTime: 30_000,
   });

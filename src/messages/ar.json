@@ -312,6 +312,10 @@
   "users": {
     "title": "إدارة المستخدمين",
     "description": "إدارة أعضاء الكنيسة والأدوار ومهام المراحل.",
+    "errors": {
+      "listFailed": "تعذّر تحميل المستخدمين.",
+      "loadFailed": "تعذّر تحميل المستخدم."
+    },
     "createUser": "إضافة مستخدم",
     "roleFilter": {
       "all": "جميع الأدوار",
@@ -415,6 +419,11 @@
   "stages": {
     "title": "إدارة المراحل",
     "description": "إدارة المجموعات والمراحل والتعيينات.",
+    "errors": {
+      "listFailed": "تعذّر تحميل المراحل.",
+      "loadFailed": "تعذّر تحميل المجموعة.",
+      "stageListFailed": "تعذّر تحميل مراحل المجموعة."
+    },
     "addMinistry": "إضافة مجموعة",
     "emptyState": {
       "title": "لم يتم العثور على مجموعات",
@@ -497,6 +506,13 @@
   "children": {
     "title": "إدارة المخدومين",
     "description": "تسجيل وتتبع وإدارة المخدومين عبر الخدمات والمراحل.",
+    "errors": {
+      "listFailed": "تعذّر تحميل المخدومين.",
+      "loadFailed": "تعذّر تحميل المخدوم.",
+      "servicesFailed": "تعذّر تحميل الخدمات.",
+      "attendanceFailed": "تعذّر تحميل سجلات الحضور.",
+      "followupsFailed": "تعذّر تحميل المتابعات."
+    },
     "addChild": "إضافة مخدوم",
     "searchPlaceholder": "بحث بالاسم أو الهاتف أو الجوال…",
     "search": "بحث",
@@ -791,6 +807,9 @@
   "approvals": {
     "title": "مركز الموافقات",
     "description": "راجع طلبات الخدام والموظفين الجدد وطلبات إنشاء الكنائس.",
+    "errors": {
+      "statsFailed": "تعذّر تحميل إحصائيات الموافقات."
+    },
     "tabs": {
       "servants": "الخدام",
     "users": "المستخدمين",
@@ -844,6 +863,9 @@
     "users": {
       "title": "موافقات المستخدمين",
       "description": "راجع طلبات المستخدمين المعلقة في كنيستك.",
+      "errors": {
+        "listFailed": "تعذّر تحميل طلبات موافقات المستخدمين المعلقة."
+      },
       "review": "مراجعة",
       "empty": {
         "title": "لا توجد طلبات مستخدمين معلقة",
@@ -900,7 +922,8 @@
       "approve": "اعتماد",
       "reject": "رفض",
       "errors": {
-        "general": "حدث خطأ. الرجاء المحاولة مرة أخرى."
+        "general": "حدث خطأ. الرجاء المحاولة مرة أخرى.",
+        "listFailed": "تعذّر تحميل طلبات الكنائس."
       },
       "rejectDialog": {
         "title": "رفض طلب الكنيسة",
@@ -1013,6 +1036,58 @@
       "description": "ليست لديك صلاحية لعرض هذه الصفحة. تواصل مع مدير الخدمة إذا كنت تعتقد أن هذا خطأ.",
       "backToDashboard": "العودة إلى لوحة التحكم"
     }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "description": "راجع واتخذ إجراءً بشأن أحدث تنبيهاتك.",
+    "filterByType": "تصفية حسب النوع",
+    "markAllRead": "تعليم الكل كمقروء",
+    "markRead": "تعليم كمقروء",
+    "noNotifications": "لا توجد إشعارات",
+    "noNotificationsDescription": "صندوق الوارد الخاص بك فارغ للمرشح المحدد.",
+    "pageInfo": "صفحة {page} من {totalPages}",
+    "prev": "السابق",
+    "next": "التالي",
+    "loadError": "تعذّر تحميل الإشعارات.",
+    "markReadError": "تعذّر تعليم الإشعار كمقروء.",
+    "markAllReadError": "تعذّر تعليم جميع الإشعارات كمقروءة.",
+    "unreadCount": "{count} إشعار غير مقروء"
+  },
+  "reports": {
+    "title": "التقارير",
+    "description": "تحليلات على مستوى الكنيسة للحضور والمتابعات.",
+    "exportCsv": "تصدير CSV",
+    "filters": "الفلاتر",
+    "fromDate": "من تاريخ",
+    "toDate": "إلى تاريخ",
+    "service": "الخدمة",
+    "allServices": "كل الخدمات",
+    "stage": "المرحلة",
+    "allStages": "كل المراحل",
+    "servant": "الخادم",
+    "allServants": "كل الخدام",
+    "attendanceRate": "نسبة الحضور",
+    "servantsTracked": "الخدام المتتبعون",
+    "beneficiariesTracked": "المخدومون المتتبعون",
+    "followupCompletion": "إتمام المتابعات",
+    "attendanceSummary": "ملخص الحضور",
+    "present": "حاضر",
+    "absent": "غائب",
+    "excused": "بعذر",
+    "totalRecords": "إجمالي السجلات",
+    "followupCompletionTitle": "إتمام المتابعات",
+    "completed": "مكتمل",
+    "open": "مفتوح",
+    "overdue": "متأخر",
+    "stageComparison": "مقارنة المراحل",
+    "loadError": "تعذّر تحميل التقارير.",
+    "exportError": "تعذّر تصدير التقارير."
+  },
+  "errorBoundary": {
+    "title": "حدث خطأ ما",
+    "message": "تعذّر عرض الصفحة المطلوبة. يمكنك إعادة المحاولة الآن أو العودة إلى لوحة التحكم.",
+    "tryAgain": "إعادة المحاولة",
+    "goToDashboard": "العودة إلى لوحة التحكم"
   },
   "audit": {
     "title": "سجل المراجعة",

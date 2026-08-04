@@ -5,7 +5,7 @@ import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarCha
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -195,6 +195,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                     </Button>
                   </SheetTrigger>
                   <SheetContent side={isRtl ? "right" : "left"} showCloseButton={false} id="mobile-navigation">
+                    <SheetTitle className="sr-only">{t("nav.mainNavigation")}</SheetTitle>
                     <Link
                       href="/dashboard"
                       className="flex items-center gap-3 px-4 pt-6"
@@ -225,7 +226,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       <Bell className="size-4" />
                     </Button>
                     {(notificationSummary?.unreadCount ?? 0) > 0 ? (
-                      <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                      <span
+                        className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground"
+                        aria-label={t("nav.notifications") + ": " + (notificationSummary?.unreadCount ?? 0)}
+                      >
                         {notificationSummary?.unreadCount ?? 0}
                       </span>
                     ) : null}

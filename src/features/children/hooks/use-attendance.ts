@@ -33,7 +33,13 @@ export function useAttendanceList(
 ) {
   return useQuery({
     queryKey: ATTENDANCE_QUERY_KEYS.list(filters),
-    queryFn: () => listAttendanceAction(filters),
+    queryFn: async () => {
+      const result = await listAttendanceAction(filters);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load attendance records.");
+      }
+      return result;
+    },
     staleTime: 30_000,
     enabled: enabled ?? true,
   });

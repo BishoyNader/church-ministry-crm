@@ -21,7 +21,13 @@ export const SPIRITUAL_JOURNAL_QUERY_KEYS = {
 export function useSpiritualJournalList(filters?: SpiritualJournalListParams) {
   return useQuery({
     queryKey: SPIRITUAL_JOURNAL_QUERY_KEYS.list(filters),
-    queryFn: () => listSpiritualJournalEntriesAction(filters),
+    queryFn: async () => {
+      const result = await listSpiritualJournalEntriesAction(filters);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load journal entries.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }

@@ -20,6 +20,7 @@ import { ChildFormDialog } from "./child-form-dialog";
 import { ChildDeleteDialog } from "./child-delete-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
+import { ErrorState } from "@/components/feedback/error-state";
 import type { ChildListItem } from "../types/child.types";
 
 const PAGE_SIZE = 20;
@@ -55,7 +56,7 @@ export function ChildListPage() {
   const stagesQuery = useChildStages(serviceId);
   const stages = stagesQuery.data?.data ?? [];
 
-  const { data, isLoading } = useChildList(
+  const { data, isLoading, error } = useChildList(
     {
       search: search || undefined,
       service_id: serviceFilter !== "all" ? serviceFilter : undefined,
@@ -101,6 +102,12 @@ export function ChildListPage() {
     search || serviceFilter !== "all" || stageFilter !== "all" ||
     statusFilter !== "all";
 
+  if (error) {
+    return (
+      <ErrorState title={t("errors.listFailed")} message={error.message} />
+    );
+  }
+
   return (
     <section className="space-y-6">
       <PageHeader
@@ -120,6 +127,7 @@ export function ChildListPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
           <Input
             placeholder={t("searchPlaceholder")}
+            aria-label={t("search")}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="flex-1 min-w-[200px]"

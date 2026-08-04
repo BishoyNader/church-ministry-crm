@@ -199,15 +199,16 @@ export function ImportUploadArea() {
             {validation.validRows.length > 0 ? (
               <div className="overflow-x-auto rounded-lg border">
                 <table className="w-full text-sm">
+                  <caption className="sr-only">{t("import.table.caption")}</caption>
                   <thead>
                     <tr className="border-b bg-muted/50 text-left">
-                      <th className="px-3 py-2 font-medium">{t("import.table.row")}</th>
-                      <th className="px-3 py-2 font-medium">{t("import.table.name")}</th>
-                      <th className="px-3 py-2 font-medium">{t("import.table.phone")}</th>
-                      <th className="px-3 py-2 font-medium">{t("import.table.birthDate")}</th>
-                      <th className="px-3 py-2 font-medium">{t("import.table.gender")}</th>
-                      <th className="px-3 py-2 font-medium">{t("import.table.stage")}</th>
-                      <th className="px-3 py-2 font-medium">{t("import.table.class")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.row")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.name")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.phone")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.birthDate")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.gender")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.stage")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.class")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -235,11 +236,12 @@ export function ImportUploadArea() {
             {validation.invalidRows.length > 0 ? (
               <div className="overflow-x-auto rounded-lg border border-destructive/30">
                 <table className="w-full text-sm">
+                  <caption className="sr-only">{t("import.table.caption")}</caption>
                   <thead>
                     <tr className="border-b bg-destructive/5 text-left">
-                      <th className="px-3 py-2 font-medium">{t("import.table.row")}</th>
-                      <th className="px-3 py-2 font-medium">{t("import.table.name")}</th>
-                      <th className="px-3 py-2 font-medium">{t("import.table.errors")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.row")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.name")}</th>
+                      <th scope="col" className="px-3 py-2 font-medium">{t("import.table.errors")}</th>
                     </tr>
                   </thead>
                   <tbody>

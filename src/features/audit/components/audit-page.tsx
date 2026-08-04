@@ -104,24 +104,36 @@ export function AuditPage() {
   };
 
   const handleExport = async () => {
-    const result = await exportMutation.mutateAsync(filters);
-    if (!result.success || !result.data) return;
+    try {
+      const result = await exportMutation.mutateAsync(filters);
+      if (!result.success || !result.data) return;
 
-    const blob = new Blob([result.data], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+      const blob = new Blob([result.data], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Error is surfaced via exportMutation.error state below
+    }
   };
 
   if (error) {
     return <ErrorState title={t("loadFailed")} message={error.message} />;
   }
 
+  const exportError = exportMutation.error?.message ?? null;
+
   return (
     <section className="space-y-6">
+      {exportError ? (
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {exportError}
+        </div>
+      ) : null}
+
       <PageHeader
         title={t("title")}
         description={t("description")}
@@ -190,6 +202,7 @@ export function AuditPage() {
           </Select>
           <Input
             placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             className="w-full lg:flex-1 lg:min-w-[220px]"
@@ -223,14 +236,15 @@ export function AuditPage() {
         <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
+              <caption className="sr-only">{t("table.caption")}</caption>
               <thead>
                 <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="px-4 py-3">{t("table.time")}</th>
-                  <th className="px-4 py-3">{t("table.action")}</th>
-                  <th className="px-4 py-3">{t("table.entityType")}</th>
-                  <th className="px-4 py-3">{t("table.entityId")}</th>
-                  <th className="px-4 py-3">{t("table.actor")}</th>
-                  <th className="px-4 py-3 text-end">{t("table.details")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.time")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.action")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.entityType")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.entityId")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.actor")}</th>
+                  <th scope="col" className="px-4 py-3 text-end">{t("table.details")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

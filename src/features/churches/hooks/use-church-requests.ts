@@ -16,7 +16,13 @@ export const CHURCH_REQUEST_QUERY_KEYS = {
 export function useChurchRequests(status: ChurchRequestStatus) {
   return useQuery({
     queryKey: CHURCH_REQUEST_QUERY_KEYS.list(status),
-    queryFn: () => listChurchRequestsAction(status),
+    queryFn: async () => {
+      const result = await listChurchRequestsAction(status);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load church requests.");
+      }
+      return result;
+    },
     staleTime: 15_000,
   });
 }

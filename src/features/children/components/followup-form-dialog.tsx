@@ -78,7 +78,13 @@ export function FollowupFormDialog({
 
   const { data: usersResult } = useQuery({
     queryKey: ["users", "list"],
-    queryFn: () => listUsersAction(),
+    queryFn: async () => {
+      const result = await listUsersAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load users.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
   const users = usersResult?.data ?? [];

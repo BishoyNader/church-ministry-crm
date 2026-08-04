@@ -10,7 +10,13 @@ export const ACCESS_QUERY_KEYS = {
 export function useAccessState() {
   return useQuery({
     queryKey: ACCESS_QUERY_KEYS.state,
-    queryFn: () => getMyAccessStateAction(),
+    queryFn: async () => {
+      const result = await getMyAccessStateAction();
+      if (result.error) {
+        throw new Error(result.error ?? "Failed to load access state.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }

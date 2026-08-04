@@ -29,7 +29,13 @@ export function useFollowupList(filters?: {
 }) {
   return useQuery({
     queryKey: FOLLOWUP_QUERY_KEYS.list(filters),
-    queryFn: () => listFollowupsAction(filters),
+    queryFn: async () => {
+      const result = await listFollowupsAction(filters);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load follow-ups.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }

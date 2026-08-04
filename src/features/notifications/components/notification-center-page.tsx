@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { BellRing, CheckCheck, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState } from "@/components/feedback/empty-state";
+import { ErrorState } from "@/components/feedback/error-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import {
@@ -21,6 +23,7 @@ import type { NotificationFilter } from "../types/notification.types";
 const pageSize = 10;
 
 export function NotificationCenterPage() {
+  const t = useTranslations("notifications");
   const [selectedType, setSelectedType] = useState<NotificationFilter>("all");
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useNotifications({ page, pageSize, type: selectedType });
@@ -32,9 +35,33 @@ export function NotificationCenterPage() {
   const notifications = data?.data ?? [];
   const totalPages = data?.totalPages ?? 1;
 
+  const handleMarkRead = (notificationId: string) => {
+    markReadMutation.mutate(notificationId, {
+      onError: () => {
+        // Error is surfaced via mutation error state below
+      },
+    });
+  };
+
+  const handleMarkAllRead = () => {
+    markAllReadMutation.mutate(undefined, {
+      onError: () => {
+        // Error is surfaced via mutation error state below
+      },
+    });
+  };
+
+  const mutationError = markReadMutation.error?.message ?? markAllReadMutation.error?.message ?? null;
+
   return (
     <section className="space-y-6">
-      <PageHeader title="Notifications" description="Review and act on your latest alerts." />
+      <PageHeader title={t("title")} description={t("description")} />
+
+      {mutationError ? (
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {mutationError}
+        </div>
+      ) : null}
 
       <SectionCard className="p-4 sm:p-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -46,8 +73,8 @@ export function NotificationCenterPage() {
                 setPage(1);
               }}
             >
-              <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Filter by type" />
+              <SelectTrigger className="w-[220px]" aria-label={t("filterByType")}>
+                <SelectValue placeholder={t("filterByType")} />
               </SelectTrigger>
               <SelectContent>
                 {filters.map((filter) => (
@@ -61,30 +88,34 @@ export function NotificationCenterPage() {
 
           <Button
             variant="outline"
-            onClick={() => markAllReadMutation.mutate()}
+            onClick={handleMarkAllRead}
             disabled={markAllReadMutation.isPending}
+            aria-busy={markAllReadMutation.isPending}
           >
             <CheckCheck className="size-4" />
-            Mark all read
+            {t("markAllRead")}
           </Button>
         </div>
       </SectionCard>
 
       <SectionCard className="overflow-hidden">
         {isLoading ? (
-          <div className="space-y-3 p-6">
+          <div role="status" aria-live="polite" className="space-y-3 p-6">
             <Skeleton className="h-5 w-48" />
             <Skeleton className="h-16 w-full" />
             <Skeleton className="h-16 w-full" />
+            <span className="sr-only">{t("loadError")}</span>
           </div>
         ) : error ? (
-          <div className="p-6 text-sm text-destructive">{error.message}</div>
+          <div className="p-6">
+            <ErrorState title={t("loadError")} message={error.message} />
+          </div>
         ) : notifications.length === 0 ? (
           <div className="p-6">
             <EmptyState
               icon={<BellRing className="size-6 text-muted-foreground" />}
-              title="No notifications"
-              description="Your inbox is clear for the selected filter."
+              title={t("noNotifications")}
+              description={t("noNotificationsDescription")}
             />
           </div>
         ) : (
@@ -99,7 +130,7 @@ export function NotificationCenterPage() {
                         {formatNotificationType(notification.notification_type)}
                       </Badge>
                       {!notification.is_read ? (
-                        <CircleDot className="size-4 text-primary" />
+                        <CircleDot className="size-4 text-primary" aria-hidden="true" />
                       ) : null}
                     </div>
                     <p className="text-sm text-muted-foreground">{notification.body_ar}</p>
@@ -112,10 +143,11 @@ export function NotificationCenterPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => markReadMutation.mutate(notification.id)}
+                      onClick={() => handleMarkRead(notification.id)}
                       disabled={markReadMutation.isPending}
+                      aria-busy={markReadMutation.isPending}
                     >
-                      Mark read
+                      {t("markRead")}
                     </Button>
                   ) : null}
                 </div>
@@ -125,10 +157,10 @@ export function NotificationCenterPage() {
         )}
 
         <div className="flex items-center justify-between border-t border-border p-4">
-          <p className="text-sm text-muted-foreground">Page {page} of {totalPages}</p>
+          <p className="text-sm text-muted-foreground">{t("pageInfo", { page, totalPages })}</p>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>
-              Previous
+              {t("prev")}
             </Button>
             <Button
               variant="outline"
@@ -136,7 +168,7 @@ export function NotificationCenterPage() {
               disabled={page >= totalPages}
               onClick={() => setPage((current) => current + 1)}
             >
-              Next
+              {t("next")}
             </Button>
           </div>
         </div>

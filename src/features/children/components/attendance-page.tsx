@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
+import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
 import { useChildList, useChildServices, useChildStages } from "../hooks/use-children";
 import { useAttendanceList, useBatchAttendance } from "../hooks/use-attendance";
@@ -46,6 +47,8 @@ export function AttendancePage() {
     !!stageId,
   );
   const batchMutation = useBatchAttendance();
+
+  const loadError = attendanceQuery.error ?? childrenQuery.error;
 
   const records = useMemo(() => {
     const merged = { ...userRecords };
@@ -113,6 +116,12 @@ export function AttendancePage() {
       setSaveError(result.message ?? tAttendance("saveError"));
     }
   };
+
+  if (loadError) {
+    return (
+      <ErrorState title={t("errors.attendanceFailed")} message={loadError.message} />
+    );
+  }
 
   return (
     <section className="space-y-6">

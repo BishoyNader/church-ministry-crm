@@ -19,7 +19,13 @@ export function useAuditPage(filters: AuditFilters = {}) {
   const locale = useLocale();
   return useQuery({
     queryKey: AUDIT_QUERY_KEYS.page(filters),
-    queryFn: () => getAuditPageAction(filters, locale),
+    queryFn: async () => {
+      const result = await getAuditPageAction(filters, locale);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load the audit log.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }
@@ -28,7 +34,13 @@ export function useAuditFilterOptions() {
   const locale = useLocale();
   return useQuery({
     queryKey: AUDIT_QUERY_KEYS.filterOptions(),
-    queryFn: () => getAuditFilterOptionsAction(locale),
+    queryFn: async () => {
+      const result = await getAuditFilterOptionsAction(locale);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load audit filters.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }

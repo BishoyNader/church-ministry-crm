@@ -33,11 +33,12 @@ export function AttendanceTable({
       <div className="rounded-xl border bg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
+            <caption className="sr-only">{t("caption")}</caption>
             <thead>
               <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-3">{t("childName")}</th>
-                <th className="px-4 py-3">{t("status")}</th>
-                <th className="px-4 py-3">{t("notes")}</th>
+                <th scope="col" className="px-4 py-3">{t("childName")}</th>
+                <th scope="col" className="px-4 py-3">{t("status")}</th>
+                <th scope="col" className="px-4 py-3">{t("notes")}</th>
               </tr>
             </thead>
             <tbody>
@@ -63,11 +64,12 @@ export function AttendanceTable({
     <div className="rounded-xl border bg-card shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
+          <caption className="sr-only">{t("caption")}</caption>
           <thead>
             <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              <th className="px-4 py-3">{t("childName")}</th>
-              <th className="px-4 py-3">{t("status")}</th>
-              <th className="px-4 py-3">{t("notes")}</th>
+              <th scope="col" className="px-4 py-3">{t("childName")}</th>
+              <th scope="col" className="px-4 py-3">{t("status")}</th>
+              <th scope="col" className="px-4 py-3">{t("notes")}</th>
             </tr>
           </thead>
           <tbody>

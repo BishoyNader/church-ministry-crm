@@ -112,11 +112,12 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
           <div className="rounded-xl border bg-card shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
+                <caption className="sr-only">{t("attendanceTable.caption")}</caption>
                 <thead>
                   <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    <th className="px-4 py-3">{t("attendanceTable.date")}</th>
-                    <th className="px-4 py-3">{t("attendanceTable.status")}</th>
-                    <th className="px-4 py-3">{t("attendanceTable.notes")}</th>
+                    <th scope="col" className="px-4 py-3">{t("attendanceTable.date")}</th>
+                    <th scope="col" className="px-4 py-3">{t("attendanceTable.status")}</th>
+                    <th scope="col" className="px-4 py-3">{t("attendanceTable.notes")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -154,14 +155,15 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
           <div className="rounded-xl border bg-card shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
+                <caption className="sr-only">{t("followupsTable.caption")}</caption>
                 <thead>
                   <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    <th className="px-4 py-3">{t("followupsTable.type")}</th>
-                    <th className="px-4 py-3">{t("followupsTable.status")}</th>
-                    <th className="px-4 py-3">{t("followupsTable.scheduledAt")}</th>
-                    <th className="px-4 py-3">{t("followupsTable.assignedTo")}</th>
-                    <th className="px-4 py-3">{t("followupsTable.outcome")}</th>
-                    <th className="px-4 py-3">{t("followupsTable.notes")}</th>
+                    <th scope="col" className="px-4 py-3">{t("followupsTable.type")}</th>
+                    <th scope="col" className="px-4 py-3">{t("followupsTable.status")}</th>
+                    <th scope="col" className="px-4 py-3">{t("followupsTable.scheduledAt")}</th>
+                    <th scope="col" className="px-4 py-3">{t("followupsTable.assignedTo")}</th>
+                    <th scope="col" className="px-4 py-3">{t("followupsTable.outcome")}</th>
+                    <th scope="col" className="px-4 py-3">{t("followupsTable.notes")}</th>
                   </tr>
                 </thead>
                 <tbody>

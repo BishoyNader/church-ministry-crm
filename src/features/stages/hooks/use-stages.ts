@@ -29,7 +29,13 @@ export const STAGE_QUERY_KEYS = {
 export function useStageList(ministryId?: string) {
   return useQuery({
     queryKey: STAGE_QUERY_KEYS.list(ministryId),
-    queryFn: () => listStagesAction(ministryId),
+    queryFn: async () => {
+      const result = await listStagesAction(ministryId);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load stages.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }
@@ -85,7 +91,13 @@ export function useDeactivateStage() {
 export function useStageUsers(stageId: string | null) {
   return useQuery({
     queryKey: STAGE_QUERY_KEYS.stageUsers(stageId ?? ""),
-    queryFn: () => getStageUsersAction(stageId!),
+    queryFn: async () => {
+      const result = await getStageUsersAction(stageId!);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load stage users.");
+      }
+      return result;
+    },
     enabled: !!stageId,
     staleTime: 30_000,
   });
@@ -94,7 +106,13 @@ export function useStageUsers(stageId: string | null) {
 export function useAllUsers() {
   return useQuery({
     queryKey: STAGE_QUERY_KEYS.allUsers(),
-    queryFn: () => listAllUsersAction(),
+    queryFn: async () => {
+      const result = await listAllUsersAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load users.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }

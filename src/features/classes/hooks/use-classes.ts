@@ -26,7 +26,13 @@ export function useClassList(filters: ClassFilters = {}) {
   const locale = useLocale();
   return useQuery({
     queryKey: CLASSES_QUERY_KEYS.list(filters),
-    queryFn: () => listClassesAction(filters, locale),
+    queryFn: async () => {
+      const result = await listClassesAction(filters, locale);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load classes.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }
@@ -35,7 +41,13 @@ export function useStageOptions() {
   const locale = useLocale();
   return useQuery({
     queryKey: CLASSES_QUERY_KEYS.stageOptions,
-    queryFn: () => listStageOptionsAction(locale),
+    queryFn: async () => {
+      const result = await listStageOptionsAction(locale);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load stage options.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }

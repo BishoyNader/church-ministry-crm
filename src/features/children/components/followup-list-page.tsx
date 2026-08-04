@@ -60,7 +60,11 @@ export function FollowupListPage() {
   const handleDelete = useCallback(
     (followupId: string) => {
       if (confirm(t("followups.deleteConfirm"))) {
-        deleteMutation.mutate(followupId);
+        deleteMutation.mutate(followupId, {
+          onError: () => {
+            // Error is surfaced via deleteMutation.error state below
+          },
+        });
       }
     },
     [deleteMutation, t],
@@ -127,8 +131,16 @@ export function FollowupListPage() {
     ...STATUS_OPTIONS.map((s) => ({ value: s, labelKey: `detail.followupStatus.${s}` })),
   ];
 
+  const deleteError = deleteMutation.error?.message ?? null;
+
   return (
     <section className="space-y-6">
+      {deleteError ? (
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {deleteError}
+        </div>
+      ) : null}
+
       <PageHeader
         title={t("followups.title")}
         description={t("followups.description")}
@@ -146,6 +158,7 @@ export function FollowupListPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
           <Input
             placeholder={t("followups.searchPlaceholder")}
+            aria-label={t("followups.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 min-w-[200px]"
@@ -211,14 +224,15 @@ export function FollowupListPage() {
         <SectionCard>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
+              <caption className="sr-only">{t("followups.caption")}</caption>
               <thead>
                 <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="px-4 py-3">{t("followups.child")}</th>
-                  <th className="px-4 py-3">{t("followups.type")}</th>
-                  <th className="px-4 py-3">{t("followups.status")}</th>
-                  <th className="px-4 py-3">{t("followups.scheduledAt")}</th>
-                  <th className="px-4 py-3">{t("followups.assignedTo")}</th>
-                  <th className="px-4 py-3 text-end">{t("followups.actions")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.child")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.type")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.status")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.scheduledAt")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.assignedTo")}</th>
+                  <th scope="col" className="px-4 py-3 text-end">{t("followups.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -245,14 +259,15 @@ export function FollowupListPage() {
         <SectionCard>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
+              <caption className="sr-only">{t("followups.caption")}</caption>
               <thead>
                 <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="px-4 py-3">{t("followups.child")}</th>
-                  <th className="px-4 py-3">{t("followups.type")}</th>
-                  <th className="px-4 py-3">{t("followups.status")}</th>
-                  <th className="px-4 py-3">{t("followups.scheduledAt")}</th>
-                  <th className="px-4 py-3">{t("followups.assignedTo")}</th>
-                  <th className="px-4 py-3 text-end">{t("followups.actions")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.child")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.type")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.status")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.scheduledAt")}</th>
+                  <th scope="col" className="px-4 py-3">{t("followups.assignedTo")}</th>
+                  <th scope="col" className="px-4 py-3 text-end">{t("followups.actions")}</th>
                 </tr>
               </thead>
               <tbody>

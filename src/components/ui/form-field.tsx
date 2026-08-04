@@ -23,11 +23,16 @@ export function FormField({
 }: FormFieldProps) {
   const autoId = useId();
   const id = htmlFor ?? autoId;
-  const child = isValidElement<{ id?: string; "aria-invalid"?: boolean; "aria-describedby"?: string }>(children)
+  const hintId = hint ? `${id}-hint` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+  const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
+
+  const child = isValidElement<{ id?: string; "aria-invalid"?: boolean; "aria-describedby"?: string; "aria-required"?: boolean }>(children)
     ? cloneElement(children, {
         id,
         "aria-invalid": error ? true : undefined,
-        "aria-describedby": error ? `${id}-error` : undefined,
+        "aria-describedby": describedBy,
+        "aria-required": required ? true : undefined,
       })
     : children;
 
@@ -38,9 +43,13 @@ export function FormField({
         {required ? <span className="text-destructive"> *</span> : null}
       </Label>
       {child}
-      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {hint ? (
+        <p id={hintId} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
       {error ? (
-        <p id={`${id}-error`} role="alert" className="text-xs text-destructive">
+        <p id={errorId} role="alert" className="text-xs text-destructive">
           {error}
         </p>
       ) : null}

@@ -78,15 +78,27 @@ export function ClassesPage() {
   };
 
   const handleRestore = async (classItem: ClassListItem) => {
-    await restoreMutation.mutateAsync(classItem.id);
+    try {
+      await restoreMutation.mutateAsync(classItem.id);
+    } catch {
+      // Error is surfaced via restoreMutation.error state below
+    }
   };
 
   if (error) {
     return <ErrorState title={t("errors.listFailed")} message={error.message} />;
   }
 
+  const restoreError = restoreMutation.error?.message ?? null;
+
   return (
     <section className="space-y-6">
+      {restoreError ? (
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {restoreError}
+        </div>
+      ) : null}
+
       <PageHeader
         title={t("title")}
         description={t("description")}
@@ -104,6 +116,7 @@ export function ClassesPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
           <Input
             placeholder={t("searchPlaceholder")}
+            aria-label={t("searchPlaceholder")}
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
             className="flex-1 min-w-[200px]"
@@ -149,14 +162,15 @@ export function ClassesPage() {
         <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
+              <caption className="sr-only">{t("table.caption")}</caption>
               <thead>
                 <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="px-4 py-3">{t("table.name")}</th>
-                  <th className="px-4 py-3">{t("table.service")}</th>
-                  <th className="px-4 py-3">{t("table.stage")}</th>
-                  <th className="px-4 py-3">{t("table.status")}</th>
-                  <th className="px-4 py-3">{t("table.sortOrder")}</th>
-                  <th className="px-4 py-3 text-end">{t("table.actions")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.name")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.service")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.stage")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.status")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.sortOrder")}</th>
+                  <th scope="col" className="px-4 py-3 text-end">{t("table.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

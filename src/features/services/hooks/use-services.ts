@@ -24,7 +24,13 @@ export function useServiceList(filters: ServiceFilters = {}) {
   const locale = useLocale();
   return useQuery({
     queryKey: SERVICES_QUERY_KEYS.list(filters),
-    queryFn: () => listServicesAction(filters, locale),
+    queryFn: async () => {
+      const result = await listServicesAction(filters, locale);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load services.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }

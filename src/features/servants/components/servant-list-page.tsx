@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
+import { ErrorState } from "@/components/feedback/error-state";
 import { useAccessState } from "@/features/rbac";
 import {
   useServantList,
@@ -62,7 +63,7 @@ export function ServantListPage() {
   const [rejectError, setRejectError] = useState<string | null>(null);
   const [archiveError, setArchiveError] = useState<string | null>(null);
 
-  const { data, isLoading } = useServantList({
+  const { data, isLoading, error } = useServantList({
     page,
     pageSize: PAGE_SIZE,
     search: search || undefined,
@@ -145,6 +146,10 @@ export function ServantListPage() {
       .map((assignment) => assignment.stages?.name_ar ?? "")
       .filter(Boolean);
 
+  if (error) {
+    return <ErrorState title={t("errors.general")} message={error.message} />;
+  }
+
   return (
     <section className="space-y-6">
       <PageHeader title={t("title")} description={t("description")} />
@@ -161,6 +166,7 @@ export function ServantListPage() {
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={t("searchPlaceholder")}
+              aria-label={t("search")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -194,15 +200,16 @@ export function ServantListPage() {
       <SectionCard>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
+            <caption className="sr-only">{t("table.caption")}</caption>
             <thead>
               <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-3">{t("table.name")}</th>
-                <th className="px-4 py-3">{t("table.email")}</th>
-                <th className="px-4 py-3">{t("table.roles")}</th>
-                <th className="px-4 py-3">{t("table.stages")}</th>
-                <th className="px-4 py-3">{t("table.approval")}</th>
-                <th className="px-4 py-3">{t("table.joined")}</th>
-                <th className="px-4 py-3 text-end">{t("table.actions")}</th>
+                <th scope="col" className="px-4 py-3">{t("table.name")}</th>
+                <th scope="col" className="px-4 py-3">{t("table.email")}</th>
+                <th scope="col" className="px-4 py-3">{t("table.roles")}</th>
+                <th scope="col" className="px-4 py-3">{t("table.stages")}</th>
+                <th scope="col" className="px-4 py-3">{t("table.approval")}</th>
+                <th scope="col" className="px-4 py-3">{t("table.joined")}</th>
+                <th scope="col" className="px-4 py-3 text-end">{t("table.actions")}</th>
               </tr>
             </thead>
             <tbody>

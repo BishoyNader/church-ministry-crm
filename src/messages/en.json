@@ -312,6 +312,10 @@
   "users": {
     "title": "User Management",
     "description": "Manage church members, roles, and stage assignments.",
+    "errors": {
+      "listFailed": "Failed to load users.",
+      "loadFailed": "Failed to load the user."
+    },
     "createUser": "Add User",
     "roleFilter": {
       "all": "All Roles",
@@ -415,6 +419,11 @@
   "stages": {
     "title": "Stage Management",
     "description": "Manage ministry groups, stages, and user assignments.",
+    "errors": {
+      "listFailed": "Failed to load stages.",
+      "loadFailed": "Failed to load the ministry.",
+      "stageListFailed": "Failed to load stages for the ministry."
+    },
     "addMinistry": "Add Ministry",
     "emptyState": {
       "title": "No ministries found",
@@ -497,6 +506,13 @@
   "children": {
     "title": "Beneficiary Management",
     "description": "Register, track, and manage beneficiaries across ministries and stages.",
+    "errors": {
+      "listFailed": "Failed to load beneficiaries.",
+      "loadFailed": "Failed to load the beneficiary.",
+      "servicesFailed": "Failed to load services.",
+      "attendanceFailed": "Failed to load attendance records.",
+      "followupsFailed": "Failed to load follow-ups."
+    },
     "addChild": "Add Beneficiary",
     "searchPlaceholder": "Search by name, phone, or mobile…",
     "search": "Search",
@@ -791,6 +807,9 @@
   "approvals": {
     "title": "Approval Center",
     "description": "Review pending servant applications, user approvals, and church request decisions.",
+    "errors": {
+      "statsFailed": "Failed to load approval statistics."
+    },
     "tabs": {
       "servants": "Servants",
     "users": "Users",
@@ -844,6 +863,9 @@
     "users": {
       "title": "User approvals",
       "description": "Review pending user approvals in your church.",
+      "errors": {
+        "listFailed": "Failed to load pending user approvals."
+      },
       "review": "Review",
       "empty": {
         "title": "No pending user approvals",
@@ -900,7 +922,8 @@
       "approve": "Approve",
       "reject": "Reject",
       "errors": {
-        "general": "Something went wrong. Please try again."
+        "general": "Something went wrong. Please try again.",
+        "listFailed": "Failed to load church requests."
       },
       "rejectDialog": {
         "title": "Reject church request",
@@ -1013,6 +1036,58 @@
       "description": "You do not have permission to view this page. Contact your ministry admin if you believe this is a mistake.",
       "backToDashboard": "Back to dashboard"
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Review and act on your latest alerts.",
+    "filterByType": "Filter by type",
+    "markAllRead": "Mark all read",
+    "markRead": "Mark read",
+    "noNotifications": "No notifications",
+    "noNotificationsDescription": "Your inbox is clear for the selected filter.",
+    "pageInfo": "Page {page} of {totalPages}",
+    "prev": "Previous",
+    "next": "Next",
+    "loadError": "Failed to load notifications.",
+    "markReadError": "Failed to mark notification as read.",
+    "markAllReadError": "Failed to mark all notifications as read.",
+    "unreadCount": "{count} unread notification(s)"
+  },
+  "reports": {
+    "title": "Reports",
+    "description": "Church-scoped analytics across attendance and followups.",
+    "exportCsv": "Export CSV",
+    "filters": "Filters",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "service": "Service",
+    "allServices": "All services",
+    "stage": "Stage",
+    "allStages": "All stages",
+    "servant": "Servant",
+    "allServants": "All servants",
+    "attendanceRate": "Attendance Rate",
+    "servantsTracked": "Servants Tracked",
+    "beneficiariesTracked": "Beneficiaries Tracked",
+    "followupCompletion": "Followup Completion",
+    "attendanceSummary": "Attendance Summary",
+    "present": "Present",
+    "absent": "Absent",
+    "excused": "Excused",
+    "totalRecords": "Total records",
+    "followupCompletionTitle": "Followup Completion",
+    "completed": "Completed",
+    "open": "Open",
+    "overdue": "Overdue",
+    "stageComparison": "Stage Comparison",
+    "loadError": "Reports failed to load.",
+    "exportError": "Failed to export reports."
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "message": "The requested page could not be rendered. You can retry now or return to the dashboard.",
+    "tryAgain": "Try again",
+    "goToDashboard": "Go to dashboard"
   },
   "audit": {
     "title": "Audit Log",

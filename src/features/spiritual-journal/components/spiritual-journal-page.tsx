@@ -31,7 +31,13 @@ export function SpiritualJournalPage() {
 
   const handleDelete = useCallback(
     (entryId: string) => {
-      if (confirm(t("deleteConfirm"))) deleteMutation.mutate(entryId);
+      if (confirm(t("deleteConfirm"))) {
+        deleteMutation.mutate(entryId, {
+          onError: () => {
+            // Error is surfaced via deleteMutation.error state below
+          },
+        });
+      }
     },
     [deleteMutation, t],
   );
@@ -51,8 +57,16 @@ export function SpiritualJournalPage() {
     if (!open) setEditingEntry(null);
   }, []);
 
+  const deleteError = deleteMutation.error?.message ?? null;
+
   return (
     <section className="space-y-6">
+      {deleteError ? (
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {deleteError}
+        </div>
+      ) : null}
+
       <PageHeader
         title={t("title")}
         description={t("description")}

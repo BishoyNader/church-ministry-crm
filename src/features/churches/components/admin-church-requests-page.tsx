@@ -21,6 +21,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { EmptyState } from "@/components/feedback/empty-state";
+import { ErrorState } from "@/components/feedback/error-state";
 import {
   useChurchRequests,
   useApproveChurchRequest,
@@ -46,7 +47,7 @@ export function AdminChurchRequestsPage() {
   const [status, setStatus] = useState<ChurchRequestStatus>("pending");
   const [search, setSearch] = useState("");
 
-  const { data, isLoading } = useChurchRequests(status);
+  const { data, isLoading, error } = useChurchRequests(status);
   const approveMutation = useApproveChurchRequest();
   const rejectMutation = useRejectChurchRequest();
 
@@ -92,6 +93,10 @@ export function AdminChurchRequestsPage() {
     setRejectTarget(null);
     setRejectReason("");
   };
+
+  if (error) {
+    return <ErrorState title={t("errors.listFailed")} message={error.message} />;
+  }
 
   return (
     <section className="space-y-6">

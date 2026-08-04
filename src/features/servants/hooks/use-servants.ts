@@ -31,8 +31,18 @@ export function useServantList(params: {
 }) {
   return useQuery({
     queryKey: SERVANT_QUERY_KEYS.list(params),
-    queryFn: () =>
-      listServantsAction(params.page, params.pageSize, params.search, params.approvalStatus),
+    queryFn: async () => {
+      const result = await listServantsAction(
+        params.page,
+        params.pageSize,
+        params.search,
+        params.approvalStatus,
+      );
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load servants.");
+      }
+      return result;
+    },
     staleTime: 30_000,
   });
 }
@@ -40,7 +50,13 @@ export function useServantList(params: {
 export function useServantDetail(servantId: string | null) {
   return useQuery({
     queryKey: SERVANT_QUERY_KEYS.detail(servantId ?? ""),
-    queryFn: () => getServantAction(servantId!),
+    queryFn: async () => {
+      const result = await getServantAction(servantId!);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load servant.");
+      }
+      return result;
+    },
     enabled: !!servantId,
     staleTime: 30_000,
   });
@@ -49,7 +65,13 @@ export function useServantDetail(servantId: string | null) {
 export function useServantStages() {
   return useQuery({
     queryKey: SERVANT_QUERY_KEYS.stages,
-    queryFn: () => getServantStagesAction(),
+    queryFn: async () => {
+      const result = await getServantStagesAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load servant stages.");
+      }
+      return result;
+    },
     staleTime: 60_000,
   });
 }
