@@ -17,11 +17,11 @@ BEGIN;
 
 -- provision_church: authenticated (PO session path) + service_role (retained)
 REVOKE ALL ON FUNCTION provision_church(
-  text, text, text, text, text, text, uuid, text, text, text, text
+  text, text, uuid, text, text, text, text, text, text, text, text
 ) FROM PUBLIC, anon, authenticated, service_role;
 
 GRANT EXECUTE ON FUNCTION provision_church(
-  text, text, text, text, text, text, uuid, text, text, text, text
+  text, text, uuid, text, text, text, text, text, text, text, text
 ) TO authenticated, service_role;
 
 -- create_church_super_admin: authenticated (PO session path) + service_role
@@ -38,9 +38,9 @@ COMMIT;
 -- ============================================================================
 -- VERIFICATION (post-apply; run against the live DB — NOT part of the batch)
 -- V1 — Privileges (032 V2 expected values are superseded):
---   SELECT has_function_privilege('anon', 'provision_church(text,text,text,text,text,text,uuid,text,text,text,text)', 'EXECUTE');        -- false
---   SELECT has_function_privilege('authenticated', 'provision_church(text,text,text,text,text,text,uuid,text,text,text,text)', 'EXECUTE'); -- true
---   SELECT has_function_privilege('service_role', 'provision_church(text,text,text,text,text,text,uuid,text,text,text,text)', 'EXECUTE');  -- true
+--   SELECT has_function_privilege('anon', 'provision_church(text,text,uuid,text,text,text,text,text,text,text,text)', 'EXECUTE');        -- false
+--   SELECT has_function_privilege('authenticated', 'provision_church(text,text,uuid,text,text,text,text,text,text,text,text)', 'EXECUTE'); -- true
+--   SELECT has_function_privilege('service_role', 'provision_church(text,text,uuid,text,text,text,text,text,text,text,text)', 'EXECUTE');  -- true
 --   SELECT has_function_privilege('authenticated', 'create_church_super_admin(uuid,uuid,text,text,text,text)', 'EXECUTE');                 -- true
 --   SELECT has_function_privilege('service_role', 'create_church_super_admin(uuid,uuid,text,text,text,text)', 'EXECUTE');                  -- true
 --
@@ -52,7 +52,7 @@ COMMIT;
 -- ============================================================================
 -- ROLLBACK
 -- R1  REVOKE EXECUTE ON FUNCTION provision_church(
---       text, text, text, text, text, text, uuid, text, text, text, text
+--       text, text, uuid, text, text, text, text, text, text, text, text
 --     ) FROM authenticated;
 -- R2  REVOKE EXECUTE ON FUNCTION create_church_super_admin(
 --       uuid, uuid, text, text, text, text

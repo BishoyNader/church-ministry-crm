@@ -89,11 +89,11 @@ CREATE OR REPLACE FUNCTION create_church_user(
   p_church_id uuid,
   p_auth_user_id uuid,
   p_full_name_ar text,
-  p_full_name_en text DEFAULT NULL,
   p_email text,
+  p_role_ids uuid[],
+  p_full_name_en text DEFAULT NULL,
   p_phone text DEFAULT NULL,
   p_preferred_locale text DEFAULT 'ar',
-  p_role_ids uuid[],
   p_stage_ids uuid[] DEFAULT NULL
 )
 RETURNS uuid

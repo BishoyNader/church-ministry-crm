@@ -25,15 +25,15 @@ BEGIN;
 
 CREATE OR REPLACE FUNCTION provision_church(
   p_church_name_ar text,
-  p_church_name_en text DEFAULT NULL,
   p_slug text,
+  p_auth_user_id uuid,
+  p_full_name_ar text,
+  p_email text,
+  p_church_name_en text DEFAULT NULL,
   p_contact_email text DEFAULT NULL,
   p_contact_phone text DEFAULT NULL,
   p_address_ar text DEFAULT NULL,
-  p_auth_user_id uuid,
-  p_full_name_ar text,
   p_full_name_en text DEFAULT NULL,
-  p_email text,
   p_phone text DEFAULT NULL
 )
 RETURNS uuid
@@ -189,8 +189,8 @@ CREATE OR REPLACE FUNCTION create_church_super_admin(
   p_church_id uuid,
   p_auth_user_id uuid,
   p_full_name_ar text,
-  p_full_name_en text DEFAULT NULL,
   p_email text,
+  p_full_name_en text DEFAULT NULL,
   p_phone text DEFAULT NULL
 )
 RETURNS uuid
@@ -326,11 +326,11 @@ $$;
 
 -- provision_church: service_role only (PO provisioning path)
 REVOKE ALL ON FUNCTION provision_church(
-  text, text, text, text, text, text, uuid, text, text, text, text
+  text, text, uuid, text, text, text, text, text, text, text, text
 ) FROM PUBLIC, anon, authenticated, service_role;
 
 GRANT EXECUTE ON FUNCTION provision_church(
-  text, text, text, text, text, text, uuid, text, text, text, text
+  text, text, uuid, text, text, text, text, text, text, text, text
 ) TO service_role;
 
 -- create_church_super_admin: service_role only (PO add-admin path)
@@ -354,16 +354,18 @@ COMMIT;
 --   -- prosecdef = true; proconfig contains 'search_path=public, auth'
 --
 -- V2 — Privileges
---   SELECT has_function_privilege('anon', 'provision_church(text,text,text,text,text,text,uuid,text,text,text,text)', 'EXECUTE');        -- false
---   SELECT has_function_privilege('authenticated', 'provision_church(text,text,text,text,text,text,uuid,text,text,text,text)', 'EXECUTE'); -- false
---   SELECT has_function_privilege('service_role', 'provision_church(text,text,text,text,text,text,uuid,text,text,text,text)', 'EXECUTE');  -- true
+--   SELECT has_function_privilege('anon', 'provision_church(text,text,uuid,text,text,text,text,text,text,text,text)', 'EXECUTE');        -- false
+--   SELECT has_function_privilege('authenticated', 'provision_church(text,text,uuid,text,text,text,text,text,text,text,text)', 'EXECUTE'); -- false
+--   SELECT has_function_privilege('service_role', 'provision_church(text,text,uuid,text,text,text,text,text,text,text,text)', 'EXECUTE');  -- true
 --   SELECT has_function_privilege('service_role', 'create_church_super_admin(uuid,uuid,text,text,text,text)', 'EXECUTE');                  -- true
 --
--- V3 — Smoke test (scratch project, service-role client)
---   1. provision_church('Test Church', 'Test Church', 'test-church', 'test@example.com', 'test@example.com', 'PO Auth User ID', 'Super Admin', 'super@example.com')
+-- V3 — Smoke test (scratch project, service-role client) — named-notation calls
+--   (positional argument order follows the fixed signature: required params first,
+--   then optional defaults)
+--   1. provision_church(p_church_name_ar := 'Test Church', p_slug := 'test-church', p_auth_user_id := 'PO Auth User ID', p_full_name_ar := 'Super Admin', p_email := 'super@example.com', p_church_name_en := 'Test Church', p_contact_email := 'test@example.com')
 --      → returns church_id
 --   2. Verify: church row exists, profile exists, servant exists (approved), super_admin role granted, 3 audit rows written
---   3. create_church_super_admin(church_id, 'PO Auth User ID', 'Another Admin', 'admin2@example.com')
+--   3. create_church_super_admin(p_church_id := church_id, p_auth_user_id := 'PO Auth User ID', p_full_name_ar := 'Another Admin', p_email := 'admin2@example.com')
 --      → returns user_id
 --   4. Verify: profile updated, servant approved, super_admin role granted (idempotent), 2 audit rows written
 --
@@ -381,7 +383,7 @@ COMMIT;
 
 -- ============================================================================
 -- ROLLBACK (in-place reverse DDL)
--- R1  DROP FUNCTION IF EXISTS provision_church(text, text, text, text, text, text, uuid, text, text, text, text);
+-- R1  DROP FUNCTION IF EXISTS provision_church(text, text, uuid, text, text, text, text, text, text, text, text);
 -- R2  DROP FUNCTION IF EXISTS create_church_super_admin(uuid, uuid, text, text, text, text);
 -- No data cleanup needed. The RPCs are the only new objects.
 -- ============================================================================

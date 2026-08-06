@@ -30,11 +30,11 @@ CREATE OR REPLACE FUNCTION create_church_user(
   p_church_id uuid,
   p_auth_user_id uuid,
   p_full_name_ar text,
-  p_full_name_en text DEFAULT NULL,
   p_email text,
+  p_role_ids uuid[],
+  p_full_name_en text DEFAULT NULL,
   p_phone text DEFAULT NULL,
   p_preferred_locale text DEFAULT 'ar',
-  p_role_ids uuid[],
   p_stage_ids uuid[] DEFAULT NULL
 )
 RETURNS uuid
@@ -230,11 +230,11 @@ $$;
 -- ============================================================================
 
 REVOKE ALL ON FUNCTION create_church_user(
-  uuid, uuid, text, text, text, text, text, uuid[], uuid[]
+  uuid, uuid, text, text, uuid[], text, text, text, uuid[]
 ) FROM PUBLIC, anon, authenticated, service_role;
 
 GRANT EXECUTE ON FUNCTION create_church_user(
-  uuid, uuid, text, text, text, text, text, uuid[], uuid[]
+  uuid, uuid, text, text, uuid[], text, text, text, uuid[]
 ) TO authenticated, service_role;
 
 COMMIT;
@@ -242,9 +242,9 @@ COMMIT;
 -- ============================================================================
 -- VERIFICATION (post-apply; run against the live DB — NOT part of the batch)
 -- V1 — Privileges:
---   SELECT has_function_privilege('anon', 'create_church_user(uuid,uuid,text,text,text,text,text,uuid[],uuid[])', 'EXECUTE');        -- false
---   SELECT has_function_privilege('authenticated', 'create_church_user(uuid,uuid,text,text,text,text,text,uuid[],uuid[])', 'EXECUTE'); -- true
---   SELECT has_function_privilege('service_role', 'create_church_user(uuid,uuid,text,text,text,text,text,uuid[],uuid[])', 'EXECUTE');  -- true
+--   SELECT has_function_privilege('anon', 'create_church_user(uuid,uuid,text,text,uuid[],text,text,text,uuid[])', 'EXECUTE');        -- false
+--   SELECT has_function_privilege('authenticated', 'create_church_user(uuid,uuid,text,text,uuid[],text,text,text,uuid[])', 'EXECUTE'); -- true
+--   SELECT has_function_privilege('service_role', 'create_church_user(uuid,uuid,text,text,uuid[],text,text,text,uuid[])', 'EXECUTE');  -- true
 -- V2 — Guards from an authenticated session:
 --   - Call as anon → 'not_authenticated'
 --   - Call as a non-super-admin, non-PO authenticated user → 'not_allowed'
@@ -257,9 +257,9 @@ COMMIT;
 -- ============================================================================
 -- ROLLBACK
 -- R1  REVOKE EXECUTE ON FUNCTION create_church_user(
---       uuid, uuid, text, text, text, text, text, uuid[], uuid[]
+--       uuid, uuid, text, text, uuid[], text, text, text, uuid[]
 --     ) FROM authenticated, service_role;
 -- R2  DROP FUNCTION create_church_user(
---       uuid, uuid, text, text, text, text, text, uuid[], uuid[]
+--       uuid, uuid, text, text, uuid[], text, text, text, uuid[]
 --     );
 -- ============================================================================

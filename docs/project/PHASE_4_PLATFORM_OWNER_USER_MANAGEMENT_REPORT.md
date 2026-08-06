@@ -5,8 +5,8 @@ Status: DONE — all code-verified gates pass (`tsc`, `lint`, `build`).
 ## What was shipped
 
 ### 1. DB-enforced user creation invariant (migration 034)
-`create_church_user(p_church_id, p_auth_user_id, p_full_name_ar, p_full_name_en, p_email,
-p_phone, p_preferred_locale, p_role_ids, p_stage_ids)` — SECURITY DEFINER RPC.
+`create_church_user(p_church_id, p_auth_user_id, p_full_name_ar, p_email, p_role_ids,
+p_full_name_en, p_phone, p_preferred_locale, p_stage_ids)` — SECURITY DEFINER RPC.
 
 - Atomic profile + **approved servant** + role grants (reactivation-first) + optional stage
   assignments in one transaction.
