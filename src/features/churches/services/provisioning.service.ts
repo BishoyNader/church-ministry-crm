@@ -1,103 +1,199 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type {
-  RegistrationError,
-  RegistrationFunctions,
-  RpcResult,
-} from "@/types/registration";
-import { toRegistrationError } from "@/types/registration";
-import { ensureUniqueSlug, generateSlug } from "@/lib/utils/slug";
+import type { Database } from "@/types/database.types";
 
-type ServiceResult<T> = { data: T | null; error: RegistrationError | null };
+type ServiceResult<T> = { data: T | null; error: string | null };
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+type ChurchRow = { slug: string };
 
-function invalid(code: RegistrationError["code"], message: string): ServiceResult<undefined> {
-  return { data: null, error: { code, message } };
+type ProvisioningRpcResult<T> = { data: T | null; error: { message: string } | null };
+
+type ProvisioningRpcClient = {
+  rpc: {
+    list_churches_for_signup: () => Promise<ProvisioningRpcResult<ChurchRow[]>>;
+    approve_church_request: (args: {
+      p_request_id: string;
+      p_auth_user_id: string;
+      p_slug: string;
+    }) => Promise<ProvisioningRpcResult<string>>;
+    reject_church_request: (args: {
+      p_request_id: string;
+      p_reason: string | null;
+    }) => Promise<ProvisioningRpcResult<string>>;
+    provision_church: (args: {
+      p_church_name_ar: string;
+      p_church_name_en: string | null;
+      p_slug: string;
+      p_contact_email: string | null;
+      p_contact_phone: string | null;
+      p_address_ar: string | null;
+      p_auth_user_id: string;
+      p_full_name_ar: string;
+      p_full_name_en: string | null;
+      p_email: string;
+      p_phone: string | null;
+    }) => Promise<ProvisioningRpcResult<string>>;
+    create_church_super_admin: (args: {
+      p_church_id: string;
+      p_auth_user_id: string;
+      p_full_name_ar: string;
+      p_full_name_en: string | null;
+      p_email: string;
+      p_phone: string | null;
+    }) => Promise<ProvisioningRpcResult<string>>;
+  };
+};
+
+function asProvisioningClient(supabase: SupabaseClient<Database>): ProvisioningRpcClient {
+  return supabase as unknown as ProvisioningRpcClient;
 }
 
-/**
- * Composes generateSlug + ensureUniqueSlug for the provisioning caller.
- * The migration's slug contract requires a lowercase `[a-z0-9-]` slug that is
- * unique across churches (023 S11-7).
- */
-export async function buildUniqueChurchSlug(
-  admin: SupabaseClient,
-  churchName: string,
+export function buildUniqueChurchSlug(
+  supabase: SupabaseClient<Database>,
+  base: string,
+): string {
+  const normalized = base
+    .toLowerCase()
+    .replace(/[^a-z0-9\u0600-\u06FF]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 100) || "church";
+
+  return normalized;
+}
+
+export async function ensureUniqueSlug(
+  supabase: SupabaseClient<Database>,
+  base: string,
 ): Promise<string> {
-  return ensureUniqueSlug(admin, generateSlug(churchName));
+  const normalized = buildUniqueChurchSlug(supabase, base);
+
+  const result = await asProvisioningClient(supabase).rpc.list_churches_for_signup();
+  if (result.error) {
+    return normalized;
+  }
+
+  const existing = new Set((result.data ?? []).map((item) => item.slug));
+  let slug = normalized;
+  let counter = 1;
+
+  while (existing.has(slug)) {
+    slug = `${normalized}-${counter++}`;
+  }
+
+  return slug;
 }
 
-/**
- * approve_church_request(p_request_id, p_auth_user_id, p_slug) — platform-owner
- * provisioning (023 S11-7). Single atomic transaction creating the church,
- * profile, approved servant row, and initial super_admin grant. Guards are
- * enforced inside the RPC (not_platform_owner, email match, etc.).
- */
 export async function approveChurchRequest(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   requestId: string,
   authUserId: string,
   slug: string,
-): Promise<ServiceResult<undefined>> {
-  if (!UUID_PATTERN.test(requestId ?? "")) {
-    return invalid("request_not_found", "Invalid request id.");
-  }
-  if (!UUID_PATTERN.test(authUserId ?? "")) {
-    return invalid("auth_user_not_found", "Invalid auth user id.");
-  }
-  if (!SLUG_PATTERN.test(slug ?? "")) {
-    return invalid("invalid_slug", "Invalid church slug.");
-  }
-
+): Promise<ServiceResult<{ churchId: string }>> {
   try {
-    const result = (await supabase.rpc<
-      "approve_church_request",
-      RegistrationFunctions["approve_church_request"]["Args"]
-    >("approve_church_request", {
+    const result = await asProvisioningClient(supabase).rpc.approve_church_request({
       p_request_id: requestId,
       p_auth_user_id: authUserId,
       p_slug: slug,
-    })) as unknown as RpcResult<undefined>;
+    });
 
     if (result.error) {
-      return { data: null, error: toRegistrationError(result.error) };
+      return { data: null, error: result.error.message };
     }
 
-    return { data: null, error: null };
+    return { data: { churchId: String(result.data) }, error: null };
   } catch {
-    return { data: null, error: { code: "unknown", message: "Failed to approve church request." } };
+    return { data: null, error: "Failed to approve church request." };
   }
 }
 
-/**
- * reject_church_request(p_request_id, p_reason) — platform-owner rejection
- * (023 S11-8). Nothing is created; the request is transitioned to rejected.
- */
 export async function rejectChurchRequest(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   requestId: string,
   reason?: string | null,
-): Promise<ServiceResult<undefined>> {
-  if (!UUID_PATTERN.test(requestId ?? "")) {
-    return invalid("request_not_found", "Invalid request id.");
-  }
-
+): Promise<ServiceResult<null>> {
   try {
-    const result = (await supabase.rpc<
-      "reject_church_request",
-      RegistrationFunctions["reject_church_request"]["Args"]
-    >("reject_church_request", {
+    const result = await asProvisioningClient(supabase).rpc.reject_church_request({
       p_request_id: requestId,
-      p_reason: reason?.trim() || null,
-    })) as unknown as RpcResult<undefined>;
+      p_reason: reason ?? null,
+    });
 
     if (result.error) {
-      return { data: null, error: toRegistrationError(result.error) };
+      return { data: null, error: result.error.message };
     }
 
     return { data: null, error: null };
   } catch {
-    return { data: null, error: { code: "unknown", message: "Failed to reject church request." } };
+    return { data: null, error: "Failed to reject church request." };
+  }
+}
+
+export async function provisionChurch(
+  supabase: SupabaseClient<Database>,
+  input: {
+    churchNameAr: string;
+    churchNameEn?: string;
+    slug: string;
+    contactEmail?: string;
+    contactPhone?: string;
+    addressAr?: string;
+    authUserId: string;
+    fullNameAr: string;
+    fullNameEn?: string;
+    email: string;
+    phone?: string;
+  },
+): Promise<ServiceResult<{ churchId: string }>> {
+  try {
+    const result = await asProvisioningClient(supabase).rpc.provision_church({
+      p_church_name_ar: input.churchNameAr,
+      p_church_name_en: input.churchNameEn ?? null,
+      p_slug: input.slug,
+      p_contact_email: input.contactEmail ?? null,
+      p_contact_phone: input.contactPhone ?? null,
+      p_address_ar: input.addressAr ?? null,
+      p_auth_user_id: input.authUserId,
+      p_full_name_ar: input.fullNameAr,
+      p_full_name_en: input.fullNameEn ?? null,
+      p_email: input.email,
+      p_phone: input.phone ?? null,
+    });
+
+    if (result.error) {
+      return { data: null, error: result.error.message };
+    }
+
+    return { data: { churchId: String(result.data) }, error: null };
+  } catch {
+    return { data: null, error: "Failed to provision church." };
+  }
+}
+
+export async function createChurchSuperAdmin(
+  supabase: SupabaseClient<Database>,
+  input: {
+    churchId: string;
+    authUserId: string;
+    fullNameAr: string;
+    fullNameEn?: string;
+    email: string;
+    phone?: string;
+  },
+): Promise<ServiceResult<{ userId: string }>> {
+  try {
+    const result = await asProvisioningClient(supabase).rpc.create_church_super_admin({
+      p_church_id: input.churchId,
+      p_auth_user_id: input.authUserId,
+      p_full_name_ar: input.fullNameAr,
+      p_full_name_en: input.fullNameEn ?? null,
+      p_email: input.email,
+      p_phone: input.phone ?? null,
+    });
+
+    if (result.error) {
+      return { data: null, error: result.error.message };
+    }
+
+    return { data: { userId: String(result.data) }, error: null };
+  } catch {
+    return { data: null, error: "Failed to create church super admin." };
   }
 }

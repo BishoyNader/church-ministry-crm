@@ -199,32 +199,6 @@
       "generalError": "تعذر إكمال إعادة تعيين كلمة المرور."
     }
   },
-  "churches": {
-    "request": {
-      "title": "طلب كنيسة جديدة",
-      "description": "أخبرنا عن كنيستك وسنتواصل معك بالخطوات التالية.",
-      "churchNameAr": "اسم الكنيسة (عربي)",
-      "catechistName": "اسم الكاهن",
-      "applicantName": "اسم مقدم الطلب",
-      "email": "البريد الإلكتروني",
-      "phone": "الهاتف (اختياري)",
-      "notes": "ملاحظات (اختياري)",
-      "submit": "إرسال الطلب",
-      "submitting": "جارٍ الإرسال…",
-      "backToSignup": "العودة إلى إنشاء الحساب",
-      "success": {
-        "title": "تم استلام الطلب",
-        "description": "شكرًا لك! تم إرسال طلبك. سيقوم فريقنا بمراجعته والتواصل معك بالخطوات التالية.",
-        "backToSignup": "العودة إلى إنشاء الحساب"
-      },
-      "errors": {
-        "emailAlreadyRegistered": "يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل. يرجى تسجيل الدخول بدلاً من ذلك.",
-        "requestAlreadyPending": "يوجد طلب قيد المراجعة لهذه الكنيسة بالفعل.",
-        "churchNameExists": "توجد كنيسة مسجلة بهذا الاسم بالفعل.",
-        "general": "حدث خطأ. الرجاء المحاولة مرة أخرى."
-      }
-    }
-  },
   "servants": {
     "title": "إدارة الخدام",
     "description": "إدارة الخدام وتعيينات الخدمة والموافقات.",
@@ -1303,9 +1277,147 @@
       "restoreFailed": "تعذّرت استعادة الفصل.",
       "createDenied": "ليست لديك صلاحية إنشاء الفصول.",
       "updateDenied": "ليست لديك صلاحية تعديل الفصول.",
-      "archiveDenied": "ليست لديك صلاحية حذف الفصول.",
+      "archiveDenied": "ليست لديك صلاحية أرشفة الفصول.",
       "restoreDenied": "ليست لديك صلاحية استعادة الفصول.",
       "notFound": "الفصل غير موجود."
+    }
+  },
+  "churches": {
+    "request": {
+      "title": "طلب كنيسة جديدة",
+      "description": "أخبرنا عن كنيستك وسنتواصل معك بالخطوات التالية.",
+      "churchNameAr": "اسم الكنيسة (عربي)",
+      "catechistName": "اسم الكاهن",
+      "applicantName": "اسم مقدم الطلب",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف (اختياري)",
+      "notes": "ملاحظات (اختياري)",
+      "submit": "إرسال الطلب",
+      "submitting": "جارٍ الإرسال…",
+      "backToSignup": "العودة إلى إنشاء الحساب",
+      "success": {
+        "title": "تم استلام الطلب",
+        "description": "شكرًا لك! تم إرسال طلبك. سيقوم فريقنا بمراجعته والتواصل معك بالخطوات التالية.",
+        "backToSignup": "العودة إلى إنشاء الحساب"
+      },
+      "errors": {
+        "emailAlreadyRegistered": "يوجد حساب مسجل بهذا البريد الإلكتروني بالفعل. يرجى تسجيل الدخول بدلاً من ذلك.",
+        "requestAlreadyPending": "يوجد طلب قيد المراجعة لهذه الكنيسة بالفعل.",
+        "churchNameExists": "توجد كنيسة مسجلة بهذا الاسم بالفعل.",
+        "general": "حدث خطأ. الرجاء المحاولة مرة أخرى."
+      }
+    },
+    "title": "الكنائس",
+    "description": "إدارة الكنائس والمستأجرين على المنصة.",
+    "addChurch": "إضافة كنيسة",
+    "provisionChurch": "تجهيز كنيسة",
+    "searchPlaceholder": "ابحث بالاسم أو الرابط…",
+    "statusFilterPlaceholder": "تصفية حسب الحالة",
+    "statusAll": "الكل",
+    "statusActive": "نشطة",
+    "statusInactive": "موقوفة",
+    "clearFilters": "مسح الفلاتر",
+    "emptyState": "لا توجد كنائس.",
+    "paginationLabel": "{total, plural, =0 {لا توجد نتائج} =1 {نتيجة واحدة} other {# نتائج}} — صفحة {page} من {totalPages}",
+    "previous": "السابق",
+    "next": "التالي",
+    "back": "رجوع",
+    "edit": "تعديل",
+    "activate": "تفعيل",
+    "deactivate": "إيقاف",
+    "members": "أعضاء",
+    "servants": "خدام",
+    "services": "خدمات",
+    "stages": "مراحل",
+    "slug": "الرابط",
+    "status": "الحالة",
+    "contactEmail": "البريد الإلكتروني",
+    "contactPhone": "الهاتف",
+    "addressAr": "العنوان (عربي)",
+    "addressEn": "العنوان (إنجليزي)",
+    "subscriptionTier": "باقة الاشتراك",
+    "subscriptionStatus": "حالة الاشتراك",
+    "locale": "اللغة",
+    "createdAt": "تاريخ الإنشاء",
+    "errors": {
+      "listFailed": "تعذّر تحميل الكنائس.",
+      "readDenied": "ليست لديك صلاحية عرض الكنائس.",
+      "createDenied": "ليست لديك صلاحية إنشاء الكنائس.",
+      "updateDenied": "ليست لديك صلاحية تعديل الكنائس.",
+      "createFailed": "تعذّر إنشاء الكنيسة.",
+      "updateFailed": "تعذّر تحديث الكنيسة.",
+      "notFound": "الكنيسة غير موجودة.",
+      "statsFailed": "تعذّر تحميل إحصائيات الكنيسة."
+    },
+    "wizard": {
+      "title": "إنشاء كنيسة جديدة",
+      "description": "أنشئ كنيسة وقم بتجهيز أول مدير لها في خطوة واحدة.",
+      "stepperLabel": "خطوات الإنشاء",
+      "step1": "بيانات الكنيسة",
+      "step2": "المدير",
+      "step3": "مراجعة وتأكيد",
+      "back": "رجوع",
+      "next": "التالي",
+      "church": {
+        "churchNameAr": "اسم الكنيسة (عربي)",
+        "churchNameArPlaceholder": "مثال: كنيسة العائلة المقدسة",
+        "churchNameEn": "اسم الكنيسة (إنجليزي)",
+        "churchNameEnPlaceholder": "مثال: Holy Family Church",
+        "slug": "رابط الكنيسة",
+        "slugHint": "يُستخدم في رابط الكنيسة. يتم إنشاؤه تلقائيًا وضمان تفرده عند الحفظ.",
+        "regenerateSlug": "إعادة توليد الرابط",
+        "contactEmail": "البريد الإلكتروني للتواصل",
+        "contactPhone": "هاتف التواصل",
+        "addressAr": "العنوان (عربي)",
+        "addressArPlaceholder": "مثال: القاهرة - مصر الجديدة"
+      },
+      "admin": {
+        "fullNameAr": "اسم المدير (عربي)",
+        "fullNameArPlaceholder": "مثال: مينا كمال",
+        "fullNameEn": "اسم المدير (إنجليزي)",
+        "fullNameEnPlaceholder": "مثال: Mina Kamal",
+        "email": "بريد المدير الإلكتروني",
+        "phone": "رقم الهاتف",
+        "password": "كلمة المرور (اختياري)",
+        "passwordHint": "اتركها فارغة لإرسال دعوة بالبريد الإلكتروني بدلًا من ذلك.",
+        "passwordPlaceholder": "8 أحرف على الأقل"
+      },
+      "summary": {
+        "churchDetails": "بيانات الكنيسة",
+        "adminDetails": "بيانات المدير",
+        "confirm": "إنشاء الكنيسة",
+        "inviteLinkNote": "سيتم إرسال دعوة عبر البريد الإلكتروني"
+      },
+      "progress": {
+        "creatingChurch": "جارٍ إنشاء الكنيسة",
+        "provisioningAdmin": "جارٍ تجهيز المدير",
+        "finalizing": "الإنهاء"
+      },
+      "success": {
+        "title": "تم إنشاء الكنيسة بنجاح",
+        "description": "الكنيسة ومديرها جاهزان للاستخدام.",
+        "inviteLinkLabel": "رابط الدعوة",
+        "inviteLinkDescription": "أرسل هذا الرابط إلى المدير لتفعيل حسابه.",
+        "copied": "تم النسخ",
+        "copyInviteLink": "نسخ رابط الدعوة",
+        "viewChurch": "عرض الكنيسة",
+        "backToChurches": "العودة إلى الكنائس",
+        "provisionAnother": "إنشاء كنيسة أخرى"
+      },
+      "errors": {
+        "notPlatformOwner": "مدير المنصة فقط يمكنه إنشاء الكنائس.",
+        "notAuthenticated": "يجب تسجيل الدخول لإنشاء كنيسة.",
+        "authUserExists": "يوجد حساب مسجّل بالفعل بهذا البريد الإلكتروني.",
+        "churchNameExists": "توجد كنيسة بهذا الاسم بالفعل.",
+        "authUserMismatch": "تعذّر تجهيز حساب المدير.",
+        "invalidSlug": "رابط الكنيسة غير صالح.",
+        "superAdminRoleNotFound": "تعذّر إنشاء دور المدير.",
+        "validation": "يرجى تصحيح الحقول المحددة.",
+        "missingServiceRole": "خطأ في إعدادات الخادم. يرجى المحاولة لاحقًا.",
+        "provisionFailed": "تعذّر إنشاء الكنيسة. يرجى المحاولة مرة أخرى.",
+        "backToReview": "العودة إلى المراجعة",
+        "tryAgain": "إعادة المحاولة"
+      }
     }
   }
 }

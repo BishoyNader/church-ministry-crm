@@ -30,6 +30,7 @@ const navItems = [
   { labelKey: "stages", href: "/stages", icon: Layers, permission: PERMISSION_CODES.STAGES_READ, disabled: false },
   { labelKey: "services", href: "/services", icon: Building2, permission: PERMISSION_CODES.SERVICES_READ, disabled: false },
   { labelKey: "classes", href: "/classes", icon: School, permission: PERMISSION_CODES.CLASSES_READ, disabled: false },
+  { labelKey: "churches", href: "/admin/churches", icon: Building2, permission: PERMISSION_CODES.TENANTS_READ, disabled: false },
   { labelKey: "users", href: "/users", icon: Users, permission: PERMISSION_CODES.USERS_READ, disabled: false },
   { labelKey: "audit", href: "/audit", icon: ScrollText, permission: PERMISSION_CODES.AUDIT_READ, disabled: false },
   { labelKey: "events", href: null, icon: CalendarDays, permission: undefined as PermissionCode | undefined, disabled: true },

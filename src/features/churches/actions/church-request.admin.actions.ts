@@ -18,7 +18,11 @@ export type ChurchRequestAdminActionResult<T = unknown> = {
   data?: T;
 };
 
-function toErrorMessage(error: RegistrationError): string {
+function toErrorMessage(error: string | RegistrationError): string {
+  if (typeof error === "string") {
+    return error;
+  }
+
   switch (error.code) {
     case "request_not_found":
       return "Request not found.";
