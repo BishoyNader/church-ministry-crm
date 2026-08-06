@@ -20,20 +20,22 @@ type UserStageAssignmentProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string;
+  churchId?: string;
 };
 
 export function UserStageAssignment({
   open,
   onOpenChange,
   userId,
+  churchId,
 }: UserStageAssignmentProps) {
   const t = useTranslations("users.stages");
-  const detailQuery = useUserDetail(userId);
+  const detailQuery = useUserDetail(userId, churchId);
   const assignMutation = useAssignStages();
 
   const user = detailQuery.data?.data;
-  const churchId = user?.church_id ?? null;
-  const stagesQuery = useStages(churchId);
+  const scopeChurchId = churchId ?? user?.church_id ?? null;
+  const stagesQuery = useStages(scopeChurchId);
   const stages = stagesQuery.data?.data ?? [];
 
   const [selectedIds, setSelectedIds] = useState<string[]>(

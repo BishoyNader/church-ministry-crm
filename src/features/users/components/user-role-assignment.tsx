@@ -21,6 +21,7 @@ type UserRoleAssignmentProps = {
   onOpenChange: (open: boolean) => void;
   userId: string;
   currentRoleIds: string[];
+  churchId?: string;
 };
 
 export function UserRoleAssignment({
@@ -28,16 +29,17 @@ export function UserRoleAssignment({
   onOpenChange,
   userId,
   currentRoleIds,
+  churchId,
 }: UserRoleAssignmentProps) {
   const t = useTranslations("users.roles");
   const [selectedIds, setSelectedIds] = useState<string[]>(currentRoleIds);
 
-  const detailQuery = useUserDetail(userId);
+  const detailQuery = useUserDetail(userId, churchId);
   const assignMutation = useAssignRoles();
 
   const user = detailQuery.data?.data;
-  const churchId = user?.church_id ?? null;
-  const rolesQuery = useRoles(churchId);
+  const scopeChurchId = churchId ?? user?.church_id ?? null;
+  const rolesQuery = useRoles(scopeChurchId);
   const roles = rolesQuery.data?.data ?? [];
 
   const toggle = (roleId: string) => {

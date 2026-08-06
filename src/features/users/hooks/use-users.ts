@@ -11,23 +11,46 @@ import {
   assignStagesAction,
   getRolesAction,
   getStagesAction,
+  getActorChurchAction,
 } from "../actions/user.actions";
 import type { CreateUserFormValues, UpdateUserFormValues } from "../schemas/user.schema";
 
 export const USER_QUERY_KEYS = {
   all: ["users"] as const,
-  list: (params: { page: number; pageSize: number; search?: string; roleFilter?: string }) =>
-    ["users", "list", params] as const,
+  actorChurch: ["users", "actor-church"] as const,
+  list: (params: {
+    page: number;
+    pageSize: number;
+    search?: string;
+    roleFilter?: string;
+    churchId?: string;
+  }) => ["users", "list", params] as const,
   detail: (id: string) => ["users", "detail", id] as const,
   roles: (churchId: string) => ["users", "roles", churchId] as const,
   stages: (churchId: string) => ["users", "stages", churchId] as const,
 };
+
+export function useActorChurch() {
+  return useQuery({
+    queryKey: USER_QUERY_KEYS.actorChurch,
+    queryFn: async () => {
+      const result = await getActorChurchAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load church context.");
+      }
+      return result.data ?? { churchId: null, isPlatformOwner: false };
+    },
+    staleTime: 60_000,
+  });
+}
 
 export function useUserList(params: {
   page: number;
   pageSize: number;
   search?: string;
   roleFilter?: string;
+  churchId?: string;
+  enabled?: boolean;
 }) {
   return useQuery({
     queryKey: USER_QUERY_KEYS.list(params),
@@ -37,21 +60,23 @@ export function useUserList(params: {
         params.pageSize,
         params.search,
         params.roleFilter,
+        params.churchId,
       );
       if (!result.success) {
         throw new Error(result.message ?? "Failed to load users.");
       }
       return result;
     },
+    enabled: params.enabled ?? true,
     staleTime: 30_000,
   });
 }
 
-export function useUserDetail(userId: string | null) {
+export function useUserDetail(userId: string | null, churchId?: string) {
   return useQuery({
     queryKey: USER_QUERY_KEYS.detail(userId ?? ""),
     queryFn: async () => {
-      const result = await getUserAction(userId!);
+      const result = await getUserAction(userId!, churchId);
       if (!result.success) {
         throw new Error(result.message ?? "Failed to load user.");
       }

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const createUserSchema = z.object({
+  churchId: z.string().uuid().optional(),
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()

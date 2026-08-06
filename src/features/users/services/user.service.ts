@@ -1,5 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { toRegistrationError } from "@/types/registration";
+import type { RegistrationFunctions } from "@/types/registration";
 import type {
   AssignRolesInput,
   AssignStagesInput,
@@ -140,12 +142,27 @@ export async function getUserById(
   }
 }
 
+/**
+ * createUser — creates a fully provisioned church user.
+ *
+ * Invariant (Phase 4): every church-scoped user must have a profile row, an
+ * approved servants row, and at least one role grant — otherwise the proxy
+ * access gate (get_my_access_state) would redirect the user to
+ * /pending-approval forever. The profile + servant + roles + stages writes are
+ * performed atomically inside the SECURITY DEFINER RPC create_church_user
+ * (migration 034), which also validates role/stage church scope and audits.
+ *
+ * This service only creates the auth account (service role) and then delegates
+ * to the RPC through the session client so auth.uid() inside the RPC resolves
+ * to the acting user (PO or church super_admin).
+ */
 export async function createUser(
+  supabase: SupabaseClient,
   input: CreateUserInput,
-  assignedBy: string,
   churchId: string,
 ): Promise<{ data: { id: string } | null; error: string | null }> {
   const admin = createAdminClient();
+  let userId: string | null = null;
 
   try {
     const { data: authData, error: authError } =
@@ -163,76 +180,33 @@ export async function createUser(
       return { data: null, error: authError?.message ?? "Failed to create auth user." };
     }
 
-    const userId = authData.user.id;
+    userId = authData.user.id;
 
-    const { data: profile, error: profileError } = await admin
-      .from("profiles")
-      .insert({
-        id: userId,
-        church_id: churchId,
-        email: input.email,
-        full_name_ar: input.full_name_ar,
-        full_name_en: input.full_name_en ?? null,
-        phone: input.phone ?? null,
-        preferred_locale: input.preferred_locale ?? "ar",
-      })
-      .select("id, church_id")
-      .single();
+    const { error: rpcError } = await supabase.rpc<
+      "create_church_user",
+      RegistrationFunctions["create_church_user"]["Args"]
+    >("create_church_user", {
+      p_church_id: churchId,
+      p_auth_user_id: userId,
+      p_full_name_ar: input.full_name_ar,
+      p_full_name_en: input.full_name_en ?? null,
+      p_email: input.email,
+      p_phone: input.phone ?? null,
+      p_preferred_locale: input.preferred_locale ?? "ar",
+      p_role_ids: input.roleIds,
+      p_stage_ids: input.stageIds && input.stageIds.length > 0 ? input.stageIds : null,
+    });
 
-    if (profileError || !profile) {
+    if (rpcError) {
       await admin.auth.admin.deleteUser(userId);
-      return { data: null, error: "Failed to create user profile." };
-    }
-
-    if (input.roleIds.length > 0) {
-      const rolesValid = await validateRolesInChurch(
-        admin,
-        profile.church_id,
-        input.roleIds,
-      );
-      if (!rolesValid) {
-        await admin.auth.admin.deleteUser(userId);
-        return { data: null, error: "Selected roles do not belong to this church." };
-      }
-      await syncRoleGrants(admin, profile.church_id, userId, input.roleIds, assignedBy);
-    }
-
-    if (input.stageIds.length > 0) {
-      const { data: stages, error: stagesError } = await admin
-        .from("stages")
-        .select("id, service_id")
-        .eq("church_id", profile.church_id)
-        .in("id", input.stageIds);
-
-      if (stagesError) {
-        await admin.auth.admin.deleteUser(userId);
-        return { data: null, error: stagesError.message };
-      }
-
-      if ((stages?.length ?? 0) !== input.stageIds.length) {
-        await admin.auth.admin.deleteUser(userId);
-        return { data: null, error: "Selected stages do not belong to this church." };
-      }
-
-      const now = new Date().toISOString();
-
-      const stageServiceMap = new Map(stages?.map((s) => [s.id, s.service_id]) ?? []);
-
-      const stageInserts = input.stageIds.map((stageId) => ({
-        church_id: profile.church_id,
-        servant_id: userId,
-        stage_id: stageId,
-        service_id: stageServiceMap.get(stageId) ?? "",
-        is_active: true,
-        start_date: now,
-        end_date: null,
-        assigned_by: assignedBy,
-      }));
-      await admin.from("servant_stage_assignments").insert(stageInserts);
+      return { data: null, error: toRegistrationError(rpcError).message };
     }
 
     return { data: { id: userId }, error: null };
   } catch {
+    if (userId) {
+      await admin.auth.admin.deleteUser(userId).catch(() => undefined);
+    }
     return { data: null, error: "Failed to create user." };
   }
 }

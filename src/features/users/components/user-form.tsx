@@ -34,27 +34,32 @@ import {
   useUserDetail,
   useRoles,
   useStages,
+  useActorChurch,
 } from "../hooks/use-users";
 
 type UserFormProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId?: string;
+  churchId?: string;
 };
 
-export function UserForm({ open, onOpenChange, userId }: UserFormProps) {
+export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps) {
   const t = useTranslations("users.form");
   const isEdit = !!userId;
 
-  const detailQuery = useUserDetail(userId ?? null);
+  const detailQuery = useUserDetail(userId ?? null, churchId);
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
 
   const user = detailQuery.data?.data;
-  const churchId = user?.church_id ?? null;
+  const actorChurchQuery = useActorChurch();
+  const scopeChurchId = isEdit
+    ? (user?.church_id ?? null)
+    : (churchId ?? actorChurchQuery.data?.churchId ?? null);
 
-  const rolesQuery = useRoles(churchId);
-  const stagesQuery = useStages(churchId);
+  const rolesQuery = useRoles(scopeChurchId);
+  const stagesQuery = useStages(scopeChurchId);
 
   const roles = rolesQuery.data?.data ?? [];
   const stages = stagesQuery.data?.data ?? [];
@@ -68,6 +73,7 @@ export function UserForm({ open, onOpenChange, userId }: UserFormProps) {
       full_name_en: "",
       phone: "",
       preferred_locale: "ar",
+      churchId: churchId ?? undefined,
       roleIds: [],
       stageIds: [],
     },

@@ -27,11 +27,13 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
-import { useUserList, useDeactivateUser } from "../hooks/use-users";
+import { useUserList, useDeactivateUser, useActorChurch } from "../hooks/use-users";
 import { PendingRegistrationsQueue } from "./pending-registrations-queue";
 import { UserForm } from "./user-form";
 import { UserRoleAssignment } from "./user-role-assignment";
 import { UserStageAssignment } from "./user-stage-assignment";
+import { ChurchScopeSelector } from "./church-scope-selector";
+import { UserImportPanel } from "./user-import-panel";
 import type { UserListItem } from "../types/user.types";
 
 const ROLE_FILTER_OPTIONS = [
@@ -54,12 +56,18 @@ export function UserListPage() {
   const [rolesUser, setRolesUser] = useState<UserListItem | null>(null);
   const [stagesUser, setStagesUser] = useState<UserListItem | null>(null);
   const [deactivateUser, setDeactivateUser] = useState<UserListItem | null>(null);
+  const [scopeChurchId, setScopeChurchId] = useState<string | null>(null);
+
+  const actorChurchQuery = useActorChurch();
+  const isPlatformOwner = actorChurchQuery.data?.isPlatformOwner ?? false;
 
   const { data, isLoading, error } = useUserList({
     page,
     pageSize: PAGE_SIZE,
     search: search || undefined,
     roleFilter: roleFilter !== "all" ? roleFilter : undefined,
+    churchId: scopeChurchId ?? undefined,
+    enabled: !isPlatformOwner || !!scopeChurchId,
   });
 
   const deactivateMutation = useDeactivateUser();
@@ -93,11 +101,22 @@ export function UserListPage() {
         title={t("title")}
         description={t("description")}
         actions={
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button
+            onClick={() => setCreateOpen(true)}
+            disabled={isPlatformOwner && scopeChurchId === null}
+          >
             <Plus className="size-4" />
             {t("createUser")}
           </Button>
         }
+      />
+
+      <ChurchScopeSelector
+        value={scopeChurchId ?? ""}
+        onChange={(churchId) => {
+          setScopeChurchId(churchId);
+          setPage(1);
+        }}
       />
 
       <PermissionGuard permission="servants.approve">
@@ -134,6 +153,8 @@ export function UserListPage() {
           </Select>
         </div>
       </SectionCard>
+
+      <UserImportPanel churchId={scopeChurchId} />
 
       <SectionCard>
         <div className="overflow-x-auto">
@@ -247,7 +268,11 @@ export function UserListPage() {
       </SectionCard>
 
       {createOpen && (
-        <UserForm open={createOpen} onOpenChange={setCreateOpen} />
+        <UserForm
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          churchId={scopeChurchId ?? undefined}
+        />
       )}
 
       {editUser && (
@@ -255,6 +280,7 @@ export function UserListPage() {
           open={!!editUser}
           onOpenChange={(open) => { if (!open) setEditUser(null); }}
           userId={editUser.id}
+          churchId={scopeChurchId ?? undefined}
         />
       )}
 
@@ -264,6 +290,7 @@ export function UserListPage() {
           onOpenChange={(open) => { if (!open) setRolesUser(null); }}
           userId={rolesUser.id}
           currentRoleIds={rolesUser.roles.map((r) => r.id)}
+          churchId={scopeChurchId ?? undefined}
         />
       )}
 
@@ -272,6 +299,7 @@ export function UserListPage() {
           open={!!stagesUser}
           onOpenChange={(open) => { if (!open) setStagesUser(null); }}
           userId={stagesUser.id}
+          churchId={scopeChurchId ?? undefined}
         />
       )}
 
