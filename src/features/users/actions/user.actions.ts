@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { writeAuditLog } from "@/lib/audit";
-import { hasPermission } from "@/features/rbac/utils/permission-check";
+import { hasPermission, hasAnyPermission } from "@/features/rbac/utils/permission-check";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
   createUserSchema,
@@ -23,6 +23,11 @@ import type {
 } from "../types/user.types";
 import * as userService from "../services/user.service";
 import { ZodError } from "zod";
+import {
+  resolveActorContext,
+  dataClientFor,
+  writeUserAudit,
+} from "./context";
 
 export type UserActionResult<T = unknown> = {
   success: boolean;
@@ -31,11 +36,27 @@ export type UserActionResult<T = unknown> = {
   data?: T;
 };
 
+const CREATE_USER_ERROR_MESSAGES: Record<string, string> = {
+  not_allowed: "You are not allowed to create users for this church.",
+  church_not_found: "The selected church is not available.",
+  roles_required: "At least one role is required.",
+  role_not_in_church: "A selected role does not belong to this church.",
+  stage_not_in_church: "A selected stage does not belong to this church.",
+  auth_user_not_found: "The user account could not be provisioned.",
+  auth_user_email_mismatch: "The account email does not match the request.",
+  email_already_registered: "An account already exists for this email.",
+};
+
+function mapCreateUserError(raw: string): string {
+  return CREATE_USER_ERROR_MESSAGES[raw] ?? raw;
+}
+
 export async function listUsersAction(
   page: number,
   pageSize: number,
   search?: string,
   roleFilter?: string,
+  churchId?: string,
 ): Promise<UserActionResult<UserListResult>> {
   try {
     userListSchema.parse({ page, pageSize, search, roleFilter });
@@ -52,12 +73,8 @@ export async function listUsersAction(
     throw error;
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
     return { success: false, message: "You must be logged in." };
   }
 
@@ -65,17 +82,16 @@ export async function listUsersAction(
     return { success: false, message: "You do not have permission to view users." };
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("church_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile) {
-    return { success: false, message: "User profile not found." };
+  const targetChurchId = ctx.churchId ?? churchId;
+  if (!targetChurchId) {
+    return { success: false, message: "A church must be selected." };
   }
 
-  const result = await userService.listUsers(supabase, profile.church_id, {
+  if (ctx.churchId && targetChurchId !== ctx.churchId) {
+    return { success: false, message: "You cannot view users from another church." };
+  }
+
+  const result = await userService.listUsers(dataClientFor(ctx), targetChurchId, {
     page,
     pageSize,
     search,
@@ -96,13 +112,10 @@ export async function listUsersAction(
 
 export async function getUserAction(
   userId: string,
+  churchId?: string,
 ): Promise<UserActionResult<UserDetail>> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
     return { success: false, message: "You must be logged in." };
   }
 
@@ -110,23 +123,36 @@ export async function getUserAction(
     return { success: false, message: "You do not have permission to view users." };
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("church_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile) {
-    return { success: false, message: "User profile not found." };
+  const targetChurchId = ctx.churchId ?? churchId;
+  if (!targetChurchId) {
+    return { success: false, message: "A church must be selected." };
   }
 
-  const result = await userService.getUserById(supabase, profile.church_id, userId);
+  if (ctx.churchId && targetChurchId !== ctx.churchId) {
+    return { success: false, message: "You cannot view users from another church." };
+  }
+
+  const result = await userService.getUserById(dataClientFor(ctx), targetChurchId, userId);
 
   if (result.error) {
     return { success: false, message: result.error };
   }
 
   return { success: true, data: result.data ?? undefined };
+}
+
+export async function getActorChurchAction(): Promise<
+  UserActionResult<{ churchId: string | null; isPlatformOwner: boolean }>
+> {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  return {
+    success: true,
+    data: { churchId: ctx.churchId, isPlatformOwner: ctx.churchId === null },
+  };
 }
 
 export async function createUserAction(
@@ -147,35 +173,38 @@ export async function createUserAction(
     throw error;
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.SERVANTS_CREATE))) {
-    return { success: false, message: "You do not have permission to create users." };
+  const isPlatformOwner = ctx.churchId === null;
+
+  if (isPlatformOwner) {
+    if (
+      !(await hasAnyPermission([
+        PERMISSION_CODES.USERS_READ,
+        PERMISSION_CODES.TENANTS_READ,
+      ]))
+    ) {
+      return { success: false, message: "You do not have permission to create users." };
+    }
+    if (!values.churchId) {
+      return { success: false, message: "A church must be selected." };
+    }
+  } else {
+    if (!(await hasPermission(PERMISSION_CODES.SERVANTS_CREATE))) {
+      return { success: false, message: "You do not have permission to create users." };
+    }
+    if (values.churchId && values.churchId !== ctx.churchId) {
+      return { success: false, message: "You cannot create users in another church." };
+    }
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("church_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile) {
-    return { success: false, message: "User profile not found." };
-  }
-
-  const actorDetail = await userService.getUserById(supabase, profile.church_id, user.id);
-  if (!(actorDetail.data?.roles.some((r) => r.role_type === "super_admin") ?? false)) {
-    return { success: false, message: "Only a super admin can create users." };
-  }
+  const targetChurchId = ctx.churchId ?? values.churchId!;
 
   const result = await userService.createUser(
+    ctx.supabase,
     {
       email: values.email,
       password: values.password,
@@ -186,16 +215,15 @@ export async function createUserAction(
       roleIds: values.roleIds,
       stageIds: values.stageIds ?? [],
     },
-    user.id,
-    profile.church_id,
+    targetChurchId,
   );
 
   if (result.error) {
-    return { success: false, message: result.error };
+    return { success: false, message: mapCreateUserError(result.error) };
   }
 
   if (result.data) {
-    await writeAuditLog(supabase, "create", "user", result.data.id, undefined, {
+    await writeUserAudit(ctx, targetChurchId, "create", "user", result.data.id, {
       email: values.email,
       full_name_ar: values.full_name_ar,
       roleIds: values.roleIds,
@@ -493,12 +521,8 @@ export async function assignStagesAction(
 export async function getRolesAction(
   churchId: string,
 ): Promise<UserActionResult<RoleRow[]>> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
     return { success: false, message: "You must be logged in." };
   }
 
@@ -506,7 +530,16 @@ export async function getRolesAction(
     return { success: false, message: "You do not have permission to view roles." };
   }
 
-  const result = await userService.listRoles(supabase, churchId);
+  const targetChurchId = ctx.churchId ?? churchId;
+  if (!targetChurchId) {
+    return { success: false, message: "A church must be selected." };
+  }
+
+  if (ctx.churchId && targetChurchId !== ctx.churchId) {
+    return { success: false, message: "You cannot view roles from another church." };
+  }
+
+  const result = await userService.listRoles(dataClientFor(ctx), targetChurchId);
   if (result.error) {
     return { success: false, message: result.error };
   }
@@ -516,12 +549,8 @@ export async function getRolesAction(
 export async function getStagesAction(
   churchId: string,
 ): Promise<UserActionResult<StageRow[]>> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
     return { success: false, message: "You must be logged in." };
   }
 
@@ -529,7 +558,16 @@ export async function getStagesAction(
     return { success: false, message: "You do not have permission to view stages." };
   }
 
-  const result = await userService.listStages(supabase, churchId);
+  const targetChurchId = ctx.churchId ?? churchId;
+  if (!targetChurchId) {
+    return { success: false, message: "A church must be selected." };
+  }
+
+  if (ctx.churchId && targetChurchId !== ctx.churchId) {
+    return { success: false, message: "You cannot view stages from another church." };
+  }
+
+  const result = await userService.listStages(dataClientFor(ctx), targetChurchId);
   if (result.error) {
     return { success: false, message: result.error };
   }

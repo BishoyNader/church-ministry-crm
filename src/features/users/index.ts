@@ -40,7 +40,14 @@ export {
   assignStagesAction,
   getRolesAction,
   getStagesAction,
+  getActorChurchAction,
 } from "./actions/user.actions";
+
+export {
+  previewUsersImportAction,
+  importUsersAction,
+  exportUsersTemplateAction,
+} from "./actions/user-import.actions";
 
 export {
   listPendingRegistrationsAction,
@@ -58,8 +65,15 @@ export {
   useAssignStages,
   useRoles,
   useStages,
+  useActorChurch,
   USER_QUERY_KEYS,
 } from "./hooks/use-users";
+
+export {
+  usePreviewUsersImport,
+  useImportUsers,
+  useExportUsersTemplate,
+} from "./hooks/use-user-import";
 
 export {
   usePendingRegistrations,
@@ -73,3 +87,16 @@ export { UserForm } from "./components/user-form";
 export { UserRoleAssignment } from "./components/user-role-assignment";
 export { UserStageAssignment } from "./components/user-stage-assignment";
 export { PendingRegistrationsQueue } from "./components/pending-registrations-queue";
+export { ChurchScopeSelector } from "./components/church-scope-selector";
+export { UserImportPanel } from "./components/user-import-panel";
+
+export type {
+  UserImportRow,
+  UserImportPreviewResult,
+  UserImportValidationResult,
+  UserImportErrorSummary,
+  UserImportSummary,
+  UserImportRowFailure,
+  UserImportRowFailureReason,
+  UserImportFileFormat,
+} from "./types/user-import.types";

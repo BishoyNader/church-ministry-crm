@@ -388,6 +388,57 @@
         "cancel": "Cancel",
         "processing": "Rejecting…"
       }
+    },
+    "churchScope": {
+      "label": "Select church",
+      "placeholder": "Select a church…"
+    },
+    "userImport": {
+      "title": "Import users",
+      "description": "Bulk create users from a CSV or XLSX file.",
+      "uploadLabel": "Upload users file",
+      "chooseFile": "Choose file",
+      "supportedFormats": "Supported formats: .csv, .xlsx (max 10 MB).",
+      "downloadTemplate": "Download template",
+      "templateError": "Failed to download the template.",
+      "churchRequired": "Select a church to import users into.",
+      "invalidFileType": "Only .csv and .xlsx files are allowed.",
+      "fileTooLarge": "The file exceeds the 10 MB size limit.",
+      "previewError": "Failed to preview the file.",
+      "importError": "Failed to import users.",
+      "validCount": "{count} valid",
+      "invalidCount": "{count} invalid",
+      "validationReport": "Validation report",
+      "duplicateEmails": "{count} rows use an email that already exists.",
+      "invalidEmails": "{count} rows have an invalid email.",
+      "shortPasswords": "{count} rows have a password shorter than 8 characters.",
+      "missingRequired": "{count} rows are missing required fields.",
+      "unknownRoles": "{count} rows reference an unknown role.",
+      "unknownStages": "{count} rows reference an unknown stage.",
+      "showingFirst": "Showing the first {count} additional rows…",
+      "importButton": "Import users",
+      "cancel": "Cancel",
+      "importSummary": "Imported {imported} users. {failed} failed.",
+      "failure": {
+        "title": "Import failures",
+        "missingRole": "A role is required for this user.",
+        "duplicate": "An account already exists for this email.",
+        "invalidRole": "Role not found in this church.",
+        "invalidStage": "Stage not found in this church.",
+        "authFailed": "Failed to create the account.",
+        "rpcFailure": "The account could not be provisioned.",
+        "row": "Row {row} — {email}",
+        "more": "and {count} more…"
+      },
+      "table": {
+        "caption": "Imported users",
+        "row": "Row",
+        "email": "Email",
+        "name": "Name",
+        "role": "Role",
+        "stage": "Stage",
+        "errors": "Errors"
+      }
     }
   },
   "stages": {

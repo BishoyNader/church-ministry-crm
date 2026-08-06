@@ -35,6 +35,14 @@ export type RegistrationErrorCode =
   | "super_admin_role_not_found"
   | "request_not_found"
   | "request_not_pending"
+  | "church_id_required"
+  | "auth_user_id_required"
+  | "full_name_ar_required"
+  | "roles_required"
+  | "role_not_in_church"
+  | "stage_not_in_church"
+  | "church_not_found"
+  | "not_allowed"
   | "unknown";
 
 export type RegistrationError = {
@@ -127,6 +135,20 @@ export type RegistrationFunctions = {
     Args: { p_request_id: string; p_auth_user_id: string; p_slug: string };
     Returns: undefined;
   };
+  create_church_user: {
+    Args: {
+      p_church_id: string;
+      p_auth_user_id: string;
+      p_full_name_ar: string;
+      p_full_name_en?: string | null;
+      p_email: string;
+      p_phone?: string | null;
+      p_preferred_locale?: string | null;
+      p_role_ids: string[];
+      p_stage_ids?: string[] | null;
+    };
+    Returns: string;
+  };
   reject_church_request: {
     Args: { p_request_id: string; p_reason?: string | null };
     Returns: undefined;
@@ -183,6 +205,14 @@ const KNOWN_REGISTRATION_ERROR_CODES = new Set<RegistrationErrorCode>([
   "super_admin_role_not_found",
   "request_not_found",
   "request_not_pending",
+  "church_id_required",
+  "auth_user_id_required",
+  "full_name_ar_required",
+  "roles_required",
+  "role_not_in_church",
+  "stage_not_in_church",
+  "church_not_found",
+  "not_allowed",
 ]);
 
 export function toRegistrationError(

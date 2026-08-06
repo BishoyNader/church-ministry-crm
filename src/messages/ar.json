@@ -388,6 +388,57 @@
         "cancel": "إلغاء",
         "processing": "جارٍ الرفض…"
       }
+    },
+    "churchScope": {
+      "label": "اختيار الكنيسة",
+      "placeholder": "اختر كنيسة…"
+    },
+    "userImport": {
+      "title": "استيراد المستخدمين",
+      "description": "إنشاء مستخدمين دفعة واحدة من ملف CSV أو XLSX.",
+      "uploadLabel": "رفع ملف المستخدمين",
+      "chooseFile": "اختيار ملف",
+      "supportedFormats": "الصيغ المدعومة: .csv، .xlsx (بحد أقصى 10 ميجابايت).",
+      "downloadTemplate": "تنزيل القالب",
+      "templateError": "تعذّر تنزيل القالب.",
+      "churchRequired": "اختر كنيسة لاستيراد المستخدمين إليها.",
+      "invalidFileType": "يُسمح فقط بملفات .csv و .xlsx.",
+      "fileTooLarge": "حجم الملف يتجاوز الحد الأقصى البالغ 10 ميجابايت.",
+      "previewError": "تعذّرت معاينة الملف.",
+      "importError": "فشل استيراد المستخدمين.",
+      "validCount": "{count} صحيح",
+      "invalidCount": "{count} غير صحيح",
+      "validationReport": "تقرير التحقق",
+      "duplicateEmails": "{count} صفوف تستخدم بريدًا إلكترونيًا موجودًا بالفعل.",
+      "invalidEmails": "{count} صفوف تحتوي على بريد إلكتروني غير صالح.",
+      "shortPasswords": "{count} صفوف تحتوي على كلمة مرور أقصر من 8 أحرف.",
+      "missingRequired": "{count} صفوف تفتقد حقولًا إلزامية.",
+      "unknownRoles": "{count} صفوف تشير إلى دور غير معروف.",
+      "unknownStages": "{count} صفوف تشير إلى مرحلة غير معروفة.",
+      "showingFirst": "عرض أول {count} صفوف إضافية…",
+      "importButton": "استيراد المستخدمين",
+      "cancel": "إلغاء",
+      "importSummary": "تم استيراد {imported} مستخدم. فشل {failed}.",
+      "failure": {
+        "title": "أخطاء الاستيراد",
+        "missingRole": "الدور مطلوب لهذا المستخدم.",
+        "duplicate": "يوجد حساب مسجّل بالفعل لهذا البريد الإلكتروني.",
+        "invalidRole": "الدور غير موجود في هذه الكنيسة.",
+        "invalidStage": "المرحلة غير موجودة في هذه الكنيسة.",
+        "authFailed": "تعذّر إنشاء الحساب.",
+        "rpcFailure": "تعذّر تجهيز الحساب.",
+        "row": "الصف {row} — {email}",
+        "more": "و {count} أخرى…"
+      },
+      "table": {
+        "caption": "المستخدمون المستوردون",
+        "row": "الصف",
+        "email": "البريد الإلكتروني",
+        "name": "الاسم",
+        "role": "الدور",
+        "stage": "المرحلة",
+        "errors": "الأخطاء"
+      }
     }
   },
   "stages": {
