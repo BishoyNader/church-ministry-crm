@@ -342,7 +342,7 @@
       "cancel": "إلغاء",
       "processing": "جارٍ الحفظ…"
     },
-  "stages": {
+    "stages": {
       "title": "إدارة تعيين المراحل",
       "description": "تعيين مراحل {name}.",
       "empty": "لا توجد مراحل نشطة متاحة.",
@@ -837,8 +837,8 @@
     },
     "tabs": {
       "servants": "الخدام",
-    "users": "المستخدمين",
-    "audit": "سجل المراجعة",
+      "users": "المستخدمين",
+      "audit": "سجل المراجعة",
       "churches": "طلبات الكنائس"
     },
     "stats": {
@@ -1016,19 +1016,19 @@
       "invalidGenders": "{count} صفوف بقيمة جنس غير صالحة",
       "importButton": "استيراد الصفوف الصالحة",
       "cancel": "إلغاء",
-    "importSummary": "تم استيراد {imported} مخدوم. تم تخطي {skipped} مكرر.",
-    "showingFirst": "عرض أول 10 صفوف. {count} أخرى غير معروضة.",
-    "failure": {
-      "title": "أخطاء الاستيراد",
-      "row": "الصف {row} · {name}",
-      "more": "{count} أخرى غير معروضة",
-      "duplicate": "مخدوم مكرر",
-      "servantNotFound": "لا يوجد ملف خادم للمستخدم الحالي",
-      "stageNotFound": "المرحلة أو الخدمة غير موجودة",
-      "invalidChurchScope": "صلاحيات غير كافية أو نطاق كنيسة غير صالح",
-      "rpcFailure": "فشلت عملية الاستيراد",
-      "insertFailure": "تعذر حفظ الصف"
-    },
+      "importSummary": "تم استيراد {imported} مخدوم. تم تخطي {skipped} مكرر.",
+      "showingFirst": "عرض أول 10 صفوف. {count} أخرى غير معروضة.",
+      "failure": {
+        "title": "أخطاء الاستيراد",
+        "row": "الصف {row} · {name}",
+        "more": "{count} أخرى غير معروضة",
+        "duplicate": "مخدوم مكرر",
+        "servantNotFound": "لا يوجد ملف خادم للمستخدم الحالي",
+        "stageNotFound": "المرحلة أو الخدمة غير موجودة",
+        "invalidChurchScope": "صلاحيات غير كافية أو نطاق كنيسة غير صالح",
+        "rpcFailure": "فشلت عملية الاستيراد",
+        "insertFailure": "تعذر حفظ الصف"
+      },
       "table": {
         "row": "الصف",
         "name": "الاسم",
@@ -1367,6 +1367,8 @@
     "statusAll": "الكل",
     "statusActive": "نشطة",
     "statusInactive": "موقوفة",
+    "statusSuspended": "معلّقة",
+    "statusDisabled": "معطّلة",
     "clearFilters": "مسح الفلاتر",
     "emptyState": "لا توجد كنائس.",
     "paginationLabel": "{total, plural, =0 {لا توجد نتائج} =1 {نتيجة واحدة} other {# نتائج}} — صفحة {page} من {totalPages}",
@@ -1376,10 +1378,120 @@
     "edit": "تعديل",
     "activate": "تفعيل",
     "deactivate": "إيقاف",
+    "suspend": "تعليق",
+    "disable": "تعطيل",
+    "reactivate": "إعادة التفعيل",
+    "children": "أطفال",
+    "classes": {
+      "label": "فصول",
+      "emptyState": "لا توجد فصول."
+    },
+    "attendanceRate": "نسبة الحضور",
+    "lastActivity": "آخر نشاط",
+    "latestAuditEvent": "أحدث حدث في السجل",
+    "recentActivity": "النشاط الأخير",
+    "cancel": "إلغاء",
+    "actions": {
+      "menu": "إجراءات",
+      "view": "عرض",
+      "edit": "تعديل",
+      "activate": "تفعيل",
+      "deactivate": "إيقاف",
+      "suspend": "تعليق",
+      "disable": "تعطيل",
+      "reactivate": "إعادة التفعيل",
+      "changeManager": "تغيير المسؤول",
+      "viewAudit": "عرض سجل التدقيق"
+    },
+    "counts": {
+      "members": "أعضاء",
+      "servants": "خدام",
+      "children": "أطفال",
+      "services": "خدمات",
+      "stages": "مراحل",
+      "classes": "فصول"
+    },
+    "manager": {
+      "label": "المسؤول",
+      "notAssigned": "لا يوجد مسؤول معيّن",
+      "changeTitle": "تغيير مسؤول الكنيسة",
+      "changeDescription": "اختر مستخدمًا نشطًا لإدارة هذه الكنيسة. سيفقد المسؤول الحالي صلاحيات الإدارة.",
+      "selectPlaceholder": "اختر مستخدمًا…",
+      "loading": "جارٍ تحميل المستخدمين…",
+      "noCandidates": "لا يوجد مستخدمون نشطون آخرون.",
+      "saving": "جارٍ الحفظ…",
+      "confirm": "تغيير المسؤول",
+      "lastLogin": "آخر تسجيل دخول",
+      "statusActive": "نشط",
+      "statusInactive": "غير نشط",
+      "change": "تغيير",
+      "resetPassword": "إعادة تعيين كلمة المرور",
+      "disable": "إلغاء التنشيط",
+      "resetTitle": "إعادة تعيين كلمة مرور المسؤول",
+      "resetDescription": "أدخل كلمة مرور جديدة لمسؤول الكنيسة. يجب ألا تقل عن 8 أحرف.",
+      "passwordPlaceholder": "كلمة المرور الجديدة",
+      "confirmDisable": "إلغاء تنشيط المستخدم",
+      "disableTitle": "إلغاء تنشيط المسؤول",
+      "disableDescription": "سيؤدي هذا إلى إزالة وصول المسؤول إلى الكنيسة. لا يمكن التراجع عن ذلك من هذه الشاشة."
+    },
+    "users": {
+      "searchPlaceholder": "ابحث عن المستخدمين…",
+      "emptyState": "لا يوجد مستخدمون."
+    },
+    "services": {
+      "label": "خدمات",
+      "emptyState": "لا توجد خدمات."
+    },
+    "stages": {
+      "label": "مراحل",
+      "emptyState": "لا توجد مراحل."
+    },
+    "audit": {
+      "emptyState": "لا توجد أحداث في سجل التدقيق."
+    },
+    "reports": {
+      "emptyState": "لا توجد بيانات حضور بعد.",
+      "attendanceRate": "نسبة الحضور",
+      "present": "حاضر",
+      "absent": "غائب",
+      "total": "إجمالي السجلات",
+      "stageComparison": "مقارنة المراحل"
+    },
+    "statusDialog": {
+      "saving": "جارٍ الحفظ…",
+      "active": {
+        "title": "إعادة تفعيل الكنيسة",
+        "description": "ستصبح هذه الكنيسة نشطة مرة أخرى وسيستعيد أعضاؤها الوصول.",
+        "confirm": "إعادة التفعيل"
+      },
+      "inactive": {
+        "title": "إيقاف الكنيسة",
+        "description": "سيتم وضع علامة غير نشط على الكنيسة. قد يفقد الأعضاء الوصول حتى تتم إعادة تفعيلها.",
+        "confirm": "إيقاف"
+      },
+      "suspended": {
+        "title": "تعليق الكنيسة",
+        "description": "سيتم تعليق الكنيسة مؤقتًا. لا يمكن لأي شخص من هذه الكنيسة تسجيل الدخول.",
+        "confirm": "تعليق"
+      },
+      "disabled": {
+        "title": "تعطيل الكنيسة",
+        "description": "سيتم تعطيل الكنيسة نهائيًا. هذا إجراء قوي ولا يمكن التراجع عنه بسهولة.",
+        "confirm": "تعطيل"
+      }
+    },
+    "tabs": {
+      "overview": "نظرة عامة",
+      "users": "المستخدمون",
+      "services": "الخدمات",
+      "stages": "المراحل",
+      "classes": "الفصول",
+      "reports": "التقارير",
+      "audit": "سجل التدقيق",
+      "settings": "الإعدادات"
+    },
     "members": "أعضاء",
     "servants": "خدام",
-    "services": "خدمات",
-    "stages": "مراحل",
     "slug": "الرابط",
     "status": "الحالة",
     "contactEmail": "البريد الإلكتروني",
@@ -1398,7 +1510,10 @@
       "createFailed": "تعذّر إنشاء الكنيسة.",
       "updateFailed": "تعذّر تحديث الكنيسة.",
       "notFound": "الكنيسة غير موجودة.",
-      "statsFailed": "تعذّر تحميل إحصائيات الكنيسة."
+      "statsFailed": "تعذّر تحميل إحصائيات الكنيسة.",
+      "passwordTooShort": "كلمة المرور يجب ألا تقل عن 8 أحرف.",
+      "managerNotFound": "لا يوجد مسؤول معيّن لهذه الكنيسة.",
+      "resetPasswordFailed": "فشلت إعادة تعيين كلمة المرور. حاول مرة أخرى."
     },
     "wizard": {
       "title": "إنشاء كنيسة جديدة",

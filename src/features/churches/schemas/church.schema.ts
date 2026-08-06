@@ -31,6 +31,7 @@ export const updateChurchSchema = z.object({
   address_ar: z.string().max(500).optional().default(""),
   address_en: z.string().max(500).optional().default(""),
   is_active: z.boolean().optional(),
+  status: z.enum(["active", "inactive", "suspended", "disabled"]).optional(),
   subscription_tier: z.string().max(50).default("trial"),
   subscription_status: z.string().max(50).default("active"),
   locale: z.string().max(10).default("ar"),

@@ -19,6 +19,13 @@
       "skillPath": "skills/taste-skill-v1/SKILL.md",
       "computedHash": "d704ab912c4d0ca954ffa858983da755ae4cd5cad9ba22554db5557382f5bd34"
     },
+    "frontend-design": {
+      "source": "smithery.ai",
+      "sourceUrl": "https://smithery.ai/skills/JoaquinCampo/frontend-design",
+      "sourceType": "well-known",
+      "computedHash": "a2561f129b0806ee58af02521f5845f2bc5474003d2227109ce9166d261c3ae0",
+      "wellKnownDigest": "sha256:c85c97b047ca06d31dc29e81ca1c9fc4bcbd93e28b4f53fd1d1c22bfcd12d38e"
+    },
     "full-output-enforcement": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
