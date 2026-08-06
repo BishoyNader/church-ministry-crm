@@ -489,6 +489,7 @@ export type Database = {
           name_en: string | null
           settings: Json
           slug: string
+          status: string
           subscription_status: string
           subscription_tier: string
           trial_ends_at: string | null
@@ -510,6 +511,7 @@ export type Database = {
           name_en?: string | null
           settings?: Json
           slug: string
+          status?: string
           subscription_status?: string
           subscription_tier?: string
           trial_ends_at?: string | null
@@ -531,6 +533,7 @@ export type Database = {
           name_en?: string | null
           settings?: Json
           slug?: string
+          status?: string
           subscription_status?: string
           subscription_tier?: string
           trial_ends_at?: string | null
@@ -1609,6 +1612,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      change_church_manager: {
+        Args: { p_church_id: string; p_new_user_id: string }
+        Returns: string
+      }
       create_beneficiary_with_assignment: {
         Args: {
           p_address?: string
@@ -1627,6 +1634,10 @@ export type Database = {
           p_stage_id: string
           p_whatsapp?: string
         }
+        Returns: string
+      }
+      deactivate_church_user: {
+        Args: { p_church_id: string; p_user_id: string }
         Returns: string
       }
       get_user_church_id: { Args: never; Returns: string }

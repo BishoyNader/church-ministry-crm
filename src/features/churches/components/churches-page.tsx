@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Pencil, Plus, SearchX, UserCheck, UserX } from "lucide-react";
+import { Building2, Plus, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,31 +13,55 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
-import { Link } from "@/i18n/navigation";
-import { useChurchList, useActivateChurch, useDeactivateChurch } from "../hooks/use-churches";
+import { Link, useRouter } from "@/i18n/navigation";
+import {
+  useChurchList,
+  useChurchesSummary,
+} from "../hooks/use-churches";
 import { ChurchFormDialog } from "./church-form-dialog";
-import type { ChurchListItem, ChurchFilters } from "../types/church.types";
+import { ChurchQuickStats } from "./church-quick-stats";
+import { ChurchStatusBadge } from "./church-status-badge";
+import { ChurchActionsMenu } from "./church-actions-menu";
+import { ChurchStatusConfirmDialog } from "./church-status-confirm-dialog";
+import { ChangeChurchManagerDialog } from "./change-church-manager-dialog";
+import type { ChurchListItem, ChurchStatus, ChurchStatusFilter } from "../types/church.types";
 
 const PAGE_SIZE = 20;
 
+type CountCellProps = {
+  label: string;
+  value: number;
+};
+
+function CountCell({ label, value }: CountCellProps) {
+  return (
+    <div className="flex min-w-[72px] flex-col items-center rounded-lg bg-muted/40 px-2 py-1.5">
+      <span className="text-sm font-semibold">{value}</span>
+      <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</span>
+    </div>
+  );
+}
+
 export function ChurchesPage() {
   const t = useTranslations("churches");
+  const router = useRouter();
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ChurchFilters["status"]>("all");
+  const [statusFilter, setStatusFilter] = useState<ChurchStatusFilter>("all");
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editChurch, setEditChurch] = useState<ChurchListItem | null>(null);
+  const [statusChurch, setStatusChurch] = useState<ChurchListItem | null>(null);
+  const [statusTarget, setStatusTarget] = useState<ChurchStatus>("inactive");
+  const [managerChurch, setManagerChurch] = useState<ChurchListItem | null>(null);
 
-  const activateMutation = useActivateChurch();
-  const deactivateMutation = useDeactivateChurch();
+  const { data: summaryData, isLoading: summaryLoading } = useChurchesSummary();
 
   const filters = useMemo(
     () => ({
@@ -73,41 +97,29 @@ export function ChurchesPage() {
   };
 
   const handleStatusChange = (value: unknown) => {
-    setStatusFilter(value as ChurchFilters["status"]);
+    setStatusFilter(value as ChurchStatusFilter);
     setPage(1);
   };
 
-  const handleActivate = async (church: ChurchListItem) => {
-    try {
-      await activateMutation.mutateAsync(church.id);
-    } catch {
-      // Error is surfaced via activateMutation.error state below
-    }
+  const handleStatusSelect = (church: ChurchListItem, status: ChurchStatus) => {
+    setStatusChurch(church);
+    setStatusTarget(status);
   };
 
-  const handleDeactivate = async (church: ChurchListItem) => {
-    try {
-      await deactivateMutation.mutateAsync(church.id);
-    } catch {
-      // Error is surfaced via deactivateMutation.error state below
-    }
+  const handleView = (church: ChurchListItem) => {
+    router.push(`/admin/churches/${church.id}`);
+  };
+
+  const handleViewAudit = (church: ChurchListItem) => {
+    router.push(`/admin/churches/${church.id}?tab=audit`);
   };
 
   if (error) {
     return <ErrorState title={t("errors.listFailed")} message={error.message} />;
   }
 
-  const activateError = activateMutation.error?.message ?? null;
-  const deactivateError = deactivateMutation.error?.message ?? null;
-
   return (
     <section className="space-y-6">
-      {(activateError || deactivateError) && (
-        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {activateError || deactivateError}
-        </div>
-      )}
-
       <PageHeader
         title={t("title")}
         description={t("description")}
@@ -128,6 +140,16 @@ export function ChurchesPage() {
         }
       />
 
+      <ChurchQuickStats
+        summary={summaryData?.data}
+        isLoading={summaryLoading}
+        activeFilter={statusFilter}
+        onSelectStatus={(status) => {
+          setStatusFilter(status);
+          setPage(1);
+        }}
+      />
+
       <SectionCard className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
           <Input
@@ -146,6 +168,8 @@ export function ChurchesPage() {
               <SelectItem value="all">{t("statusAll")}</SelectItem>
               <SelectItem value="active">{t("statusActive")}</SelectItem>
               <SelectItem value="inactive">{t("statusInactive")}</SelectItem>
+              <SelectItem value="suspended">{t("statusSuspended")}</SelectItem>
+              <SelectItem value="disabled">{t("statusDisabled")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -162,73 +186,69 @@ export function ChurchesPage() {
         {isLoading ? (
           <div className="divide-y">
             {Array.from({ length: 5 }).map((_, index) => (
-              <div key={index} className="flex items-center gap-4 px-4 py-3">
-                <Skeleton className="h-4 w-48" />
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-40" />
+              <div key={index} className="flex items-center gap-4 px-4 py-4">
+                <Skeleton className="h-10 w-10 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
               </div>
             ))}
           </div>
         ) : rows.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-            <SearchX className="size-8 text-muted-foreground" />
+            <Building2 className="size-8 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">{t("emptyState")}</p>
           </div>
         ) : (
           <div className="divide-y">
             {rows.map((church) => (
-              <div key={church.id} className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-y-1">
-                  <p className="font-medium">{church.name_ar}</p>
+              <div key={church.id} className="flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0 space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => handleView(church)}
+                    className="text-left font-medium hover:underline"
+                  >
+                    {church.name_ar}
+                  </button>
                   <p className="text-xs text-muted-foreground">
-                    {church.slug} · {church.contact_email ?? "—"} · {church.contact_phone ?? "—"}
+                    {church.slug} · {church.contact_email ?? "—"}
                   </p>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span>{new Date(church.created_at).toLocaleDateString()}</span>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                    <span>
+                      {t("manager.label")}:{" "}
+                      {church.manager ? church.manager.fullNameAr : t("manager.notAssigned")}
+                    </span>
                     <span>·</span>
-                    <span>{church.subscription_tier}</span>
+                    <span>{t("createdAt")}: {new Date(church.created_at).toLocaleDateString()}</span>
                     <span>·</span>
-                    <Badge variant={church.is_active ? "default" : "secondary"}>
-                      {church.is_active ? t("statusActive") : t("statusInactive")}
-                    </Badge>
+                    <span>
+                      {t("lastActivity")}:{" "}
+                      {church.lastActivityAt ? new Date(church.lastActivityAt).toLocaleDateString() : "—"}
+                    </span>
                   </div>
                 </div>
 
+                <div className="flex flex-wrap items-center gap-2">
+                  <CountCell label={t("counts.members")} value={church.memberCount} />
+                  <CountCell label={t("counts.servants")} value={church.servantCount} />
+                  <CountCell label={t("counts.children")} value={church.childCount} />
+                  <CountCell label={t("counts.services")} value={church.serviceCount} />
+                  <CountCell label={t("counts.stages")} value={church.stageCount} />
+                  <CountCell label={t("counts.classes")} value={church.classCount} />
+                </div>
+
                 <div className="flex items-center gap-2">
-                  <PermissionGuard permission="tenants.update">
-                    {church.is_active ? (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeactivate(church)}
-                        disabled={deactivateMutation.isPending}
-                        aria-label={t("deactivate")}
-                      >
-                        <UserX className="size-4" />
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleActivate(church)}
-                        disabled={activateMutation.isPending}
-                        aria-label={t("activate")}
-                      >
-                        <UserCheck className="size-4" />
-                      </Button>
-                    )}
-                  </PermissionGuard>
-                  <PermissionGuard permission="tenants.update">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setEditChurch(church)}
-                      aria-label={t("edit")}
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
-                  </PermissionGuard>
+                  <ChurchStatusBadge status={church.status} />
+                  <ChurchActionsMenu
+                    church={church}
+                    onView={handleView}
+                    onEdit={setEditChurch}
+                    onStatusChange={handleStatusSelect}
+                    onChangeManager={setManagerChurch}
+                    onViewAudit={handleViewAudit}
+                  />
                 </div>
               </div>
             ))}
@@ -273,6 +293,24 @@ export function ChurchesPage() {
           if (!open) setEditChurch(null);
         }}
         church={editChurch}
+      />
+
+      <ChurchStatusConfirmDialog
+        open={!!statusChurch}
+        onOpenChange={(open) => {
+          if (!open) setStatusChurch(null);
+        }}
+        churchId={statusChurch?.id ?? ""}
+        status={statusTarget}
+      />
+
+      <ChangeChurchManagerDialog
+        open={!!managerChurch}
+        onOpenChange={(open) => {
+          if (!open) setManagerChurch(null);
+        }}
+        churchId={managerChurch?.id ?? ""}
+        currentManagerId={managerChurch?.manager?.userId}
       />
     </section>
   );

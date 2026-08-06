@@ -342,7 +342,7 @@
       "cancel": "Cancel",
       "processing": "Saving…"
     },
-  "stages": {
+    "stages": {
       "title": "Manage Stage Assignments",
       "description": "Assign stages for {name}.",
       "empty": "No active stages available.",
@@ -837,8 +837,8 @@
     },
     "tabs": {
       "servants": "Servants",
-    "users": "Users",
-    "audit": "Audit Log",
+      "users": "Users",
+      "audit": "Audit Log",
       "churches": "Church Requests"
     },
     "stats": {
@@ -1367,6 +1367,8 @@
     "statusAll": "All",
     "statusActive": "Active",
     "statusInactive": "Inactive",
+    "statusSuspended": "Suspended",
+    "statusDisabled": "Disabled",
     "clearFilters": "Clear filters",
     "emptyState": "No churches found.",
     "paginationLabel": "{total, plural, =0 {No results} =1 {1 result} other {# results}} — page {page} of {totalPages}",
@@ -1376,10 +1378,120 @@
     "edit": "Edit",
     "activate": "Activate",
     "deactivate": "Deactivate",
+    "suspend": "Suspend",
+    "disable": "Disable",
+    "reactivate": "Reactivate",
+    "children": "Children",
+    "classes": {
+      "label": "Classes",
+      "emptyState": "No classes found."
+    },
+    "attendanceRate": "Attendance rate",
+    "lastActivity": "Last activity",
+    "latestAuditEvent": "Latest audit event",
+    "recentActivity": "Recent activity",
+    "cancel": "Cancel",
+    "actions": {
+      "menu": "Actions",
+      "view": "View",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "suspend": "Suspend",
+      "disable": "Disable",
+      "reactivate": "Reactivate",
+      "changeManager": "Change manager",
+      "viewAudit": "View audit log"
+    },
+    "counts": {
+      "members": "Members",
+      "servants": "Servants",
+      "children": "Children",
+      "services": "Services",
+      "stages": "Stages",
+      "classes": "Classes"
+    },
+    "manager": {
+      "label": "Manager",
+      "notAssigned": "No manager assigned",
+      "changeTitle": "Change church manager",
+      "changeDescription": "Select an active user to manage this church. The current manager will lose administrative access.",
+      "selectPlaceholder": "Select a user…",
+      "loading": "Loading users…",
+      "noCandidates": "No other active users available.",
+      "saving": "Saving…",
+      "confirm": "Change manager",
+      "lastLogin": "Last login",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "change": "Change",
+      "resetPassword": "Reset password",
+      "disable": "Deactivate",
+      "resetTitle": "Reset manager password",
+      "resetDescription": "Enter a new password for this church manager. It must be at least 8 characters.",
+      "passwordPlaceholder": "New password",
+      "confirmDisable": "Deactivate user",
+      "disableTitle": "Deactivate manager",
+      "disableDescription": "This will remove the manager's access to the church. It cannot be undone from this screen."
+    },
+    "users": {
+      "searchPlaceholder": "Search users…",
+      "emptyState": "No users found."
+    },
+    "services": {
+      "label": "Services",
+      "emptyState": "No services found."
+    },
+    "stages": {
+      "label": "Stages",
+      "emptyState": "No stages found."
+    },
+    "audit": {
+      "emptyState": "No audit entries."
+    },
+    "reports": {
+      "emptyState": "No attendance data yet.",
+      "attendanceRate": "Attendance rate",
+      "present": "Present",
+      "absent": "Absent",
+      "total": "Total records",
+      "stageComparison": "Stage comparison"
+    },
+    "statusDialog": {
+      "saving": "Saving…",
+      "active": {
+        "title": "Reactivate church",
+        "description": "This church will become active again and its members will regain access.",
+        "confirm": "Reactivate"
+      },
+      "inactive": {
+        "title": "Deactivate church",
+        "description": "The church will be marked inactive. Members may lose access until it is reactivated.",
+        "confirm": "Deactivate"
+      },
+      "suspended": {
+        "title": "Suspend church",
+        "description": "The church will be temporarily suspended. No one from this church can sign in.",
+        "confirm": "Suspend"
+      },
+      "disabled": {
+        "title": "Disable church",
+        "description": "The church will be permanently disabled. This is a strong action and cannot be easily undone.",
+        "confirm": "Disable"
+      }
+    },
+    "tabs": {
+      "overview": "Overview",
+      "users": "Users",
+      "services": "Services",
+      "stages": "Stages",
+      "classes": "Classes",
+      "reports": "Reports",
+      "audit": "Audit log",
+      "settings": "Settings"
+    },
     "members": "Members",
     "servants": "Servants",
-    "services": "Services",
-    "stages": "Stages",
     "slug": "Slug",
     "status": "Status",
     "contactEmail": "Contact email",
@@ -1398,7 +1510,10 @@
       "createFailed": "Failed to create the church.",
       "updateFailed": "Failed to update the church.",
       "notFound": "Church not found.",
-      "statsFailed": "Failed to load church statistics."
+      "statsFailed": "Failed to load church statistics.",
+      "passwordTooShort": "The password must be at least 8 characters long.",
+      "managerNotFound": "No manager is assigned to this church.",
+      "resetPasswordFailed": "Failed to reset the password. Please try again."
     },
     "wizard": {
       "title": "Provision a new church",
