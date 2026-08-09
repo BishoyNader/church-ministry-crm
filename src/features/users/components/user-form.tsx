@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { AlertTriangle, Info, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +37,7 @@ import {
   useStages,
   useActorChurch,
 } from "../hooks/use-users";
+import { useChurchList, useChurchDetail } from "@/features/churches/hooks/use-churches";
 
 type UserFormProps = {
   open: boolean;
@@ -48,21 +50,15 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
   const t = useTranslations("users.form");
   const isEdit = !!userId;
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const detailQuery = useUserDetail(userId ?? null, churchId);
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
 
   const user = detailQuery.data?.data;
   const actorChurchQuery = useActorChurch();
-  const scopeChurchId = isEdit
-    ? (user?.church_id ?? null)
-    : (churchId ?? actorChurchQuery.data?.churchId ?? null);
-
-  const rolesQuery = useRoles(scopeChurchId);
-  const stagesQuery = useStages(scopeChurchId);
-
-  const roles = rolesQuery.data?.data ?? [];
-  const stages = stagesQuery.data?.data ?? [];
+  const isPlatformOwner = actorChurchQuery.data?.isPlatformOwner ?? false;
 
   const createForm = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),
@@ -76,6 +72,7 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
       churchId: churchId ?? undefined,
       roleIds: [],
       stageIds: [],
+      confirmReplaceManager: false,
     },
   });
 
@@ -102,19 +99,74 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
     }
   }, [isEdit, user, updateForm]);
 
+  // The Platform Owner (church_id NULL) can create users for any church. When no
+  // church is preselected (e.g. the global /users page), the form shows a church
+  // selector so the target tenant is explicit before choosing roles/stages.
+  const watchedChurchId = createForm.watch("churchId");
+  const scopeChurchId = isEdit
+    ? (user?.church_id ?? null)
+    : (churchId ?? watchedChurchId ?? actorChurchQuery.data?.churchId ?? null);
+
+  const churchesQuery = useChurchList(
+    { status: "active" },
+    { enabled: isPlatformOwner && !isEdit && !churchId },
+  );
+  const churches = churchesQuery.data?.data?.rows ?? [];
+
+  const rolesQuery = useRoles(scopeChurchId);
+  const stagesQuery = useStages(scopeChurchId);
+
+  const roles = rolesQuery.data?.data ?? [];
+  const stages = stagesQuery.data?.data ?? [];
+
+  // Manager replacement warning: only meaningful when creating as the PO and the
+  // Church Manager role is selected for a church that already has a manager.
+  const managerChurchId = isPlatformOwner && !isEdit ? (scopeChurchId ?? "") : "";
+  const churchDetailQuery = useChurchDetail(managerChurchId);
+  const manager = churchDetailQuery.data?.data?.manager ?? null;
+  const superAdminRole = roles.find((role) => role.role_type === "super_admin");
+  const selectedRoleIds = createForm.watch("roleIds");
+  const showManagerWarning =
+    !isEdit &&
+    isPlatformOwner &&
+    !!scopeChurchId &&
+    !!superAdminRole &&
+    selectedRoleIds.includes(superAdminRole.id) &&
+    !!manager;
+
   const handleCreate = async (values: CreateUserFormValues) => {
+    setSubmitError(null);
     const result = await createMutation.mutateAsync(values);
-    if (result.success) onOpenChange(false);
+    if (result.success) {
+      onOpenChange(false);
+    } else {
+      setSubmitError(result.message ?? null);
+    }
   };
 
   const handleUpdate = async (values: UpdateUserFormValues) => {
     if (!userId) return;
-    const result = await updateMutation.mutateAsync({ userId, values });
-    if (result.success) onOpenChange(false);
+    setSubmitError(null);
+    const result = await updateMutation.mutateAsync({ userId, values, churchId });
+    if (result.success) {
+      onOpenChange(false);
+    } else {
+      setSubmitError(result.message ?? null);
+    }
   };
 
   const isLoading = isEdit && detailQuery.isLoading;
   const isPending = createMutation.isPending || updateMutation.isPending;
+
+  const errorBanner = submitError ? (
+    <div
+      role="alert"
+      className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+    >
+      <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+      {submitError}
+    </div>
+  ) : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -174,17 +226,70 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
               <Label htmlFor="is_active">{t("active")}</Label>
             </div>
 
+            {errorBanner}
+
             <DialogFooter>
               <DialogClose render={<Button variant="outline" type="button" />}>
                 {t("cancel")}
               </DialogClose>
               <Button type="submit" disabled={isPending}>
-                {isPending ? t("processing") : t("save")}
+                {isPending ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    {t("processing")}
+                  </>
+                ) : (
+                  t("save")
+                )}
               </Button>
             </DialogFooter>
           </form>
         ) : (
           <form onSubmit={createForm.handleSubmit(handleCreate)} className="space-y-4">
+            {isPlatformOwner && !churchId ? (
+              <FormField
+                label={t("church")}
+                error={createForm.formState.errors.churchId?.message}
+                required
+              >
+                <Select
+                  value={watchedChurchId ?? ""}
+                  onValueChange={(val) => {
+                    createForm.setValue("churchId", val as string);
+                    // Roles/stages are church-scoped; clear stale selections from
+                    // a previously selected church.
+                    createForm.setValue("roleIds", []);
+                    createForm.setValue("stageIds", []);
+                    createForm.setValue("confirmReplaceManager", false);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("churchPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {churchesQuery.isLoading ? (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {t("loadingChurches")}
+                      </div>
+                    ) : (
+                      churches.map((church) => (
+                        <SelectItem key={church.id} value={church.id}>
+                          {church.name_ar}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormField>
+            ) : null}
+
+            {!scopeChurchId ? (
+              <div className="flex items-start gap-2 rounded-lg border border-muted bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                <Info className="mt-0.5 size-4 shrink-0" />
+                {t("selectChurchFirst")}
+              </div>
+            ) : null}
+
             <FormField
               label={t("email")}
               error={createForm.formState.errors.email?.message}
@@ -234,28 +339,38 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
 
             <div className="space-y-2">
               <Label>{t("roles")} *</Label>
-              <div className="flex flex-wrap gap-2">
-                {roles.map((role) => (
-                  <label
-                    key={role.id}
-                    className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"
-                  >
-                    <Checkbox
-                      checked={createForm.watch("roleIds").includes(role.id)}
-                      onCheckedChange={(checked) => {
-                        const current = createForm.getValues("roleIds");
-                        createForm.setValue(
-                          "roleIds",
-                          checked
-                            ? [...current, role.id]
-                            : current.filter((id) => id !== role.id),
-                        );
-                      }}
-                    />
-                    {role.name_ar}
-                  </label>
-                ))}
-              </div>
+              {rolesQuery.isLoading ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-9 w-full" />
+                  ))}
+                </div>
+              ) : roles.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("noRoles")}</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {roles.map((role) => (
+                    <label
+                      key={role.id}
+                      className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                    >
+                      <Checkbox
+                        checked={createForm.watch("roleIds").includes(role.id)}
+                        onCheckedChange={(checked) => {
+                          const current = createForm.getValues("roleIds");
+                          createForm.setValue(
+                            "roleIds",
+                            checked
+                              ? [...current, role.id]
+                              : current.filter((id) => id !== role.id),
+                          );
+                        }}
+                      />
+                      {role.name_ar}
+                    </label>
+                  ))}
+                </div>
+              )}
               {createForm.formState.errors.roleIds?.message && (
                 <p className="text-xs text-destructive">{createForm.formState.errors.roleIds.message}</p>
               )}
@@ -289,12 +404,42 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
               </div>
             )}
 
+            {showManagerWarning ? (
+              <div className="space-y-2 rounded-lg border border-amber-300/50 bg-amber-50 p-4 dark:bg-amber-950/20">
+                <div className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
+                  <AlertTriangle className="size-4" />
+                  {t("managerWarningTitle")}
+                </div>
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  {t("managerWarning", { name: manager?.fullNameAr ?? manager?.email ?? "" })}
+                </p>
+                <label className="flex cursor-pointer items-start gap-2 text-sm text-amber-800 dark:text-amber-200">
+                  <Checkbox
+                    checked={createForm.watch("confirmReplaceManager") ?? false}
+                    onCheckedChange={(checked) =>
+                      createForm.setValue("confirmReplaceManager", !!checked)
+                    }
+                  />
+                  {t("confirmReplaceManager")}
+                </label>
+              </div>
+            ) : null}
+
+            {errorBanner}
+
             <DialogFooter>
               <DialogClose render={<Button variant="outline" type="button" />}>
                 {t("cancel")}
               </DialogClose>
               <Button type="submit" disabled={isPending}>
-                {isPending ? t("processing") : t("create")}
+                {isPending ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" />
+                    {t("processing")}
+                  </>
+                ) : (
+                  t("create")
+                )}
               </Button>
             </DialogFooter>
           </form>
@@ -303,4 +448,3 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
     </Dialog>
   );
 }
-

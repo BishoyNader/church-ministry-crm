@@ -44,7 +44,10 @@ export const CHURCHES_QUERY_KEYS = {
   reports: (churchId: string) => ["churches", "reports", churchId] as const,
 };
 
-export function useChurchList(filters: ChurchFilters = {}) {
+export function useChurchList(
+  filters: ChurchFilters = {},
+  options: { enabled?: boolean } = {},
+) {
   const locale = useLocale();
   return useQuery({
     queryKey: CHURCHES_QUERY_KEYS.list(filters),
@@ -55,6 +58,7 @@ export function useChurchList(filters: ChurchFilters = {}) {
       }
       return result;
     },
+    enabled: options.enabled ?? true,
     staleTime: 30_000,
   });
 }

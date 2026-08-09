@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Plus, MoreHorizontal, Download, Loader2 } from "lucide-react";
+import { Search, Plus, Download, Loader2, Layers, Pencil, UserCog, UserX } from "lucide-react";
 import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,7 +118,10 @@ export function UserListPage() {
 
   const handleDeactivate = async () => {
     if (!deactivateUser) return;
-    const result = await deactivateMutation.mutateAsync(deactivateUser.id);
+    const result = await deactivateMutation.mutateAsync({
+      userId: deactivateUser.id,
+      churchId: scopeChurchId ?? undefined,
+    });
     if (result.success) setDeactivateUser(null);
   };
 
@@ -136,10 +139,7 @@ export function UserListPage() {
         title={t("title")}
         description={t("description")}
         actions={
-          <Button
-            onClick={() => setCreateOpen(true)}
-            disabled={isPlatformOwner && scopeChurchId === null}
-          >
+          <Button onClick={() => setCreateOpen(true)}>
             <Plus className="size-4" />
             {t("createUser")}
           </Button>
@@ -282,8 +282,37 @@ export function UserListPage() {
                             size="icon-sm"
                             onClick={() => setEditUser(user)}
                             aria-label={t("actions.edit")}
+                            title={t("actions.edit")}
                           >
-                            <MoreHorizontal className="size-4" />
+                            <Pencil className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setRolesUser(user)}
+                            aria-label={t("actions.changeRole")}
+                            title={t("actions.changeRole")}
+                          >
+                            <UserCog className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setStagesUser(user)}
+                            aria-label={t("actions.assignStages")}
+                            title={t("actions.assignStages")}
+                          >
+                            <Layers className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => setDeactivateUser(user)}
+                            aria-label={t("actions.deactivate")}
+                            title={t("actions.deactivate")}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <UserX className="size-4" />
                           </Button>
                         </div>
                       </td>

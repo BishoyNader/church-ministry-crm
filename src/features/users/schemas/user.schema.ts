@@ -12,6 +12,9 @@ export const createUserSchema = z.object({
   preferred_locale: z.enum(["ar", "en"]).optional(),
   roleIds: z.array(z.string()).min(1, { message: "At least one role is required" }),
   stageIds: z.array(z.string()).optional(),
+  // Platform Owner confirmation when the Church Manager role would replace an
+  // existing active manager. Server-enforced in createUserAction.
+  confirmReplaceManager: z.boolean().optional(),
 });
 
 export const updateUserSchema = z.object({

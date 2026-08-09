@@ -103,8 +103,15 @@ export function useUpdateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, values }: { userId: string; values: UpdateUserFormValues }) =>
-      updateUserAction(userId, values),
+    mutationFn: ({
+      userId,
+      values,
+      churchId,
+    }: {
+      userId: string;
+      values: UpdateUserFormValues;
+      churchId?: string;
+    }) => updateUserAction(userId, values, churchId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
       queryClient.invalidateQueries({
@@ -118,7 +125,8 @@ export function useDeactivateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userId: string) => deactivateUserAction(userId),
+    mutationFn: ({ userId, churchId }: { userId: string; churchId?: string }) =>
+      deactivateUserAction(userId, churchId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
     },
@@ -129,8 +137,15 @@ export function useAssignRoles() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, roleIds }: { userId: string; roleIds: string[] }) =>
-      assignRolesAction(userId, roleIds),
+    mutationFn: ({
+      userId,
+      roleIds,
+      churchId,
+    }: {
+      userId: string;
+      roleIds: string[];
+      churchId?: string;
+    }) => assignRolesAction(userId, roleIds, churchId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
       queryClient.invalidateQueries({
@@ -144,8 +159,15 @@ export function useAssignStages() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ userId, stageIds }: { userId: string; stageIds: string[] }) =>
-      assignStagesAction(userId, stageIds),
+    mutationFn: ({
+      userId,
+      stageIds,
+      churchId,
+    }: {
+      userId: string;
+      stageIds: string[];
+      churchId?: string;
+    }) => assignStagesAction(userId, stageIds, churchId),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
       queryClient.invalidateQueries({

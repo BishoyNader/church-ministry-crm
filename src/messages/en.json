@@ -328,7 +328,15 @@
       "create": "Create user",
       "save": "Save changes",
       "cancel": "Cancel",
-      "processing": "Processing…"
+      "processing": "Processing…",
+      "church": "Church",
+      "churchPlaceholder": "Select a church…",
+      "loadingChurches": "Loading churches…",
+      "selectChurchFirst": "Select a church first to choose roles and stages.",
+      "noRoles": "No roles are available for this church.",
+      "managerWarningTitle": "Church Manager replacement",
+      "managerWarning": "This church already has a Church Manager ({name}). Creating this user with the Church Manager role will end the current manager's assignment and make the new user the manager.",
+      "confirmReplaceManager": "I understand — replace the current Church Manager"
     },
     "roles": {
       "title": "Manage Roles",
@@ -353,7 +361,10 @@
       "processing": "Deactivating…"
     },
     "actions": {
-      "edit": "Edit user"
+      "edit": "Edit user",
+      "changeRole": "Change role",
+      "assignStages": "Assign stages",
+      "deactivate": "Deactivate"
     },
     "approvalQueue": {
       "title": "Pending Registrations",
@@ -1517,7 +1528,9 @@
     },
     "users": {
       "searchPlaceholder": "Search users…",
-      "emptyState": "No users found."
+      "emptyState": "No users found.",
+      "addUser": "Add User",
+      "changeManager": "Change manager"
     },
     "services": {
       "label": "Services",
