@@ -18,6 +18,7 @@ import {
   validateUserImportRows,
   resolveUserImportRow,
   buildUserImportTemplate,
+  CHURCH_MANAGER_CONFLICT_MESSAGE,
   type UserImportRoleOption,
   type UserImportStageOption,
 } from "../services/user-import.service";
@@ -44,21 +45,32 @@ async function loadChurchCatalog(
   roleOptions: UserImportRoleOption[];
   stageOptions: UserImportStageOption[];
   existingEmails: string[];
+  activeSuperAdminExists: boolean;
 } | null> {
   const ctx = await resolveActorContext();
   if (!ctx) return null;
 
   const db = dataClientFor(ctx);
 
-  const [rolesResult, stagesResult, profilesResult] = await Promise.all([
-    userService.listRoles(db, churchId),
-    userService.listStages(db, churchId),
-    db
-      .from("profiles")
-      .select("email")
-      .eq("church_id", churchId)
-      .is("deleted_at", null),
-  ]);
+  const [rolesResult, stagesResult, profilesResult, managerGrants] =
+    await Promise.all([
+      userService.listRoles(db, churchId),
+      userService.listStages(db, churchId),
+      db
+        .from("profiles")
+        .select("email")
+        .eq("church_id", churchId)
+        .is("deleted_at", null),
+      // Admin client: the PO has no RLS path to user_roles; the query stays
+      // scoped to the server-validated churchId. Mirrors createUserAction.
+      ctx.admin
+        .from("user_roles")
+        .select("user_id, roles!inner(role_type)")
+        .eq("church_id", churchId)
+        .is("end_date", null)
+        .eq("roles.role_type", "super_admin")
+        .limit(1),
+    ]);
 
   if (rolesResult.error || stagesResult.error) return null;
 
@@ -67,6 +79,7 @@ async function loadChurchCatalog(
       id: role.id,
       name_ar: role.name_ar,
       name_en: role.name_en,
+      role_type: role.role_type,
     }),
   );
 
@@ -82,7 +95,9 @@ async function loadChurchCatalog(
     .map((p) => p.email)
     .filter((email): email is string => typeof email === "string" && email.length > 0);
 
-  return { roleOptions, stageOptions, existingEmails };
+  const activeSuperAdminExists = (managerGrants.data?.length ?? 0) > 0;
+
+  return { roleOptions, stageOptions, existingEmails, activeSuperAdminExists };
 }
 
 export async function previewUsersImportAction(
@@ -122,6 +137,7 @@ export async function previewUsersImportAction(
     catalog.roleOptions,
     catalog.stageOptions,
     catalog.existingEmails,
+    { activeSuperAdminExists: catalog.activeSuperAdminExists },
   );
 
   return {
@@ -168,6 +184,14 @@ export async function importUsersAction(
   const failures: UserImportRowFailure[] = [];
   let importedCount = 0;
 
+  // Defensive single-manager guard. Validation already rejects super_admin rows
+  // when a manager exists (or a previous row claimed the slot); this protects
+  // against a race where a manager is assigned between preview and import.
+  const superAdminRoleId =
+    catalog.roleOptions.find((option) => option.role_type === "super_admin")?.id ??
+    null;
+  let managerSlotTaken = catalog.activeSuperAdminExists;
+
   const rows: UserImportRow[] = values.rows.map((row) => ({
     rowNumber: row.rowNumber,
     email: row.email,
@@ -204,6 +228,21 @@ export async function importUsersAction(
         message: `Stage "${row.stageName}" was not found in this church.`,
       });
       continue;
+    }
+
+    const isSuperAdminRow =
+      !!superAdminRoleId && roleIds.includes(superAdminRoleId);
+    if (isSuperAdminRow && managerSlotTaken) {
+      failures.push({
+        rowNumber: row.rowNumber,
+        email: row.email,
+        reason: "manager_conflict",
+        message: CHURCH_MANAGER_CONFLICT_MESSAGE,
+      });
+      continue;
+    }
+    if (isSuperAdminRow) {
+      managerSlotTaken = true;
     }
 
     const { data: authData, error: authError } = await admin.auth.admin.createUser({

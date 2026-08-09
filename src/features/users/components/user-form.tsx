@@ -44,10 +44,25 @@ type UserFormProps = {
   onOpenChange: (open: boolean) => void;
   userId?: string;
   churchId?: string;
+  /**
+   * Roles preselected when the form opens in create mode (e.g. the Church
+   * Manager flow presets the super_admin role for the selected church).
+   */
+  presetRoleIds?: string[];
+  /** Called after a successful create/update (the dialog has already closed). */
+  onSuccess?: () => void;
 };
 
-export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps) {
+export function UserForm({
+  open,
+  onOpenChange,
+  userId,
+  churchId,
+  presetRoleIds,
+  onSuccess,
+}: UserFormProps) {
   const t = useTranslations("users.form");
+  const ct = useTranslations("churches");
   const isEdit = !!userId;
 
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -70,7 +85,7 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
       phone: "",
       preferred_locale: "ar",
       churchId: churchId ?? undefined,
-      roleIds: [],
+      roleIds: presetRoleIds ?? [],
       stageIds: [],
       confirmReplaceManager: false,
     },
@@ -107,11 +122,31 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
     ? (user?.church_id ?? null)
     : (churchId ?? watchedChurchId ?? actorChurchQuery.data?.churchId ?? null);
 
+  // The PO is global: list ALL churches they are authorized to manage — the
+  // same source as Church Management (all statuses, no status filter; the
+  // service caps page size at 100, far beyond any real church count). A church
+  // must never disappear from the selector because of its status or because it
+  // currently has zero users.
   const churchesQuery = useChurchList(
-    { status: "active" },
+    { pageSize: 100 },
     { enabled: isPlatformOwner && !isEdit && !churchId },
   );
   const churches = churchesQuery.data?.data?.rows ?? [];
+
+  const churchStatusLabel = (status: string): string => {
+    switch (status) {
+      case "active":
+        return ct("statusActive");
+      case "inactive":
+        return ct("statusInactive");
+      case "suspended":
+        return ct("statusSuspended");
+      case "disabled":
+        return ct("statusDisabled");
+      default:
+        return status;
+    }
+  };
 
   const rolesQuery = useRoles(scopeChurchId);
   const stagesQuery = useStages(scopeChurchId);
@@ -119,16 +154,17 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
   const roles = rolesQuery.data?.data ?? [];
   const stages = stagesQuery.data?.data ?? [];
 
-  // Manager replacement warning: only meaningful when creating as the PO and the
-  // Church Manager role is selected for a church that already has a manager.
-  const managerChurchId = isPlatformOwner && !isEdit ? (scopeChurchId ?? "") : "";
+  // Manager replacement warning: shown whenever this creation would replace an
+  // existing Church Manager — for the PO (any selected church) and for church
+  // actors (their own church). The server-side gate in createUserAction applies
+  // to every authorized creation path, so this mirrors it exactly.
+  const managerChurchId = !isEdit ? (scopeChurchId ?? "") : "";
   const churchDetailQuery = useChurchDetail(managerChurchId);
   const manager = churchDetailQuery.data?.data?.manager ?? null;
   const superAdminRole = roles.find((role) => role.role_type === "super_admin");
   const selectedRoleIds = createForm.watch("roleIds");
   const showManagerWarning =
     !isEdit &&
-    isPlatformOwner &&
     !!scopeChurchId &&
     !!superAdminRole &&
     selectedRoleIds.includes(superAdminRole.id) &&
@@ -139,6 +175,7 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
     const result = await createMutation.mutateAsync(values);
     if (result.success) {
       onOpenChange(false);
+      onSuccess?.();
     } else {
       setSubmitError(result.message ?? null);
     }
@@ -150,6 +187,7 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
     const result = await updateMutation.mutateAsync({ userId, values, churchId });
     if (result.success) {
       onOpenChange(false);
+      onSuccess?.();
     } else {
       setSubmitError(result.message ?? null);
     }
@@ -271,10 +309,20 @@ export function UserForm({ open, onOpenChange, userId, churchId }: UserFormProps
                       <div className="px-3 py-2 text-sm text-muted-foreground">
                         {t("loadingChurches")}
                       </div>
+                    ) : churches.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {t("noChurches")}
+                      </div>
                     ) : (
                       churches.map((church) => (
                         <SelectItem key={church.id} value={church.id}>
-                          {church.name_ar}
+                          <span className="flex items-center gap-2">
+                            <span className="truncate">{church.name_ar}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {churchStatusLabel(church.status)}
+                              {church.manager ? ` · ${church.manager.fullNameAr}` : ""}
+                            </span>
+                          </span>
                         </SelectItem>
                       ))
                     )}

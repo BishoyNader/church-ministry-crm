@@ -32,6 +32,8 @@ export type UserImportErrorSummary = {
   missingRequired: number;
   unknownRoles: number;
   unknownStages: number;
+  /** super_admin rows rejected because the church already has (or claimed) a Church Manager. */
+  managerConflicts: number;
 };
 
 export type UserImportValidationResult = {
@@ -51,6 +53,7 @@ export type UserImportRowFailureReason =
   | "duplicate"
   | "invalid_role"
   | "invalid_stage"
+  | "manager_conflict"
   | "auth_failed"
   | "rpc_failure";
 

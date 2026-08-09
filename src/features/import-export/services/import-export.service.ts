@@ -103,6 +103,17 @@ function normalizeHeader(header: string): string {
   return header.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
+/**
+ * The upload client sends every file (CSV included) as base64. parseCsv needs
+ * plain text, so decode when the payload is base64 before splitting lines.
+ */
+function decodeCsvContent(content: string): string {
+  if (isBase64Encoded(content)) {
+    return Buffer.from(content, "base64").toString("utf8");
+  }
+  return content;
+}
+
 function parseDateValue(value: unknown): string | null {
   if (value === null || value === undefined || value === "") return null;
   if (typeof value === "number") {
@@ -130,7 +141,8 @@ function parseDateValue(value: unknown): string | null {
 }
 
 function parseCsv(content: string): Record<string, unknown>[] {
-  const lines = content.split(/\r?\n/).filter((line) => line.trim().length > 0);
+  const text = decodeCsvContent(content);
+  const lines = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
   if (lines.length === 0) return [];
 
   const headers = lines[0].split(",").map((header) => normalizeHeader(header.replace(/^"|"$/g, "")));
