@@ -19,6 +19,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
+import { StaggerItem, StaggerList } from "@/components/motion/motion-primitives";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   useChurchList,
@@ -194,9 +195,12 @@ export function ChurchesPage() {
             <p className="text-sm text-muted-foreground">{t("emptyState")}</p>
           </div>
         ) : (
-          <div className="divide-y">
+          <StaggerList className="divide-y">
             {rows.map((church) => (
-              <div key={church.id} className="flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+              <StaggerItem
+                key={church.id}
+                className="flex flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
+              >
                 <div className="min-w-0 space-y-1">
                   <button
                     type="button"
@@ -243,9 +247,9 @@ export function ChurchesPage() {
                     onViewAudit={handleViewAudit}
                   />
                 </div>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerList>
         )}
       </SectionCard>
 
