@@ -486,7 +486,6 @@ export type Database = {
           locale: string
           logo_url: string | null
           name_ar: string
-          name_en: string | null
           settings: Json
           slug: string
           status: string
@@ -508,7 +507,6 @@ export type Database = {
           locale?: string
           logo_url?: string | null
           name_ar: string
-          name_en?: string | null
           settings?: Json
           slug: string
           status?: string
@@ -530,7 +528,6 @@ export type Database = {
           locale?: string
           logo_url?: string | null
           name_ar?: string
-          name_en?: string | null
           settings?: Json
           slug?: string
           status?: string

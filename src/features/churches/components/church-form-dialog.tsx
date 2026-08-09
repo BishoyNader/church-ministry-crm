@@ -34,7 +34,6 @@ export function ChurchFormDialog({ open, onOpenChange, church }: ChurchFormDialo
     resolver: zodResolver(createChurchSchema),
     defaultValues: {
       name_ar: "",
-      name_en: "",
       slug: "",
       contact_email: "",
       contact_phone: "",
@@ -50,7 +49,6 @@ export function ChurchFormDialog({ open, onOpenChange, church }: ChurchFormDialo
     resolver: zodResolver(updateChurchSchema),
     defaultValues: {
       name_ar: "",
-      name_en: "",
       slug: "",
       contact_email: "",
       contact_phone: "",
@@ -66,7 +64,6 @@ export function ChurchFormDialog({ open, onOpenChange, church }: ChurchFormDialo
     if (isEdit && church) {
       updateForm.reset({
         name_ar: church.name_ar,
-        name_en: church.name_en ?? "",
         slug: church.slug,
         contact_email: church.contact_email ?? "",
         contact_phone: church.contact_phone ?? "",
@@ -152,10 +149,6 @@ function ChurchFields({ form }: ChurchFieldsProps) {
     <>
       <FormField label={t("nameAr")} error={errors.name_ar?.message} required>
         <Input {...form.register("name_ar")} placeholder={t("placeholderNameAr")} />
-      </FormField>
-
-      <FormField label={t("nameEn")} error={errors.name_en?.message}>
-        <Input {...form.register("name_en")} placeholder={t("placeholderNameEn")} />
       </FormField>
 
       <FormField label={t("slug")} error={errors.slug?.message} required>

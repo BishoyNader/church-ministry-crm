@@ -123,7 +123,7 @@ export function ChurchDetailPage({ churchId, initialTab = "overview", onBack }: 
     <div className="space-y-6">
       <PageHeader
         title={church.name_ar}
-        description={church.name_en ?? church.slug}
+        description={church.slug}
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" onClick={handleBack}>

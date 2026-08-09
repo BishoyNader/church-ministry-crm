@@ -225,7 +225,7 @@ export async function listChurches(
     if (search) {
       const pattern = sanitizeSearchTerm(search);
       if (pattern) {
-        query = query.or(`name_ar.ilike.%${pattern}%,name_en.ilike.%${pattern}%,slug.ilike.%${pattern}%`);
+        query = query.or(`name_ar.ilike.%${pattern}%,slug.ilike.%${pattern}%`);
       }
     }
 
@@ -319,7 +319,6 @@ export async function createChurch(
       .from("churches")
       .insert({
         name_ar: input.name_ar,
-        name_en: input.name_en ?? null,
         slug: input.slug,
         contact_email: input.contact_email ?? null,
         contact_phone: input.contact_phone ?? null,
@@ -351,7 +350,6 @@ export async function updateChurch(
     const updatePayload: Database["public"]["Tables"]["churches"]["Update"] = {};
 
     if (input.name_ar !== undefined) updatePayload.name_ar = input.name_ar;
-    if (input.name_en !== undefined) updatePayload.name_en = input.name_en;
     if (input.slug !== undefined) updatePayload.slug = input.slug;
     if (input.contact_email !== undefined) updatePayload.contact_email = input.contact_email;
     if (input.contact_phone !== undefined) updatePayload.contact_phone = input.contact_phone;

@@ -14,7 +14,6 @@ const optionalEmail = z
 
 export const provisionChurchWizardSchema = z.object({
   churchNameAr: z.string().min(1, "Church name (Arabic) is required").max(255),
-  churchNameEn: z.string().max(255).optional().default(""),
   slug: z
     .string()
     .max(100)

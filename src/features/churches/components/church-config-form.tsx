@@ -19,13 +19,12 @@ export function ChurchConfigForm({ form }: ChurchConfigFormProps) {
   const errors = form.formState.errors;
 
   const watchedNameAr = form.watch("churchNameAr");
-  const watchedNameEn = form.watch("churchNameEn");
   const slugValue = form.watch("slug");
 
   const lastAutoSlug = useRef<string | null>(null);
 
   useEffect(() => {
-    const base = (watchedNameEn ?? "").trim() || (watchedNameAr ?? "").trim();
+    const base = (watchedNameAr ?? "").trim();
     const current = slugValue ?? "";
     const isAuto = current === "" || (lastAutoSlug.current !== null && current === lastAutoSlug.current);
 
@@ -44,10 +43,10 @@ export function ChurchConfigForm({ form }: ChurchConfigFormProps) {
     } else if (isAuto) {
       lastAutoSlug.current = candidate;
     }
-  }, [watchedNameAr, watchedNameEn, slugValue, form]);
+  }, [watchedNameAr, slugValue, form]);
 
   const regenerateSlug = () => {
-    const base = (watchedNameEn ?? "").trim() || (watchedNameAr ?? "").trim();
+    const base = (watchedNameAr ?? "").trim();
     const candidate = generateSlug(base || "church");
     lastAutoSlug.current = candidate;
     form.setValue("slug", candidate, { shouldValidate: true });
@@ -60,17 +59,15 @@ export function ChurchConfigForm({ form }: ChurchConfigFormProps) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <FormField
-        label={t("wizard.church.churchNameAr")}
-        error={errors.churchNameAr?.message}
-        required
-      >
-        <Input {...form.register("churchNameAr")} placeholder={t("wizard.church.churchNameArPlaceholder")} />
-      </FormField>
-
-      <FormField label={t("wizard.church.churchNameEn")} error={errors.churchNameEn?.message}>
-        <Input {...form.register("churchNameEn")} placeholder={t("wizard.church.churchNameEnPlaceholder")} />
-      </FormField>
+      <div className="sm:col-span-2">
+        <FormField
+          label={t("wizard.church.churchNameAr")}
+          error={errors.churchNameAr?.message}
+          required
+        >
+          <Input {...form.register("churchNameAr")} placeholder={t("wizard.church.churchNameArPlaceholder")} />
+        </FormField>
+      </div>
 
       <div className="sm:col-span-2">
         <FormField

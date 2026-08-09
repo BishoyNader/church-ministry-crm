@@ -144,7 +144,6 @@ export async function updateChurchAction(
   const oldValues = existing.data ?? undefined;
   const result = await settingsService.updateChurch(supabase, profile.church_id, {
     nameAr: values.nameAr,
-    nameEn: values.nameEn,
     contactEmail: values.contactEmail,
     contactPhone: values.contactPhone,
     addressAr: values.addressAr,

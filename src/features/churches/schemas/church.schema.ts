@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const createChurchSchema = z.object({
   name_ar: z.string().min(1, "Arabic name is required").max(255),
-  name_en: z.string().max(255).optional().default(""),
   slug: z
     .string()
     .min(1, "Slug is required")
@@ -19,7 +18,6 @@ export const createChurchSchema = z.object({
 
 export const updateChurchSchema = z.object({
   name_ar: z.string().min(1).max(255).optional().default(""),
-  name_en: z.string().max(255).optional().default(""),
   slug: z
     .string()
     .max(100)
