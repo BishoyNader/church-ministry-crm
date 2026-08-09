@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { SearchX } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
+import { PaginationBar } from "@/components/layout/pagination-bar";
 import { useChurchAudit } from "../hooks/use-churches";
 
 const PAGE_SIZE = 10;
@@ -67,30 +67,15 @@ export function ChurchAuditTable({ churchId, limit }: ChurchAuditTableProps) {
         )}
       </SectionCard>
 
-      {!limit && totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {t("paginationLabel", { total, page, totalPages })}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-              disabled={page === 1}
-            >
-              {t("previous")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={page === totalPages}
-            >
-              {t("next")}
-            </Button>
-          </div>
-        </div>
+      {!limit && (
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={limit ?? PAGE_SIZE}
+          labelMode="count"
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

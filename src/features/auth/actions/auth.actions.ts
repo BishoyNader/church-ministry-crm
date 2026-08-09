@@ -5,6 +5,7 @@ import type { ForgotPasswordFormValues, LoginFormValues, SignupFormValues } from
 import { registerExistingChurchUser, sendPasswordReset, signInWithEmail, signOut as signOutService } from "../services/auth.service";
 import { getMyAccessState } from "../services/access.service";
 import { createClient } from "@/lib/supabase/server";
+import { assertRateLimit } from "@/lib/rate-limit";
 import { getTranslations } from "next-intl/server";
 import { ZodError } from "zod";
 
@@ -16,6 +17,14 @@ export type AuthActionResult = {
 };
 
 export async function loginAction(values: LoginFormValues, locale: string): Promise<AuthActionResult> {
+  const gate = await assertRateLimit({ scope: "login", limit: 10 });
+  if (!gate.ok) {
+    return {
+      success: false,
+      message: "Too many attempts. Please wait a moment and try again.",
+    };
+  }
+
   try {
     loginSchema.parse(values);
   } catch (error) {
@@ -59,6 +68,14 @@ export async function loginAction(values: LoginFormValues, locale: string): Prom
 }
 
 export async function signupAction(values: SignupFormValues, locale: string): Promise<AuthActionResult> {
+  const gate = await assertRateLimit({ scope: "signup", limit: 5 });
+  if (!gate.ok) {
+    return {
+      success: false,
+      message: "Too many attempts. Please wait a moment and try again.",
+    };
+  }
+
   try {
     signupSchema.parse(values);
   } catch (error) {
@@ -105,6 +122,14 @@ export async function signupAction(values: SignupFormValues, locale: string): Pr
 }
 
 export async function forgotPasswordAction(values: ForgotPasswordFormValues, locale: string): Promise<AuthActionResult> {
+  const gate = await assertRateLimit({ scope: "forgot-password", limit: 5 });
+  if (!gate.ok) {
+    return {
+      success: false,
+      message: "Too many attempts. Please wait a moment and try again.",
+    };
+  }
+
   try {
     forgotPasswordSchema.parse(values);
   } catch (error) {

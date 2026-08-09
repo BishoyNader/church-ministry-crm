@@ -25,18 +25,54 @@ export async function listServices(
   supabase: SupabaseClient<Database>,
   churchId: string,
   filters: ServiceFilters = {},
+  stageIds?: string[],
 ): Promise<ServiceResult<ServicePageData>> {
   try {
+    const scoped = stageIds !== undefined;
+
+    if (scoped && stageIds.length === 0) {
+      return {
+        data: { rows: [], total: 0, page: 1, pageSize: DEFAULT_PAGE_SIZE, totalPages: 0 },
+        error: null,
+      };
+    }
+
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? DEFAULT_PAGE_SIZE));
     const from = (page - 1) * pageSize;
     const to = page * pageSize - 1;
+
+    // Stage-scoped actors may only see the services that contain at least one
+    // of their assigned stages (server-enforced; never client-trusted).
+    let allowedServiceIds: string[] | null = null;
+    if (scoped) {
+      const { data: scopedStages, error: scopedStagesError } = await supabase
+        .from("stages")
+        .select("service_id")
+        .eq("church_id", churchId)
+        .is("deleted_at", null)
+        .in("id", stageIds);
+
+      if (scopedStagesError) return { data: null, error: scopedStagesError.message };
+
+      allowedServiceIds = [...new Set((scopedStages ?? []).map((row) => row.service_id as string))];
+      if (allowedServiceIds.length === 0) {
+        return {
+          data: { rows: [], total: 0, page, pageSize, totalPages: 0 },
+          error: null,
+        };
+      }
+    }
 
     let query = supabase
       .from("services")
       .select("*", { count: "exact" })
       .eq("church_id", churchId)
       .is("deleted_at", null);
+
+    if (scoped) {
+      query = query.in("id", allowedServiceIds as string[]);
+    }
 
     const search = filters.search?.trim();
     if (search) {
@@ -61,13 +97,22 @@ export async function listServices(
 
     const serviceIds = (data ?? []).map((service) => service.id);
 
+    let stageCountQuery = supabase
+      .from("stages")
+      .select("service_id")
+      .eq("church_id", churchId)
+      .is("deleted_at", null);
+
+    if (serviceIds.length) {
+      stageCountQuery = stageCountQuery.in("service_id", serviceIds);
+    }
+
+    if (scoped) {
+      stageCountQuery = stageCountQuery.in("id", stageIds);
+    }
+
     const { data: stageCountRows } = serviceIds.length
-      ? await supabase
-          .from("stages")
-          .select("service_id")
-          .eq("church_id", churchId)
-          .in("service_id", serviceIds)
-          .is("deleted_at", null)
+      ? await stageCountQuery
       : { data: [] as { service_id: string }[] };
 
     const countsByService = new Map<string, number>();

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { writeAuditLog } from "@/lib/audit";
 import { hasPermission } from "@/features/rbac/utils/permission-check";
+import { getActorStageScope } from "@/features/rbac/utils/stage-scope";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import { getTranslations } from "next-intl/server";
 import { ZodError } from "zod";
@@ -67,7 +68,17 @@ export async function listClassesAction(
     return { success: false, message: "Profile not found." };
   }
 
-  const result = await classesService.listClasses(supabase, churchId, filters);
+  const { scope, error } = await getActorStageScope(supabase, churchId, user.id);
+  if (!scope) {
+    return { success: false, message: error ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await classesService.listClasses(
+    supabase,
+    churchId,
+    filters,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
   if (result.error) {
     const t = await getTranslations({ locale, namespace: "classes" });
     return { success: false, message: t("errors.listFailed"), data: undefined };
@@ -97,7 +108,16 @@ export async function listStageOptionsAction(
     return { success: false, message: "Profile not found." };
   }
 
-  const result = await classesService.listStageOptions(supabase, churchId);
+  const { scope, error } = await getActorStageScope(supabase, churchId, user.id);
+  if (!scope) {
+    return { success: false, message: error ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await classesService.listStageOptions(
+    supabase,
+    churchId,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
   if (result.error) {
     const t = await getTranslations({ locale, namespace: "classes" });
     return { success: false, message: t("errors.stageOptionsFailed"), data: undefined };

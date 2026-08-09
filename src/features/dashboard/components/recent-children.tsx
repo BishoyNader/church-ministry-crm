@@ -2,7 +2,6 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { UserRound } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
 import { EmptyState } from "@/components/feedback/empty-state";
@@ -56,9 +55,6 @@ export function RecentChildren({ data, isLoading }: RecentChildrenProps) {
                     {timeAgo(child.createdAt, locale)}
                   </p>
                 </div>
-                <Badge variant="outline" className="ml-3 shrink-0 text-xs">
-                  {t(`pipeline.${child.pipelineStage}`)}
-                </Badge>
               </Link>
             </li>
           ))}

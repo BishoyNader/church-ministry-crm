@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Plus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,11 +41,11 @@ export function ChildListPage() {
   const t = useTranslations("children");
 
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [serviceFilter, setServiceFilter] = useState("all");
   const [stageFilter, setStageFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const search = useDebouncedValue(searchInput, 300);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editChild, setEditChild] = useState<ChildListItem | null>(null);
@@ -70,14 +72,6 @@ export function ChildListPage() {
   const total = data?.data?.total ?? 0;
   const totalPages = data?.data?.totalPages ?? 0;
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearch(searchInput);
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
   const handleServiceChange = (value: unknown) => {
     setServiceFilter(value as string);
     setStageFilter("all");
@@ -91,7 +85,6 @@ export function ChildListPage() {
 
   const clearFilters = () => {
     setSearchInput("");
-    setSearch("");
     setServiceFilter("all");
     setStageFilter("all");
     setStatusFilter("all");
@@ -208,35 +201,13 @@ export function ChildListPage() {
         />
       )}
 
-      {totalPages > 1 && (
-        <SectionCard className="flex items-center justify-between px-4 py-3">
-          <p className="text-xs text-muted-foreground">
-            {t("pagination.showing", {
-              from: (page - 1) * PAGE_SIZE + 1,
-              to: Math.min(page * PAGE_SIZE, total),
-              total,
-            })}
-          </p>
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              {t("pagination.prev")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {t("pagination.next")}
-            </Button>
-          </div>
-        </SectionCard>
-      )}
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        onPageChange={setPage}
+      />
 
       {createOpen && (
         <ChildFormDialog open={createOpen} onOpenChange={setCreateOpen} />

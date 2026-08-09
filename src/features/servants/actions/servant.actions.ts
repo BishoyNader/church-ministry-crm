@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { writeAuditLog } from "@/lib/audit";
 import { hasPermission } from "@/features/rbac/utils/permission-check";
+import { getActorStageScope, allStagesInScope } from "@/features/rbac/utils/stage-scope";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
   assignServantStagesSchema,
@@ -91,10 +92,11 @@ export async function listServantsAction(
   pageSize: number,
   search?: string,
   approvalStatus?: string,
+  stageId?: string,
 ): Promise<ServantActionResult<ServantListResult>> {
   let parsed;
   try {
-    parsed = servantListSchema.parse({ page, pageSize, search, approvalStatus });
+    parsed = servantListSchema.parse({ page, pageSize, search, approvalStatus, stageId });
   } catch (error) {
     if (error instanceof ZodError) return parseError(error);
     throw error;
@@ -109,7 +111,17 @@ export async function listServantsAction(
     return { success: false, message: "You do not have permission to view servants." };
   }
 
-  const result = await servantService.listServants(ctx.supabase, ctx.churchId, parsed);
+  const { scope, error } = await getActorStageScope(ctx.supabase, ctx.churchId, ctx.userId);
+  if (!scope) {
+    return { success: false, message: error ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await servantService.listServants(
+    ctx.supabase,
+    ctx.churchId,
+    parsed,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -136,7 +148,17 @@ export async function getServantAction(servantId: string): Promise<ServantAction
     return { success: false, message: "You do not have permission to view servants." };
   }
 
-  const result = await servantService.getServantById(ctx.supabase, ctx.churchId, parsed.servantId);
+  const { scope, error } = await getActorStageScope(ctx.supabase, ctx.churchId, ctx.userId);
+  if (!scope) {
+    return { success: false, message: error ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await servantService.getServantById(
+    ctx.supabase,
+    ctx.churchId,
+    parsed.servantId,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -220,6 +242,15 @@ export async function assignServantStagesAction(
 
   if (!(await hasPermission(PERMISSION_CODES.SERVANTS_ASSIGN))) {
     return { success: false, message: "You do not have permission to assign stages." };
+  }
+
+  const { scope, error } = await getActorStageScope(ctx.supabase, ctx.churchId, ctx.userId);
+  if (!scope) {
+    return { success: false, message: error ?? "Failed to resolve stage scope." };
+  }
+
+  if (!allStagesInScope(scope, parsed.stageIds)) {
+    return { success: false, message: "You do not have permission to assign these stages." };
   }
 
   const existing = await servantService.getServantById(ctx.supabase, ctx.churchId, parsed.servantId);
@@ -314,7 +345,16 @@ export async function getServantStagesAction(): Promise<ServantActionResult<Serv
     return { success: false, message: "You do not have permission to assign stages." };
   }
 
-  const result = await servantService.listServantStages(ctx.supabase, ctx.churchId);
+  const { scope, error } = await getActorStageScope(ctx.supabase, ctx.churchId, ctx.userId);
+  if (!scope) {
+    return { success: false, message: error ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await servantService.listServantStages(
+    ctx.supabase,
+    ctx.churchId,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
 
   if (result.error) {
     return { success: false, message: result.error };

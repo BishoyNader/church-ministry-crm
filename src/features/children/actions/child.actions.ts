@@ -1,8 +1,11 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { writeAuditLog } from "@/lib/audit";
 import { hasPermission } from "@/features/rbac/utils/permission-check";
+import { getActorStageScope, isStageInScope } from "@/features/rbac/utils/stage-scope";
+import type { ActorStageScope } from "@/features/rbac/utils/stage-scope";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
   createChildSchema,
@@ -69,6 +72,18 @@ function validateId(id: string, label: string): ChildActionResult<never> | null 
   return null;
 }
 
+async function getStageScope(
+  supabase: SupabaseClient,
+  churchId: string,
+  userId: string,
+): Promise<{ scope: ActorStageScope | null; message: string | null }> {
+  const result = await getActorStageScope(supabase, churchId, userId);
+  if (result.error || !result.scope) {
+    return { scope: null, message: result.error ?? "Failed to resolve stage scope." };
+  }
+  return { scope: result.scope, message: null };
+}
+
 // ─── Child Actions ──────────────────────────────────────────
 
 export async function listChildrenAction(
@@ -103,7 +118,18 @@ export async function listChildrenAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await childService.listChildren(supabase, profile.church_id, filters, pagination);
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  const stageIds = scope.churchWide ? undefined : scope.stageIds;
+  const result = await childService.listChildren(
+    supabase,
+    profile.church_id,
+    { ...filters, stageIds },
+    pagination,
+  );
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -141,7 +167,17 @@ export async function getChildByIdAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await childService.getChildById(supabase, childId, profile.church_id);
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await childService.getChildById(
+    supabase,
+    childId,
+    profile.church_id,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -170,6 +206,25 @@ export async function createChildAction(
 
   if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_CREATE))) {
     return { success: false, message: "You do not have permission to create children." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  if (!isStageInScope(scope, values.stage_id)) {
+    return { success: false, message: "You do not have permission to create children in this stage." };
   }
 
   const result = await childService.createChild(supabase, {
@@ -270,13 +325,38 @@ export async function updateChildAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const existing = await childService.getChildById(supabase, childId, profile.church_id);
-  const oldValues = existing.data
-    ? {
-        full_name_ar: existing.data.full_name_ar,
-        status: existing.data.status,
-      }
-    : undefined;
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  const existing = await childService.getChildById(
+    supabase,
+    childId,
+    profile.church_id,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
+  if (!existing.data) {
+    return { success: false, message: existing.error ?? "Child not found." };
+  }
+  const oldValues = {
+    full_name_ar: existing.data.full_name_ar,
+    status: existing.data.status,
+  };
+
+  // Service/stage live on beneficiary_assignments, not beneficiaries. When the
+  // edit form changed them, close the old current assignment and open a new one
+  // through the transfer RPC (the table is RLS-immutable for direct writes).
+  const movedStage =
+    existing.data &&
+    values.service_id &&
+    values.stage_id &&
+    (existing.data.serviceId !== values.service_id ||
+      existing.data.stageId !== values.stage_id);
+
+  if (movedStage && !isStageInScope(scope, values.stage_id)) {
+    return { success: false, message: "You do not have permission to move children to this stage." };
+  }
 
   const result = await childService.updateChild(supabase, childId, profile.church_id, {
     full_name_ar: values.full_name_ar,
@@ -300,16 +380,6 @@ export async function updateChildAction(
   if (result.error) {
     return { success: false, message: result.error };
   }
-
-  // Service/stage live on beneficiary_assignments, not beneficiaries. When the
-  // edit form changed them, close the old current assignment and open a new one
-  // through the transfer RPC (the table is RLS-immutable for direct writes).
-  const movedStage =
-    existing.data &&
-    values.service_id &&
-    values.stage_id &&
-    (existing.data.serviceId !== values.service_id ||
-      existing.data.stageId !== values.stage_id);
 
   if (movedStage) {
     const transferResult = await childService.transferChild(supabase, childId, profile.church_id, {
@@ -366,6 +436,15 @@ export async function transferChildAction(
     return { success: false, message: "User profile not found." };
   }
 
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  if (!isStageInScope(scope, values.stage_id)) {
+    return { success: false, message: "You do not have permission to transfer children to this stage." };
+  }
+
   const result = await childService.transferChild(supabase, childId, profile.church_id, {
     service_id: values.service_id,
     stage_id: values.stage_id,
@@ -412,10 +491,21 @@ export async function deactivateChildAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const existing = await childService.getChildById(supabase, childId, profile.church_id);
-  const oldValues = existing.data
-    ? { full_name_ar: existing.data.full_name_ar, status: existing.data.status }
-    : undefined;
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  const existing = await childService.getChildById(
+    supabase,
+    childId,
+    profile.church_id,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
+  if (!existing.data) {
+    return { success: false, message: existing.error ?? "Child not found." };
+  }
+  const oldValues = { full_name_ar: existing.data.full_name_ar, status: existing.data.status };
 
   const result = await childService.deactivateChild(supabase, childId, profile.church_id);
 
@@ -452,6 +542,25 @@ export async function createAttendanceAction(
 
   if (!(await hasPermission(PERMISSION_CODES.ATTENDANCE_CREATE))) {
     return { success: false, message: "You do not have permission to record attendance." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  if (!isStageInScope(scope, values.stage_id)) {
+    return { success: false, message: "You do not have permission to record attendance for this stage." };
   }
 
   const result = await childService.createAttendance(supabase, {
@@ -501,6 +610,25 @@ export async function batchAttendanceAction(
 
   if (!(await hasPermission(PERMISSION_CODES.ATTENDANCE_CREATE))) {
     return { success: false, message: "You do not have permission to record attendance." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  if (!isStageInScope(scope, values.stage_id)) {
+    return { success: false, message: "You do not have permission to record attendance for this stage." };
   }
 
   const result = await childService.batchAttendance(supabase, {
@@ -576,7 +704,16 @@ export async function listAttendanceAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await childService.listAttendance(supabase, profile.church_id, filters);
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  const stageIds = scope.churchWide ? undefined : scope.stageIds;
+  const result = await childService.listAttendance(supabase, profile.church_id, {
+    ...filters,
+    stageIds,
+  });
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -607,6 +744,33 @@ export async function createFollowupAction(
 
   if (!(await hasPermission(PERMISSION_CODES.FOLLOWUPS_CREATE))) {
     return { success: false, message: "You do not have permission to create followups." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  const currentStage = await childService.getBeneficiaryCurrentStage(
+    supabase,
+    profile.church_id,
+    values.beneficiary_id,
+  );
+  if (currentStage.error) {
+    return { success: false, message: currentStage.error };
+  }
+  if (!isStageInScope(scope, currentStage.data)) {
+    return { success: false, message: "You do not have permission to create followups for children outside your stages." };
   }
 
   const result = await childService.createFollowup(supabase, {
@@ -689,8 +853,33 @@ export async function updateFollowupAction(
     return { success: false, message: "User profile not found." };
   }
 
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
   const existing = await childService.getFollowupById(supabase, followupId, profile.church_id);
-  const oldValues = existing.data ?? undefined;
+  if (!existing.data) {
+    return { success: false, message: existing.error ?? "Followup not found." };
+  }
+  const oldValues = existing.data;
+
+  const beneficiaryId = (existing.data as { beneficiary_id?: string }).beneficiary_id;
+  if (!beneficiaryId) {
+    return { success: false, message: "Followup has no beneficiary." };
+  }
+
+  const currentStage = await childService.getBeneficiaryCurrentStage(
+    supabase,
+    profile.church_id,
+    beneficiaryId,
+  );
+  if (currentStage.error) {
+    return { success: false, message: currentStage.error };
+  }
+  if (!isStageInScope(scope, currentStage.data)) {
+    return { success: false, message: "You do not have permission to update followups for children outside your stages." };
+  }
 
   const result = await childService.updateFollowup(supabase, followupId, profile.church_id, {
     status: values.status,
@@ -738,8 +927,33 @@ export async function deleteFollowupAction(
     return { success: false, message: "User profile not found." };
   }
 
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
   const existing = await childService.getFollowupById(supabase, followupId, profile.church_id);
-  const oldValues = existing.data ?? undefined;
+  if (!existing.data) {
+    return { success: false, message: existing.error ?? "Followup not found." };
+  }
+  const oldValues = existing.data;
+
+  const beneficiaryId = (existing.data as { beneficiary_id?: string }).beneficiary_id;
+  if (!beneficiaryId) {
+    return { success: false, message: "Followup has no beneficiary." };
+  }
+
+  const currentStage = await childService.getBeneficiaryCurrentStage(
+    supabase,
+    profile.church_id,
+    beneficiaryId,
+  );
+  if (currentStage.error) {
+    return { success: false, message: currentStage.error };
+  }
+  if (!isStageInScope(scope, currentStage.data)) {
+    return { success: false, message: "You do not have permission to delete followups for children outside your stages." };
+  }
 
   const result = await childService.deleteFollowup(supabase, followupId, profile.church_id);
 
@@ -782,7 +996,16 @@ export async function listFollowupsAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await childService.listFollowups(supabase, profile.church_id, filters);
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  const stageIds = scope.churchWide ? undefined : scope.stageIds;
+  const result = await childService.listFollowups(supabase, profile.church_id, {
+    ...filters,
+    stageIds,
+  });
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -819,7 +1042,17 @@ export async function listStagesAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await childService.listStages(supabase, profile.church_id, serviceId);
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await childService.listStages(
+    supabase,
+    profile.church_id,
+    serviceId,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
 
   if (result.error) {
     return { success: false, message: result.error };

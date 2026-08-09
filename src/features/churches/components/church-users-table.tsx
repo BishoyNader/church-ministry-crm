@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { SearchX } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
+import { PaginationBar } from "@/components/layout/pagination-bar";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useChurchUsers } from "../hooks/use-churches";
 
 const PAGE_SIZE = 10;
@@ -20,19 +21,11 @@ export function ChurchUsersTable({ churchId }: ChurchUsersTableProps) {
   const t = useTranslations("churches");
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
+  const search = useDebouncedValue(searchInput, 300);
 
   const filters = useMemo(() => ({ page, pageSize: PAGE_SIZE, search: search || undefined }), [page, search]);
 
   const { data, isLoading, error } = useChurchUsers(churchId, filters);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearch(searchInput);
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
 
   const rows = data?.data?.rows ?? [];
   const total = data?.data?.total ?? 0;
@@ -93,31 +86,14 @@ export function ChurchUsersTable({ churchId }: ChurchUsersTableProps) {
         )}
       </SectionCard>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {t("paginationLabel", { total, page, totalPages })}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-              disabled={page === 1}
-            >
-              {t("previous")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={page === totalPages}
-            >
-              {t("next")}
-            </Button>
-          </div>
-        </div>
-      )}
+      <PaginationBar
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        pageSize={PAGE_SIZE}
+        labelMode="count"
+        onPageChange={setPage}
+      />
     </div>
   );
 }

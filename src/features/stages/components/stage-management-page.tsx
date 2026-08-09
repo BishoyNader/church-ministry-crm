@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
-import { PermissionGuard } from "@/features/rbac";
+import { PermissionGuard, useIsStageScoped } from "@/features/rbac";
 import { useMinistryList } from "../hooks/use-ministries";
 import { useStageList } from "../hooks/use-stages";
 import { MinistryCard } from "./ministry-card";
@@ -34,6 +34,8 @@ export function StageManagementPage() {
 
   const ministriesQuery = useMinistryList();
   const stagesQuery = useStageList();
+
+  const isStageScoped = useIsStageScoped();
 
   const ministries = ministriesQuery.data?.data ?? [];
   const allStages = stagesQuery.data?.data ?? [];
@@ -82,7 +84,7 @@ export function StageManagementPage() {
           ))}
         </div>
       ) : ministries.length === 0 ? (
-        <StageEmptyState />
+        <StageEmptyState scoped={isStageScoped} />
       ) : (
         <div className="space-y-4">
           {ministries.map((ministry) => (

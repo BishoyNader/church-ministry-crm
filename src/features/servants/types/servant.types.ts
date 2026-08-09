@@ -48,6 +48,7 @@ export type ServantListParams = {
   pageSize: number;
   search?: string;
   approvalStatus?: "pending" | "approved" | "rejected";
+  stageId?: string;
 };
 
 export type ServantListResult = {

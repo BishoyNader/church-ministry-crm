@@ -64,7 +64,6 @@ export type ScheduledFollowupItem = {
 export type RecentChildItem = {
   id: string;
   name: string;
-  pipelineStage: string;
   createdAt: string;
 };
 

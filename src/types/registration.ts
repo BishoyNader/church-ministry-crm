@@ -123,6 +123,25 @@ export type RegistrationFunctions = {
     Args: Record<never, never>;
     Returns: MyAccessStateResult[];
   };
+  get_dashboard_trends: {
+    Args: { p_stage_ids?: string[] | null };
+    Returns: Record<string, unknown>;
+  };
+  get_stage_manager_stage_ids: {
+    Args: Record<never, never>;
+    Returns: string[];
+  };
+  get_stage_reports: {
+    Args: {
+      p_stage_ids?: string[] | null;
+      p_from_date?: string | null;
+      p_to_date?: string | null;
+      p_service_id?: string | null;
+      p_stage_id?: string | null;
+      p_servant_id?: string | null;
+    };
+    Returns: Record<string, unknown>;
+  };
   approve_servant: {
     Args: { p_servant_id: string };
     Returns: undefined;
