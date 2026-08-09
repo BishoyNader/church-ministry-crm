@@ -6,6 +6,7 @@ import {
   Upload,
   FileSpreadsheet,
   FileText,
+  FileDown,
   CheckCircle2,
   XCircle,
   AlertTriangle,
@@ -28,6 +29,7 @@ import {
   usePreviewUsersImport,
   useImportUsers,
   useExportUsersTemplate,
+  useExportUsersImportErrors,
 } from "../hooks/use-user-import";
 import type {
   UserImportPreviewResult,
@@ -82,6 +84,7 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
   const previewMutation = usePreviewUsersImport();
   const importMutation = useImportUsers();
   const templateMutation = useExportUsersTemplate();
+  const errorsFileMutation = useExportUsersImportErrors();
 
   const importFailureReasonLabel = (reason: UserImportRowFailureReason): string => {
     switch (reason) {
@@ -99,6 +102,35 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
         return t("failure.rpcFailure");
     }
   };
+
+  const handleErrorsFileDownload = useCallback(
+    async (format: UserImportFileFormat) => {
+      if (!preview?.validation.invalidRows.length) return;
+      setError(null);
+      const result = await errorsFileMutation.mutateAsync({
+        format,
+        rows: preview.validation.invalidRows.map((invalid) => ({
+          rowNumber: invalid.row.rowNumber,
+          values: {
+            email: invalid.row.email,
+            password: invalid.row.password,
+            full_name_ar: invalid.row.fullNameAr,
+            full_name_en: invalid.row.fullNameEn ?? "",
+            phone: invalid.row.phone ?? "",
+            role: invalid.row.roleName ?? "",
+            stage: invalid.row.stageName ?? "",
+          },
+          messages: invalid.errors.map((err) => err.message),
+        })),
+      });
+      if (!result.success || !result.data) {
+        setError(result.message ?? t("previewError"));
+        return;
+      }
+      triggerDownload(result.data.content, result.data.mimeType, result.data.fileName);
+    },
+    [errorsFileMutation, preview, t],
+  );
 
   const handleTemplateDownload = useCallback(async () => {
     setError(null);
@@ -365,6 +397,43 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
                     ))}
                   </tbody>
                 </table>
+                <div className="border-t bg-muted/20 px-3 py-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleErrorsFileDownload("csv")}
+                      disabled={errorsFileMutation.isPending}
+                      className="gap-2"
+                    >
+                      {errorsFileMutation.isPending ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <FileDown className="size-3.5" />
+                      )}
+                      {t("downloadErrorsCsv")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleErrorsFileDownload("xlsx")}
+                      disabled={errorsFileMutation.isPending}
+                      className="gap-2"
+                    >
+                      {errorsFileMutation.isPending ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <FileDown className="size-3.5" />
+                      )}
+                      {t("downloadErrorsXlsx")}
+                    </Button>
+                    {validation.invalidRows.length > 10 ? (
+                      <span className="text-xs text-muted-foreground">
+                        {t("invalidShown", { count: validation.invalidRows.length - 10 })}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
               </div>
             ) : null}
 

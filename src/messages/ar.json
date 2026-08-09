@@ -386,6 +386,11 @@
         "processing": "جارٍ الرفض…"
       }
     },
+    "export": {
+      "button": "تصدير",
+      "error": "فشل تصدير المستخدمين.",
+      "formatLabel": "صيغة التصدير"
+    },
     "churchScope": {
       "label": "اختيار الكنيسة",
       "placeholder": "اختر كنيسة…"
@@ -413,6 +418,9 @@
       "unknownRoles": "{count} صفوف تشير إلى دور غير معروف.",
       "unknownStages": "{count} صفوف تشير إلى مرحلة غير معروفة.",
       "showingFirst": "عرض أول {count} صفوف إضافية…",
+      "downloadErrorsCsv": "تنزيل الأخطاء (CSV)",
+      "downloadErrorsXlsx": "تنزيل الأخطاء (XLSX)",
+      "invalidShown": "{count} أخرى غير معروضة",
       "importButton": "استيراد المستخدمين",
       "cancel": "إلغاء",
       "importSummary": "تم استيراد {imported} مستخدم. فشل {failed}.",
@@ -1080,6 +1088,12 @@
       "fileTooLarge": "الملف يتجاوز الحد الأقصى 10 ميجابايت.",
       "invalidFileType": "يُسمح فقط بملفات .csv و .xlsx."
     },
+    "children": {
+      "bulk": {
+        "title": "استيراد / تصدير بالجملة",
+        "description": "استيراد المخدومين من جدول بيانات أو تصدير القائمة الحالية."
+      }
+    },
     "import": {
       "title": "استيراد المخدومين",
       "description": "ارفع ملف CSV أو XLSX لاستيراد المخدومين بالجملة.",
@@ -1094,6 +1108,11 @@
       "missingRequired": "{count} صف(وف) ينقصها حقول مطلوبة",
       "invalidDates": "{count} صف(وف) بتواريخ غير صالحة",
       "invalidGenders": "{count} صفوف بقيمة جنس غير صالحة",
+      "downloadTemplateCsv": "تنزيل قالب CSV",
+      "downloadTemplateXlsx": "تنزيل قالب XLSX",
+      "downloadErrorsCsv": "تنزيل الأخطاء (CSV)",
+      "downloadErrorsXlsx": "تنزيل الأخطاء (XLSX)",
+      "invalidShown": "{count} أخرى غير معروضة",
       "importButton": "استيراد الصفوف الصالحة",
       "cancel": "إلغاء",
       "importSummary": "تم استيراد {imported} مخدوم. تم تخطي {skipped} مكرر.",
@@ -1549,6 +1568,7 @@
       "services": "الخدمات",
       "stages": "المراحل",
       "classes": "الفصول",
+      "children": "المخدومون",
       "reports": "التقارير",
       "audit": "سجل التدقيق",
       "settings": "الإعدادات"

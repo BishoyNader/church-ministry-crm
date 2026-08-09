@@ -7,19 +7,30 @@ import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/components/layout/section-card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useExportData } from "../hooks/use-import-export";
-import type { ExportEntityType, ExportFileFormat } from "../types/import-export.types";
+import type { ExportEntityType, ExportFileFormat, BeneficiaryExportFilters } from "../types/import-export.types";
 
-export function ExportActions() {
+export function ExportActions({
+  churchId,
+  filters,
+  entities,
+}: {
+  churchId?: string;
+  filters?: BeneficiaryExportFilters;
+  entities?: ExportEntityType[];
+}) {
   const t = useTranslations("importExport");
-  const [entity, setEntity] = useState<ExportEntityType>("beneficiaries");
+  const [entity, setEntity] = useState<ExportEntityType>(
+    entities?.[0] ?? "beneficiaries",
+  );
   const [format, setFormat] = useState<ExportFileFormat>("csv");
   const [error, setError] = useState<string | null>(null);
 
   const exportMutation = useExportData();
+  const availableEntities = entities ?? ["beneficiaries", "attendance", "followups", "servants"];
 
   const handleExport = async () => {
     setError(null);
-    const result = await exportMutation.mutateAsync({ entity, format });
+    const result = await exportMutation.mutateAsync({ entity, format, churchId, filters });
 
     if (!result.success || !result.data) {
       setError(result.message ?? t("export.error"));
@@ -66,10 +77,11 @@ export function ExportActions() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="beneficiaries">{t("export.entities.beneficiaries")}</SelectItem>
-                <SelectItem value="attendance">{t("export.entities.attendance")}</SelectItem>
-                <SelectItem value="followups">{t("export.entities.followups")}</SelectItem>
-                <SelectItem value="servants">{t("export.entities.servants")}</SelectItem>
+                {availableEntities.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {t(`export.entities.${value}`)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

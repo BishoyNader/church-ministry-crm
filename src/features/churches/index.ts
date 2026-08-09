@@ -10,6 +10,7 @@ export { ChurchUsersTable } from "./components/church-users-table";
 export { ChurchEntityTable } from "./components/church-entity-table";
 export { ChurchAuditTable } from "./components/church-audit-table";
 export { ChurchReportsTab } from "./components/church-reports-tab";
+export { ChurchChildrenTab } from "./components/church-children-tab";
 export { ChangeChurchManagerDialog } from "./components/change-church-manager-dialog";
 export {
   listChurchesAction,
@@ -28,6 +29,7 @@ export {
   getChurchStagesAction,
   getChurchClassesAction,
   getChurchReportsAction,
+  getChurchChildrenAction,
   getChurchAuditAction,
   changeChurchManagerAction,
   deactivateChurchUserAction,
@@ -60,6 +62,7 @@ export {
   useChurchesForSignup,
   useProvisionChurchWizard,
 } from "./hooks/use-churches";
+export { useChurchChildren, CHURCH_CHILDREN_QUERY_KEYS } from "./hooks/use-children";
 export type {
   ChurchRow,
   ChurchInsert,

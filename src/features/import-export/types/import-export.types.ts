@@ -85,6 +85,36 @@ export type ExportOptions = {
   format: ExportFileFormat;
 };
 
+/**
+ * Filters applied while exporting beneficiaries. Mirrors the filters available
+ * on the children list page so an export honours the current search, status,
+ * service, and stage selection instead of dumping every row.
+ */
+export type BeneficiaryExportFilters = {
+  search?: string;
+  status?: string;
+  service_id?: string;
+  stage_id?: string;
+};
+
+/**
+ * A row destined for a downloadable import-error file (e.g. users-import-errors
+ * or children-import-errors). `values` holds the raw parsed row so the operator
+ * can see exactly what was in the failing line, and `messages` carries the
+ * human-readable validation errors for that row.
+ */
+export type ImportErrorFileRow = {
+  rowNumber: number;
+  values: Record<string, unknown>;
+  messages: string[];
+};
+
+export type DownloadableFile = {
+  fileName: string;
+  content: string;
+  mimeType: string;
+};
+
 export type ExportActionResult = {
   success: boolean;
   message?: string;

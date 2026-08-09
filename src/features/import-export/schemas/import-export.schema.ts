@@ -22,15 +22,28 @@ export const importPreviewSchema = z.object({
   fileName: z.string().min(1),
   format: z.enum(["xlsx", "csv"]),
   content: z.string().min(1, { message: "File content is required" }),
+  // Explicit target church — required for the PO (church_id NULL), ignored and
+  // forced to the actor's own church for church-scoped users.
+  churchId: z.string().uuid().optional(),
 });
 
 export const importBeneficiariesSchema = z.object({
   rows: z.array(beneficiaryImportRowSchema).min(1, { message: "At least one row is required" }),
+  churchId: z.string().uuid().optional(),
 });
 
 export const exportOptionsSchema = z.object({
   entity: z.enum(["beneficiaries", "attendance", "followups", "servants"]),
   format: z.enum(["csv", "xlsx"]),
+  churchId: z.string().uuid().optional(),
+  filters: z
+    .object({
+      search: z.string().max(200).optional(),
+      status: z.enum(["active", "inactive", "transferred", "graduated"]).optional(),
+      service_id: z.string().uuid().optional(),
+      stage_id: z.string().uuid().optional(),
+    })
+    .optional(),
 });
 
 export type BeneficiaryImportRowFormValues = z.infer<typeof beneficiaryImportRowSchema>;

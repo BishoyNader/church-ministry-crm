@@ -22,6 +22,11 @@ import type {
 } from "../types/church.types";
 import { CHURCH_STATUSES } from "../services/church-admin.service";
 import * as churchAdminService from "../services/church-admin.service";
+import { listChildren } from "@/features/children/services/child.service";
+import type {
+  ChildListItem,
+  PaginatedResult,
+} from "@/features/children/types/child.types";
 import { getReportsData } from "@/features/reports/services/reports.service";
 import type { ReportsData } from "@/features/reports/types/reports.types";
 
@@ -505,10 +510,58 @@ export async function getChurchReportsAction(
   };
 }
 
+export async function getChurchChildrenAction(
+  churchId: string,
+  filters: {
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    service_id?: string;
+    stage_id?: string;
+    status?: string;
+  } = {},
+  locale: string,
+): Promise<ChurchActionResult<PaginatedResult<ChildListItem>>> {
+  const supabase = await createClient();
+
+  if (!(await ensureAuthenticated(supabase))) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.TENANTS_READ))) {
+    const t = await getTranslations({ locale, namespace: "churches" });
+    return { success: false, message: t("errors.readDenied") };
+  }
+
+  const adminSupabase = createAdminClient();
+  const result = await listChildren(
+    adminSupabase,
+    churchId,
+    {
+      search: filters.search,
+      service_id: filters.service_id,
+      stage_id: filters.stage_id,
+      status: filters.status,
+    },
+    { page: filters.page ?? 1, pageSize: filters.pageSize ?? 20 },
+  );
+
+  if (result.error) {
+    const t = await getTranslations({ locale, namespace: "churches" });
+    return { success: false, message: t("errors.listFailed") };
+  }
+
+  return {
+    success: true,
+    message: "Church children loaded successfully.",
+    data: result.data ?? { data: [], total: 0, page: 1, pageSize: 20, totalPages: 0 },
+  };
+}
+
 export async function getChurchAuditAction(
   churchId: string,
-  page: number = 1,
-  pageSize: number = 20,
+  page: number,
+  pageSize: number,
   locale: string,
 ): Promise<ChurchActionResult<ChurchAuditPageData>> {
   const supabase = await createClient();

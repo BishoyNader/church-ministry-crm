@@ -386,6 +386,11 @@
         "processing": "Rejecting…"
       }
     },
+    "export": {
+      "button": "Export",
+      "error": "Failed to export users.",
+      "formatLabel": "Export format"
+    },
     "churchScope": {
       "label": "Select church",
       "placeholder": "Select a church…"
@@ -413,6 +418,9 @@
       "unknownRoles": "{count} rows reference an unknown role.",
       "unknownStages": "{count} rows reference an unknown stage.",
       "showingFirst": "Showing the first {count} additional rows…",
+      "downloadErrorsCsv": "Download errors (CSV)",
+      "downloadErrorsXlsx": "Download errors (XLSX)",
+      "invalidShown": "{count} more not shown",
       "importButton": "Import users",
       "cancel": "Cancel",
       "importSummary": "Imported {imported} users. {failed} failed.",
@@ -1080,6 +1088,12 @@
       "fileTooLarge": "File exceeds the 10 MB size limit.",
       "invalidFileType": "Only .csv and .xlsx files are allowed."
     },
+    "children": {
+      "bulk": {
+        "title": "Bulk Import / Export",
+        "description": "Import beneficiaries from a spreadsheet or export the current list."
+      }
+    },
     "import": {
       "title": "Import Beneficiaries",
       "description": "Upload a CSV or XLSX file to bulk import beneficiaries.",
@@ -1094,6 +1108,11 @@
       "missingRequired": "{count} row(s) missing required fields",
       "invalidDates": "{count} row(s) with invalid dates",
       "invalidGenders": "{count} row(s) with an invalid gender value",
+      "downloadTemplateCsv": "Download CSV template",
+      "downloadTemplateXlsx": "Download XLSX template",
+      "downloadErrorsCsv": "Download errors (CSV)",
+      "downloadErrorsXlsx": "Download errors (XLSX)",
+      "invalidShown": "{count} more not shown",
       "importButton": "Import valid rows",
       "cancel": "Cancel",
       "importSummary": "Imported {imported} beneficiary(ies). Skipped {skipped} duplicate(s).",
@@ -1549,6 +1568,7 @@
       "services": "Services",
       "stages": "Stages",
       "classes": "Classes",
+      "children": "Children",
       "reports": "Reports",
       "audit": "Audit log",
       "settings": "Settings"
