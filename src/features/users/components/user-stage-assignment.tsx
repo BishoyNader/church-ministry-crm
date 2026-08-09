@@ -49,7 +49,11 @@ export function UserStageAssignment({
   };
 
   const handleSave = async () => {
-    const result = await assignMutation.mutateAsync({ userId, stageIds: selectedIds });
+    const result = await assignMutation.mutateAsync({
+      userId,
+      stageIds: selectedIds,
+      churchId: scopeChurchId ?? undefined,
+    });
     if (result.success) onOpenChange(false);
   };
 

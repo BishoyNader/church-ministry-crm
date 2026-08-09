@@ -49,7 +49,11 @@ export function UserRoleAssignment({
   };
 
   const handleSave = async () => {
-    const result = await assignMutation.mutateAsync({ userId, roleIds: selectedIds });
+    const result = await assignMutation.mutateAsync({
+      userId,
+      roleIds: selectedIds,
+      churchId: scopeChurchId ?? undefined,
+    });
     if (result.success) onOpenChange(false);
   };
 

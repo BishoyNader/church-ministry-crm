@@ -6,7 +6,25 @@ import type { NextConfig } from "next";
 //   injects inline RSC payloads; a nonce-based strict CSP is the documented
 //   follow-up (see docs/security/SPRINT2_SECURITY_REVIEW.md).
 // - HSTS is applied only in production (never on local http dev servers).
-// - connect-src is restricted to self + Supabase.
+// - connect-src is restricted to self + hosted Supabase. Hosted projects are
+//   covered by the https://*.supabase.co wildcard; a self-hosted/local instance
+//   (e.g. http://127.0.0.1:54321) is added dynamically from the runtime env so
+//   the browser client (session refresh, RBAC reads, RPC calls, realtime) is
+//   not blocked by the CSP — the local dev app otherwise renders AccessDenied
+//   everywhere because every client-side Supabase fetch is refused.
+function buildConnectSrc(): string[] {
+  const sources = ["'self'", "https://*.supabase.co", "wss://*.supabase.co"];
+  const raw =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? "";
+  const supabaseUrl = raw.replace(/\/$/, "");
+  const hosted = /^https:\/\/[^/]+\.supabase\.co$/.test(supabaseUrl);
+  if (supabaseUrl && !hosted) {
+    sources.push(supabaseUrl);
+    sources.push(supabaseUrl.replace(/^http/, "ws"));
+  }
+  return sources;
+}
+
 const baseSecurityHeaders = [
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -26,7 +44,7 @@ const baseSecurityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+      `connect-src ${buildConnectSrc().join(" ")}`,
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

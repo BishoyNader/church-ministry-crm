@@ -279,6 +279,28 @@ async function isSuperAdminOfChurch(
   );
 }
 
+/**
+ * The Platform Owner is a GLOBAL role (church_id NULL, is_system). The PO has
+ * no church-scoped servants.* permissions, so role/stage management by the PO
+ * is gated by the platform tenants bundle in the actions layer; this helper
+ * lets the service skip the church super_admin-only check for the PO.
+ */
+async function isPlatformOwner(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+): Promise<boolean> {
+  const { data: grants } = await admin
+    .from("user_roles")
+    .select("role_id, roles(role_type)")
+    .eq("user_id", userId)
+    .is("church_id", null)
+    .is("end_date", null);
+
+  return (grants ?? []).some(
+    (g) => (g as { roles?: { role_type?: string } | null })?.roles?.role_type === "platform_owner",
+  );
+}
+
 async function getSuperAdminRoleId(
   admin: ReturnType<typeof createAdminClient>,
   churchId: string,
@@ -406,7 +428,11 @@ export async function assignRoles(
 
     const admin = createAdminClient();
 
-    if (!(await isSuperAdminOfChurch(admin, assignedBy, profile.church_id))) {
+    const isPo = await isPlatformOwner(admin, assignedBy);
+    if (
+      !isPo &&
+      !(await isSuperAdminOfChurch(admin, assignedBy, profile.church_id))
+    ) {
       return { data: false, error: "Only a super admin can manage roles." };
     }
 
