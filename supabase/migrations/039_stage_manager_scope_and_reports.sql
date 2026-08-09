@@ -1,6 +1,6 @@
 -- ============================================================================
 -- Church Ministry CRM — Stage Manager Secure Scope + Stage Reports RPC
--- Migration: 038_stage_manager_scope_and_reports.sql
+-- Migration: 039_stage_manager_scope_and_reports.sql
 -- Action: Sprint — Stage Manager Secure Scope Implementation (P0/P1/P3).
 --   1. New scope helper get_stage_manager_stage_ids(): church + role-aware.
 --      super_admin / admin -> whole church; stage_manager / servant -> their
@@ -8,12 +8,12 @@
 --      server-side resolution point.)
 --   2. (D4) Recreate the 022 scope helpers (get_user_stage_ids /
 --      get_user_class_ids / get_user_service_ids) so `admin` is treated as
---      church-wide, aligning the RLS read/write scope with migration 037's
+--      church-wide, aligning the RLS read/write scope with migration 038's
 --      user_is_admin() branch. Also aligns the active-assignment predicate
---      with 037: (end_date IS NULL OR end_date >= CURRENT_DATE).
+--      with 038: (end_date IS NULL OR end_date >= CURRENT_DATE).
 --   3. New get_stage_reports(...) SECURITY DEFINER RPC — SQL port of the
 --      reports module's client aggregation (reports.service.ts:90-331),
---      scoped exactly like 037: the actor scope is computed INSIDE the
+--      scoped exactly like 038: the actor scope is computed INSIDE the
 --      function from get_user_stage_ids() / servant_stage_assignments and is
 --      defensively INTERSECTed with the caller-supplied p_stage_ids, so a
 --      stage-scoped caller can never read outside their assigned stages.
@@ -24,7 +24,7 @@
 --      actor's scope (get_user_stage_ids / get_user_class_ids).
 -- Security posture: additive SECURITY DEFINER functions + policy replacement.
 -- No destructive DDL, no table changes, no RLS weakening.
--- Dependency: 036 (stage_manager role + permissions), 037 (037 scope pattern,
+-- Dependency: 037 (stage_manager role + permissions), 038 (038 scope pattern,
 --             applied before this migration).
 -- ============================================================================
 
@@ -49,7 +49,7 @@ BEGIN
     RETURN ARRAY[]::uuid[];
   END IF;
 
-  -- super_admin / admin: whole-church scope (D4 — matches 037).
+  -- super_admin / admin: whole-church scope (D4 — matches 038).
   IF user_is_admin(v_church_id) THEN
     RETURN ARRAY(
       SELECT id FROM stages
@@ -439,7 +439,7 @@ CREATE POLICY record_attendance_update ON attendance_records FOR UPDATE
   );
 
 -- ============================================================================
--- PRIVILEGE LOCKDOWN (matches 024/035/037 conventions)
+-- PRIVILEGE LOCKDOWN (matches 024/035/038 conventions)
 -- ============================================================================
 
 REVOKE ALL ON FUNCTION get_stage_manager_stage_ids() FROM PUBLIC, anon, service_role;
@@ -467,9 +467,9 @@ COMMIT;
 -- ROLLBACK
 --   DROP FUNCTION IF EXISTS get_stage_reports(uuid[], date, date, uuid, uuid, uuid);
 --   DROP FUNCTION IF EXISTS get_stage_manager_stage_ids();
---   -- Restore the 022 scope helpers to their pre-038 (pre-D4) bodies, i.e.
+--   -- Restore the 022 scope helpers to their pre-039 (pre-D4) bodies, i.e.
 --   -- user_is_super_admin(v_church_id) instead of user_is_admin(v_church_id)
 --   -- and end_date IS NULL, then re-create the original record_attendance and
 --   -- record_attendance_update policies (see 022/027/028).
---   -- Primary rollback path in all cases: restore the pre-038 database snapshot.
+--   -- Primary rollback path in all cases: restore the pre-039 database snapshot.
 -- ============================================================================

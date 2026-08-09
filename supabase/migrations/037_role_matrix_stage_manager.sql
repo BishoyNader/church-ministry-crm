@@ -1,8 +1,8 @@
 -- ============================================================================
 -- Church Ministry CRM — Role Matrix Correction + Stage Manager Role
--- Migration: 036_role_matrix_stage_manager.sql
+-- Migration: 037_role_matrix_stage_manager.sql
 -- Action: Sprint 2 — Permission Matrix Review (Phase 4).
---   1. Add 'stage_manager' to the user_role_type enum.
+--   1. Ensure 'stage_manager' is in user_role_type (no-op — committed by 036).
 --   2. Rebuild seed_church_roles(): fix the admin role's missing operational
 --      permissions (attendance.create, follow-ups CRUD, notifications.read,
 --      settings.read/update, services.update/delete, classes.delete,
@@ -23,7 +23,7 @@
 BEGIN;
 
 -- ============================================================================
--- PART 1: ENUM — add stage_manager role type
+-- PART 1: ENUM — ensure stage_manager exists (no-op; committed by 036)
 -- ============================================================================
 
 ALTER TYPE user_role_type ADD VALUE IF NOT EXISTS 'stage_manager';
@@ -196,5 +196,5 @@ COMMIT;
 --     (SELECT id FROM roles WHERE role_type = 'stage_manager');
 --   -- Note: the admin role additions are additive and can be removed with a
 --   -- targeted DELETE by permission code; the primary rollback path is the
---   -- pre-036 database backup snapshot.
+--   -- pre-037 database backup snapshot.
 -- ============================================================================

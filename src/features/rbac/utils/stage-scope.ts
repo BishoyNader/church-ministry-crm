@@ -7,7 +7,7 @@ import type { RegistrationFunctions } from "@/types/registration";
 // Stage Manager sprint: server actions and services must never trust
 // client-supplied stage/church ids. This util is the single resolution point
 // for "which stages can this actor read/write?" backed by the
-// get_stage_manager_stage_ids() RPC (migration 038), which returns:
+// get_stage_manager_stage_ids() RPC (migration 039), which returns:
 //   - super_admin / admin -> every active stage in the actor's church, or
 //   - stage_manager / servant -> their active servant_stage_assignments.
 //
