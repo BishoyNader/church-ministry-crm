@@ -31,7 +31,7 @@ type FollowupRow = {
   beneficiary_id: string | null;
 };
 
-// Shape of the get_stage_reports() SECURITY DEFINER RPC (migration 038). It is
+// Shape of the get_stage_reports() SECURITY DEFINER RPC (migration 039). It is
 // DB-scoped (intersects the caller-supplied p_stage_ids with the actor's real
 // scope) and returns the same metrics the client used to aggregate below.
 type StageReportsRpcResult = {

@@ -1,13 +1,13 @@
 -- ============================================================================
 -- Church Ministry CRM — Stage-Manager-Aware Beneficiary Write RPCs
--- Migration: 039_stage_manager_beneficiary_write_rpcs.sql
+-- Migration: 040_stage_manager_beneficiary_write_rpcs.sql
 -- Action: Recreate create_beneficiary_with_assignment(...) and
 --         transfer_beneficiary(...) so Stage Managers (and any non-admin
 --         holder of beneficiaries.create / beneficiaries.transfer) can operate
 --         strictly within their assigned stage scope, while Admin / Super
 --         Admin retain their existing church-wide behavior.
 -- Root cause (UAT): 024 only recognized user_is_admin(); Stage Managers hold
---         beneficiaries.create from seed_church_roles (036) and the UI/actions
+--         beneficiaries.create from seed_church_roles (037) and the UI/actions
 --         allow create/transfer, but the RPCs rejected them with 'not_admin'
 --         (HTTP 400 / P0001), so stage-scoped writes were impossible.
 -- Authorization model (inside the RPC — the DB is the final boundary):
@@ -16,7 +16,7 @@
 --   * Everyone else (stage_manager, servant, …):
 --       - create_beneficiary_with_assignment: requires the
 --         'beneficiaries.create' permission (user_has_permission_in_church,
---         028) AND p_stage_id IN get_user_stage_ids() (022/038).
+--         028) AND p_stage_id IN get_user_stage_ids() (022/039).
 --       - transfer_beneficiary: requires the 'beneficiaries.transfer'
 --         permission AND the beneficiary's current assignment stage AND the
 --         destination stage are BOTH in get_user_stage_ids(). This blocks:
@@ -43,8 +43,8 @@
 --   system role (seed_church_roles for future churches + idempotent backfill
 --   of existing churches) so the RPC permission gate can be satisfied.
 -- Dependencies: 022 (get_user_church_id/user_is_admin/get_user_stage_ids),
---               028 (user_has_permission_in_church), 036 (stage_manager role),
---               038 (stage-scope resolution alignment).
+--               028 (user_has_permission_in_church), 037 (stage_manager role),
+--               039 (stage-scope resolution alignment).
 -- ============================================================================
 
 BEGIN;
@@ -488,8 +488,8 @@ COMMIT;
 
 -- ============================================================================
 -- ROLLBACK
---   Restore the pre-039 function bodies (see 024) via CREATE OR REPLACE with
---   the 024 definitions, or restore the pre-039 database snapshot. Remove
+--   Restore the pre-040 function bodies (see 024) via CREATE OR REPLACE with
+--   the 024 definitions, or restore the pre-040 database snapshot. Remove
 --   'beneficiaries.transfer' from stage_manager roles with a targeted DELETE
 --   by (role_id, permission_id). No data migration was performed, so the
 --   rollback is purely DDL + a permission row.

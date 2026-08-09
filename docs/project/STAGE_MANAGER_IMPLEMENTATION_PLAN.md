@@ -28,7 +28,7 @@ lockdown.
 
 ## 1. Migration plan
 
-### M1 — `036_role_matrix_stage_manager.sql` (already drafted — finalize + merge)
+### M1 — `037_role_matrix_stage_manager.sql` (already drafted — finalize + merge)
 
 Review before merge:
 
@@ -39,9 +39,9 @@ Review before merge:
 3. Keep the admin-permission backfill (PART 3a) — it is a correctness fix for the
    existing `admin` role, additive and idempotent.
 4. Keep `ALTER TYPE user_role_type ADD VALUE IF NOT EXISTS 'stage_manager'`
-   (036:29) — idempotent.
+   (037:29) — idempotent.
 
-### M2 — NEW `038_stage_scope_helpers.sql`
+### M2 — NEW `039_stage_scope_helpers.sql`
 
 No RLS rewrites (per D1). Additives only:
 
@@ -165,8 +165,8 @@ Add keys (both `en.json` and `ar.json`, keeping 100% parity — see
 
 | Change | Rollback |
 |---|---|
-| M1 (036) | Restore pre-036 backup. In-place: drop enum value only via rename dance (see 036 header); delete `stage_manager` roles/role_permissions; admin additions are additive and removable by targeted DELETE. |
-| M2 (038) | `DROP FUNCTION get_stage_manager_stage_ids()`, `DROP FUNCTION get_stage_reports(uuid[])`; `CREATE OR REPLACE` the 022 scope helpers back to their pre-M2 bodies (or restore backup). All changes are additive/`CREATE OR REPLACE` — no destructive DDL. |
+| M1 (037) | Restore pre-037 backup. In-place: drop enum value only via rename dance (see 037 header); delete `stage_manager` roles/role_permissions; admin additions are additive and removable by targeted DELETE. |
+| M2 (039) | `DROP FUNCTION get_stage_manager_stage_ids()`, `DROP FUNCTION get_stage_reports(uuid[])`; `CREATE OR REPLACE` the 022 scope helpers back to their pre-M2 bodies (or restore backup). All changes are additive/`CREATE OR REPLACE` — no destructive DDL. |
 | Server actions | Revert to church-wide queries (git revert of the feature commit). |
 | UI | Revert component changes (git revert). |
 | i18n | Remove added keys from both files (keep parity). |

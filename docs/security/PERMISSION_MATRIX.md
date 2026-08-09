@@ -1,8 +1,8 @@
 # Permission Matrix — Church Ministry CRM
 
-**Source of truth:** migrations `021_role_and_permissions.sql`, `026_platform_owner_bootstrap.sql`, `028_security_remediation.sql`, `036_role_matrix_stage_manager.sql` (Sprint 2 correction).
+**Source of truth:** migrations `021_role_and_permissions.sql`, `026_platform_owner_bootstrap.sql`, `028_security_remediation.sql`, `037_role_matrix_stage_manager.sql` (Sprint 2 correction).
 
-**Roles:** `platform_owner` (global, `church_id = NULL`) · `super_admin` · `admin` · `stage_manager` (added in 036) · `servant`.
+**Roles:** `platform_owner` (global, `church_id = NULL`) · `super_admin` · `admin` · `stage_manager` (added in 037) · `servant`.
 
 Legend: ✓ granted · – not granted
 
@@ -66,7 +66,7 @@ Legend: ✓ granted · – not granted
 ## Notes
 
 1. **Platform Owner** holds only the platform bundle (`tenants.*`, `system.*`, `billing.*`, `users.read`, `reports.*`, `audit.read`, `notifications.read`) and — by design — **no church-data permissions** (`beneficiaries.*`, `attendance.*`, `followups.*`, `services.*`, `classes.*`, `stages.*`, `spiritual.*`). Tenant isolation policies exclude the PO (church_id NULL).
-2. **Stage Manager** (036) is a stage-scoped operator: beneficiaries, attendance, follow-ups, and read-only access to services/stages/classes/servants + notifications + reports. Stage-level RLS (via `servant_stage_assignments` + `user_has_stage_access`) is the enforcement boundary — a stage manager without stage assignments sees nothing.
+2. **Stage Manager** (037) is a stage-scoped operator: beneficiaries, attendance, follow-ups, and read-only access to services/stages/classes/servants + notifications + reports. Stage-level RLS (via `servant_stage_assignments` + `user_has_stage_access`) is the enforcement boundary — a stage manager without stage assignments sees nothing.
 3. **Super Admin** receives every non-platform permission (`module NOT IN ('tenants','system')`), excluding billing/subscriptions/system codes.
 4. **Privilege-escalation audit (Sprint 2):** no role grants a permission outside its hierarchy; `servants.approve` is super-admin-only; `stages.delete` and `beneficiaries.delete` are super-admin-only; no self-promotion paths exist (`create_church_user`, `assignRoles`, and `bootstrap_platform_owner` are guarded by super-admin checks / service-role-only EXECUTE).
 5. **Dead codes:** `tenants.delete` is seeded but no UI/action consumes it today (PO UI uses update + status toggles). Kept in the catalog for the platform contract; flagged in the tech-debt backlog.

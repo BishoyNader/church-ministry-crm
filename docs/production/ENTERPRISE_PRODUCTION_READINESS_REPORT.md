@@ -70,7 +70,7 @@ translations, and up-to-date operational documentation.
   (`docs/security/SPRINT2_SECURITY_REVIEW.md`).
 
 ### Phase 4 — Permission Matrix Review
-- `supabase/migrations/036_role_matrix_stage_manager.sql`: fixed the seeded
+- `supabase/migrations/037_role_matrix_stage_manager.sql`: fixed the seeded
   `admin` role's missing capabilities (attendance, follow-ups, settings,
   notifications) and introduced the **`stage_manager`** role (previously
   absent from the codebase despite the milestone claim).
@@ -78,7 +78,7 @@ translations, and up-to-date operational documentation.
 - `docs/security/PERMISSION_MATRIX.md` documents every role × permission code.
 
 ### Phase 5 — Dashboard Performance
-- `supabase/migrations/037_dashboard_trends_rpc.sql`: SECURITY DEFINER
+- `supabase/migrations/038_dashboard_trends_rpc.sql`: SECURITY DEFINER
   `get_dashboard_trends()` aggregates monthly/weekly/stage series in SQL.
 - `dashboard.service.ts`: count-based KPIs (`count: "exact", head: true`),
   targeted small lists, RPC with transparent JS fallback, 60s staleTime.

@@ -15,10 +15,10 @@ reports, manage attendance and follow-ups — while never managing the whole chu
 
 The audit found that **the database role/permission foundation is 80% ready**:
 
-- Migration `036_role_matrix_stage_manager.sql` already adds the enum value, a
+- Migration `037_role_matrix_stage_manager.sql` already adds the enum value, a
   corrected `seed_church_roles()` (with the Stage Manager permission set), and an
   idempotent backfill for existing churches.
-- Migration `037_dashboard_trends_rpc.sql` already enforces stage scope server-side
+- Migration `038_dashboard_trends_rpc.sql` already enforces stage scope server-side
   for dashboard aggregation.
 - The stage-scoping primitive `get_user_stage_ids()` already exists and is wired into
   the RLS write policies for `attendance_sessions`.
@@ -30,7 +30,7 @@ attendance records, servants, stages, services and classes, and only be constrai
 on *writes* in a few places. The navigation and several management pages would also
 show controls the role cannot use.
 
-The audit also found one **factually incorrect security assumption** in migration 036
+The audit also found one **factually incorrect security assumption** in migration 037
 (a reference to a function that no longer exists) and a **role-scoping quirk in
 `get_user_stage_ids()`** that also affects `admin`.
 

@@ -21,7 +21,7 @@ const OPEN_STATUSES = new Set(["open", "in_progress"]);
 
 /**
  * Sprint 2 (Phase 5): expensive dashboard series are aggregated by the
- * get_dashboard_trends() SECURITY DEFINER RPC (migration 037). If the RPC is
+ * get_dashboard_trends() SECURITY DEFINER RPC (migration 038). If the RPC is
  * unavailable (older database), the service transparently falls back to the
  * previous JS aggregation so behavior is unchanged.
  */

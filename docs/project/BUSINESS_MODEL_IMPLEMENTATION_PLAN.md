@@ -44,7 +44,7 @@ Spiritual Journal UI, Reports module + CSV, Notifications center + automation (b
 - **stage_leader (NEW):** scoped bundle = `beneficiaries.read/update` + `attendance.create/read` + `followups.create/read/update/delete` + `servants.read/update/assign` + `reports.read/export` + `notifications.read` + `services/stages/classes.read`, all **stage-scoped** (enforced in RLS + actions). No spiritual (private), no users, no settings, no delete, no tenants.
 - **servant:** keep 15 codes but enforce assignment-scope in actions and RLS (view/edit only assigned beneficiaries; followups only own/assigned). Remove nothing now (additive).
 - **New role_seed function** supersedes `seed_church_roles` (021) via `CREATE OR REPLACE` in 026; relabel; new `stage_leader` bundle added in 030.
-- Wire currently-unused codes as features land: `spiritual.*` (033), `notifications.*` (031), `import.execute` (036), `reports.export` (032), `classes.*` (assignments), `settings.*`/`audit.read` (037), `beneficiaries.transfer` (switch `transferChildAction` gate from `beneficiaries.update`).
+- Wire currently-unused codes as features land: `spiritual.*` (033), `notifications.*` (031), `import.execute` (037), `reports.export` (032), `classes.*` (assignments), `settings.*`/`audit.read` (038), `beneficiaries.transfer` (switch `transferChildAction` gate from `beneficiaries.update`).
 
 ---
 

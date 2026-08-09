@@ -10,7 +10,7 @@
 ## 1. Executive Summary
 
 The **Stage Manager** (`stage_manager` / أمين مرحلة) previously held `beneficiaries.create`
-and `beneficiaries.update` permissions (migration 036) but the beneficiary write RPCs
+and `beneficiaries.update` permissions (migration 037) but the beneficiary write RPCs
 (`create_beneficiary_with_assignment`, `transfer_beneficiary`, migration 024) only checked
 `user_has_permission_in_church(...)` — i.e. **church-wide**. A Stage Manager could therefore
 create beneficiaries in any stage of the church and transfer any beneficiary between any
@@ -78,8 +78,8 @@ cases, 5 read-scope regression cases.
    approved church servant) with `servant_not_found`, and
    `ORDER BY start_date DESC LIMIT 1` for the current assignment.
 
-6. **Grant backfill is idempotent and targeted.** `seed_church_roles()` (036) is *not*
-   idempotent (plain `INSERT … RETURNING`), so 039 does **not** re-run it on existing
+6. **Grant backfill is idempotent and targeted.** `seed_church_roles()` (037) is *not*
+   idempotent (plain `INSERT … RETURNING`), so 040 does **not** re-run it on existing
    churches. Instead it (a) recreates `seed_church_roles` with `beneficiaries.transfer`
    added to the Stage Manager set (for future churches) and (b) backfills existing
    `stage_manager` system roles with an idempotent
@@ -97,7 +97,7 @@ cases, 5 read-scope regression cases.
 
 ## 4. What Changed
 
-### Database — `supabase/migrations/039_stage_manager_beneficiary_write_rpcs.sql`
+### Database — `supabase/migrations/040_stage_manager_beneficiary_write_rpcs.sql`
 
 - **Part 1** — role grant: adds `beneficiaries.transfer` to `seed_church_roles()` and
   backfills existing `stage_manager` roles.
@@ -207,7 +207,7 @@ read path (`listChildren`/`getChildById` with `stageIds` filtering) is unchanged
 
 ## 7. Rollback
 
-Revert the commit that introduced `039_stage_manager_beneficiary_write_rpcs.sql`; the
+Revert the commit that introduced `040_stage_manager_beneficiary_write_rpcs.sql`; the
 previous migration state is restored on the next `supabase db reset` (or by dropping the
 two functions and the `beneficiaries.transfer` → `stage_manager` backfill rows). The RPCs
 revert to the church-wide 024 behavior. App-layer changes revert to the previous gate
@@ -217,9 +217,9 @@ messages; no migration depends on the new RPC signatures.
 
 ## 8. Related Documents
 
-- `supabase/migrations/039_stage_manager_beneficiary_write_rpcs.sql`
+- `supabase/migrations/040_stage_manager_beneficiary_write_rpcs.sql`
 - `supabase/migrations/024_p0_beneficiary_assignment_rpcs.sql` (baseline behavior preserved)
-- `supabase/migrations/036_role_matrix_stage_manager.sql` (`seed_church_roles` base)
-- `supabase/migrations/038_stage_manager_scope_and_reports.sql` (`get_user_stage_ids`,
+- `supabase/migrations/037_role_matrix_stage_manager.sql` (`seed_church_roles` base)
+- `supabase/migrations/039_stage_manager_scope_and_reports.sql` (`get_user_stage_ids`,
   dashboard/reports RPCs)
 - `STAGE_MANAGER_ARCHITECTURE_AUDIT.md`, `STAGE_MANAGER_IMPLEMENTATION_PLAN.md`

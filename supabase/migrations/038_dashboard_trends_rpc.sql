@@ -1,6 +1,6 @@
 -- ============================================================================
 -- Church Ministry CRM — Dashboard Analytics Aggregation RPC
--- Migration: 037_dashboard_trends_rpc.sql
+-- Migration: 038_dashboard_trends_rpc.sql
 -- Action: Sprint 2 — Dashboard Performance (Phase 5). Move the expensive
 --         dashboard series aggregations from client-side JS (which loaded
 --         full tables) into a single SQL aggregation.
