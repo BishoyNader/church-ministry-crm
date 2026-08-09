@@ -37,7 +37,7 @@ export async function getProfileSettings(
     if (profile.church_id) {
       const { data: churchData } = await supabase
         .from("churches")
-        .select("id, name_ar, name_en")
+        .select("id, name_ar")
         .eq("id", profile.church_id)
         .single();
       church = churchData ?? null;
@@ -94,7 +94,7 @@ export async function getChurchSettings(
   try {
     const { data, error } = await supabase
       .from("churches")
-      .select("id, name_ar, name_en, contact_email, contact_phone, address_ar, address_en, logo_url")
+      .select("id, name_ar, contact_email, contact_phone, address_ar, address_en, logo_url")
       .eq("id", churchId)
       .single();
 
@@ -118,7 +118,6 @@ export async function updateChurch(
       .from("churches")
       .update({
         name_ar: input.nameAr,
-        name_en: input.nameEn?.trim() || null,
         contact_email: input.contactEmail?.trim() || null,
         contact_phone: input.contactPhone?.trim() || null,
         address_ar: input.addressAr?.trim() || null,

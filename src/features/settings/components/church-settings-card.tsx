@@ -24,7 +24,6 @@ export function ChurchSettingsCard() {
     resolver: zodResolver(updateChurchSchema),
     defaultValues: {
       nameAr: "",
-      nameEn: "",
       contactEmail: "",
       contactPhone: "",
       addressAr: "",
@@ -37,7 +36,6 @@ export function ChurchSettingsCard() {
     if (data?.data) {
       form.reset({
         nameAr: data.data.name_ar ?? "",
-        nameEn: data.data.name_en ?? "",
         contactEmail: data.data.contact_email ?? "",
         contactPhone: data.data.contact_phone ?? "",
         addressAr: data.data.address_ar ?? "",
@@ -90,9 +88,6 @@ export function ChurchSettingsCard() {
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField label={t("church.nameAr")} error={form.formState.errors.nameAr?.message} required>
             <Input {...form.register("nameAr")} />
-          </FormField>
-          <FormField label={t("church.nameEn")}>
-            <Input {...form.register("nameEn")} />
           </FormField>
         </div>
 

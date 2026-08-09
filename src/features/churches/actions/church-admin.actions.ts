@@ -163,7 +163,6 @@ export async function createChurchAction(
   const adminSupabase = createAdminClient();
   const result = await churchAdminService.createChurch(adminSupabase, {
     name_ar: values.name_ar,
-    name_en: values.name_en,
     slug: values.slug,
     contact_email: values.contact_email,
     contact_phone: values.contact_phone,

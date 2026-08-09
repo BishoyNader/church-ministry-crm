@@ -12,12 +12,12 @@ export type ProfileSettings = {
   phone: string | null;
   preferredLocale: string;
   roles: Pick<RoleRow, "id" | "name_ar" | "name_en" | "role_type">[];
-  church: Pick<ChurchRow, "id" | "name_ar" | "name_en"> | null;
+  church: Pick<ChurchRow, "id" | "name_ar"> | null;
 };
 
 export type ChurchSettings = Pick<
   ChurchRow,
-  "id" | "name_ar" | "name_en" | "contact_email" | "contact_phone" | "address_ar" | "address_en" | "logo_url"
+  "id" | "name_ar" | "contact_email" | "contact_phone" | "address_ar" | "address_en" | "logo_url"
 >;
 
 export type UpdateProfileInput = {
@@ -29,7 +29,6 @@ export type UpdateProfileInput = {
 
 export type UpdateChurchInput = {
   nameAr: string;
-  nameEn?: string;
   contactEmail?: string;
   contactPhone?: string;
   addressAr?: string;

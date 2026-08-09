@@ -34,7 +34,6 @@ export function ChurchProvisioningSummary({ form }: ChurchProvisioningSummaryPro
         <div className="space-y-3">
           <h3 className="text-sm font-semibold tracking-tight">{t("wizard.summary.churchDetails")}</h3>
           <SummaryRow label={t("wizard.church.churchNameAr")} value={values.churchNameAr} />
-          <SummaryRow label={t("wizard.church.churchNameEn")} value={values.churchNameEn} />
           <SummaryRow label={t("wizard.church.slug")} value={values.slug} mono />
           <SummaryRow label={t("wizard.church.contactEmail")} value={values.contactEmail} />
           <SummaryRow label={t("wizard.church.contactPhone")} value={values.contactPhone} />

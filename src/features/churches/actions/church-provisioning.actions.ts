@@ -38,7 +38,6 @@ function isKnownRpcError(message: string | null | undefined): boolean {
 
 export async function provisionChurchAction(input: {
   churchNameAr: string;
-  churchNameEn?: string;
   slug: string;
   contactEmail?: string;
   contactPhone?: string;
@@ -144,7 +143,6 @@ export async function provisionChurchWizardAction(
   const fullNameAr = parsed.fullNameAr.trim();
   const fullNameEn = parsed.fullNameEn.trim();
   const churchNameAr = parsed.churchNameAr.trim();
-  const churchNameEn = parsed.churchNameEn.trim();
 
   const { data: existingProfile } = await admin
     .from("profiles")
@@ -187,7 +185,7 @@ export async function provisionChurchWizardAction(
     authUserId = authData.user.id;
 
     const baseSlug =
-      parsed.slug.trim() || generateSlug(churchNameEn || churchNameAr);
+      parsed.slug.trim() || generateSlug(churchNameAr);
     const slug = await ensureUniqueSlug(
       supabase as unknown as Parameters<typeof ensureUniqueSlug>[0],
       baseSlug,
@@ -197,7 +195,6 @@ export async function provisionChurchWizardAction(
       supabase as unknown as Parameters<typeof provisionChurch>[0],
       {
         churchNameAr,
-        churchNameEn: churchNameEn || undefined,
         slug,
         contactEmail: parsed.contactEmail.trim() || undefined,
         contactPhone: parsed.contactPhone.trim() || undefined,

@@ -28,7 +28,6 @@ type Phase = "form" | "provisioning" | "success" | "error";
 
 const defaultValues: ProvisionChurchWizardValues = {
   churchNameAr: "",
-  churchNameEn: "",
   slug: "",
   contactEmail: "",
   contactPhone: "",
@@ -41,7 +40,7 @@ const defaultValues: ProvisionChurchWizardValues = {
 };
 
 const STEP_FIELDS: Record<number, Array<keyof ProvisionChurchWizardValues>> = {
-  1: ["churchNameAr", "churchNameEn", "slug", "contactEmail", "contactPhone", "addressAr"],
+  1: ["churchNameAr", "slug", "contactEmail", "contactPhone", "addressAr"],
   2: ["fullNameAr", "fullNameEn", "email", "phone", "password"],
   3: [],
 };

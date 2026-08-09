@@ -5,46 +5,29 @@ type ServiceResult<T> = { data: T | null; error: string | null };
 
 type ChurchRow = { slug: string };
 
-type ProvisioningRpcResult<T> = { data: T | null; error: { message: string } | null };
+type RpcResult<T> = { data: T | null; error: { message: string } | null };
 
-type ProvisioningRpcClient = {
-  rpc: {
-    list_churches_for_signup: () => Promise<ProvisioningRpcResult<ChurchRow[]>>;
-    approve_church_request: (args: {
-      p_request_id: string;
-      p_auth_user_id: string;
-      p_slug: string;
-    }) => Promise<ProvisioningRpcResult<string>>;
-    reject_church_request: (args: {
-      p_request_id: string;
-      p_reason: string | null;
-    }) => Promise<ProvisioningRpcResult<string>>;
-    provision_church: (args: {
-      p_church_name_ar: string;
-      p_church_name_en: string | null;
-      p_slug: string;
-      p_contact_email: string | null;
-      p_contact_phone: string | null;
-      p_address_ar: string | null;
-      p_auth_user_id: string;
-      p_full_name_ar: string;
-      p_full_name_en: string | null;
-      p_email: string;
-      p_phone: string | null;
-    }) => Promise<ProvisioningRpcResult<string>>;
-    create_church_super_admin: (args: {
-      p_church_id: string;
-      p_auth_user_id: string;
-      p_full_name_ar: string;
-      p_full_name_en: string | null;
-      p_email: string;
-      p_phone: string | null;
-    }) => Promise<ProvisioningRpcResult<string>>;
-  };
-};
+/**
+ * The provisioning RPCs (list_churches_for_signup, approve_church_request,
+ * reject_church_request, provision_church, create_church_super_admin) are not
+ * part of the generated Database["public"]["Functions"] types, so the typed
+ * `supabase.rpc(name, args)` signature rejects them. These helpers cast only
+ * the `rpc` callable itself and keep the CORRECT runtime invocation shape
+ * (`rpc("function_name", args)`) — previously the service used a cast that
+ * looked like `rpc.provision_church(...)`, which is not a function at runtime
+ * and threw `TypeError: ...rpc.provision_church is not a function`.
+ */
+type RpcCallable = (
+  name: string,
+  args?: Record<string, unknown>,
+) => Promise<RpcResult<unknown>>;
 
-function asProvisioningClient(supabase: SupabaseClient<Database>): ProvisioningRpcClient {
-  return supabase as unknown as ProvisioningRpcClient;
+function callRpc(
+  supabase: SupabaseClient<Database>,
+  name: string,
+  args?: Record<string, unknown>,
+): Promise<RpcResult<unknown>> {
+  return (supabase.rpc as unknown as RpcCallable)(name, args);
 }
 
 export function buildUniqueChurchSlug(
@@ -66,17 +49,18 @@ export async function ensureUniqueSlug(
 ): Promise<string> {
   const normalized = buildUniqueChurchSlug(supabase, base);
 
-  const result = await asProvisioningClient(supabase).rpc.list_churches_for_signup();
+  const result = await callRpc(supabase, "list_churches_for_signup");
   if (result.error) {
     return normalized;
   }
 
-  const existing = new Set((result.data ?? []).map((item) => item.slug));
+  const existing = new Set(((result.data as ChurchRow[] | null) ?? []).map((item) => item.slug));
   let slug = normalized;
   let counter = 1;
 
   while (existing.has(slug)) {
-    slug = `${normalized}-${counter++}`;
+    slug = `${normalized}-${counter}`;
+    counter++;
   }
 
   return slug;
@@ -89,7 +73,7 @@ export async function approveChurchRequest(
   slug: string,
 ): Promise<ServiceResult<{ churchId: string }>> {
   try {
-    const result = await asProvisioningClient(supabase).rpc.approve_church_request({
+    const result = await callRpc(supabase, "approve_church_request", {
       p_request_id: requestId,
       p_auth_user_id: authUserId,
       p_slug: slug,
@@ -111,7 +95,7 @@ export async function rejectChurchRequest(
   reason?: string | null,
 ): Promise<ServiceResult<null>> {
   try {
-    const result = await asProvisioningClient(supabase).rpc.reject_church_request({
+    const result = await callRpc(supabase, "reject_church_request", {
       p_request_id: requestId,
       p_reason: reason ?? null,
     });
@@ -130,7 +114,6 @@ export async function provisionChurch(
   supabase: SupabaseClient<Database>,
   input: {
     churchNameAr: string;
-    churchNameEn?: string;
     slug: string;
     contactEmail?: string;
     contactPhone?: string;
@@ -143,9 +126,8 @@ export async function provisionChurch(
   },
 ): Promise<ServiceResult<{ churchId: string }>> {
   try {
-    const result = await asProvisioningClient(supabase).rpc.provision_church({
+    const result = await callRpc(supabase, "provision_church", {
       p_church_name_ar: input.churchNameAr,
-      p_church_name_en: input.churchNameEn ?? null,
       p_slug: input.slug,
       p_contact_email: input.contactEmail ?? null,
       p_contact_phone: input.contactPhone ?? null,
@@ -179,7 +161,7 @@ export async function createChurchSuperAdmin(
   },
 ): Promise<ServiceResult<{ userId: string }>> {
   try {
-    const result = await asProvisioningClient(supabase).rpc.create_church_super_admin({
+    const result = await callRpc(supabase, "create_church_super_admin", {
       p_church_id: input.churchId,
       p_auth_user_id: input.authUserId,
       p_full_name_ar: input.fullNameAr,

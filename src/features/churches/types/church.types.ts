@@ -117,7 +117,6 @@ export type ChurchAdminListRow = {
 
 export interface CreateChurchInput {
   name_ar: string;
-  name_en?: string;
   slug: string;
   contact_email?: string;
   contact_phone?: string;
@@ -130,7 +129,6 @@ export interface CreateChurchInput {
 
 export interface UpdateChurchInput {
   name_ar?: string;
-  name_en?: string;
   slug?: string;
   contact_email?: string;
   contact_phone?: string;
