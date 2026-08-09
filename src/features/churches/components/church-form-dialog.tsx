@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useForm, type UseFormReturn, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,6 +27,7 @@ type ChurchFormDialogProps = {
 };
 
 export function ChurchFormDialog({ open, onOpenChange, church }: ChurchFormDialogProps) {
+  const t = useTranslations("churches.form");
   const isEdit = !!church;
 
   const createForm = useForm<CreateChurchFormValues>({
@@ -102,9 +104,9 @@ export function ChurchFormDialog({ open, onOpenChange, church }: ChurchFormDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogPopup className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Church" : "Create Church"}</DialogTitle>
+          <DialogTitle>{isEdit ? t("editTitle") : t("createTitle")}</DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update church details below." : "Fill in the church details below."}
+            {isEdit ? t("editDescription") : t("createDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -113,10 +115,10 @@ export function ChurchFormDialog({ open, onOpenChange, church }: ChurchFormDialo
             <ChurchFields form={updateForm as unknown as UseFormReturn<FieldValues>} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-                Cancel
+                {t("cancel")}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save Changes"}
+                {isSubmitting ? t("saving") : t("save")}
               </Button>
             </DialogFooter>
           </form>
@@ -125,10 +127,10 @@ export function ChurchFormDialog({ open, onOpenChange, church }: ChurchFormDialo
             <ChurchFields form={createForm as unknown as UseFormReturn<FieldValues>} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-                Cancel
+                {t("cancel")}
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Church"}
+                {isSubmitting ? t("creating") : t("create")}
               </Button>
             </DialogFooter>
           </form>
@@ -143,48 +145,49 @@ type ChurchFieldsProps = {
 };
 
 function ChurchFields({ form }: ChurchFieldsProps) {
+  const t = useTranslations("churches.form");
   const errors = form.formState.errors as Record<string, { message?: string } | undefined>;
 
   return (
     <>
-      <FormField label="Arabic Name" error={errors.name_ar?.message} required>
-        <Input {...form.register("name_ar")} placeholder="Arabic church name" />
+      <FormField label={t("nameAr")} error={errors.name_ar?.message} required>
+        <Input {...form.register("name_ar")} placeholder={t("placeholderNameAr")} />
       </FormField>
 
-      <FormField label="English Name" error={errors.name_en?.message}>
-        <Input {...form.register("name_en")} placeholder="English church name" />
+      <FormField label={t("nameEn")} error={errors.name_en?.message}>
+        <Input {...form.register("name_en")} placeholder={t("placeholderNameEn")} />
       </FormField>
 
-      <FormField label="Slug" error={errors.slug?.message} required>
-        <Input {...form.register("slug")} placeholder="church-slug" />
+      <FormField label={t("slug")} error={errors.slug?.message} required>
+        <Input {...form.register("slug")} placeholder={t("placeholderSlug")} />
       </FormField>
 
-      <FormField label="Contact Email" error={errors.contact_email?.message}>
-        <Input type="email" {...form.register("contact_email")} placeholder="contact@church.org" />
+      <FormField label={t("contactEmail")} error={errors.contact_email?.message}>
+        <Input type="email" {...form.register("contact_email")} placeholder={t("placeholderEmail")} />
       </FormField>
 
-      <FormField label="Contact Phone" error={errors.contact_phone?.message}>
-        <Input {...form.register("contact_phone")} placeholder="+20 123 456 7890" />
+      <FormField label={t("contactPhone")} error={errors.contact_phone?.message}>
+        <Input {...form.register("contact_phone")} placeholder={t("placeholderPhone")} />
       </FormField>
 
-      <FormField label="Address (Arabic)" error={errors.address_ar?.message}>
-        <Input {...form.register("address_ar")} placeholder="Address in Arabic" />
+      <FormField label={t("addressAr")} error={errors.address_ar?.message}>
+        <Input {...form.register("address_ar")} placeholder={t("placeholderAddressAr")} />
       </FormField>
 
-      <FormField label="Address (English)" error={errors.address_en?.message}>
-        <Input {...form.register("address_en")} placeholder="Address in English" />
+      <FormField label={t("addressEn")} error={errors.address_en?.message}>
+        <Input {...form.register("address_en")} placeholder={t("placeholderAddressEn")} />
       </FormField>
 
-      <FormField label="Subscription Tier" error={errors.subscription_tier?.message}>
-        <Input {...form.register("subscription_tier")} placeholder="trial" />
+      <FormField label={t("subscriptionTier")} error={errors.subscription_tier?.message}>
+        <Input {...form.register("subscription_tier")} placeholder={t("placeholderTier")} />
       </FormField>
 
-      <FormField label="Subscription Status" error={errors.subscription_status?.message}>
-        <Input {...form.register("subscription_status")} placeholder="active" />
+      <FormField label={t("subscriptionStatus")} error={errors.subscription_status?.message}>
+        <Input {...form.register("subscription_status")} placeholder={t("placeholderStatus")} />
       </FormField>
 
-      <FormField label="Locale" error={errors.locale?.message}>
-        <Input {...form.register("locale")} placeholder="ar" />
+      <FormField label={t("locale")} error={errors.locale?.message}>
+        <Input {...form.register("locale")} placeholder={t("placeholderLocale")} />
       </FormField>
     </>
   );

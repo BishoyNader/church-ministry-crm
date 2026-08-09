@@ -13,12 +13,6 @@ const optionalUrl = z
   .optional()
   .or(z.literal(""));
 
-const optionalEmail = z
-  .string()
-  .email({ message: "Invalid email" })
-  .optional()
-  .or(z.literal(""));
-
 export const createChildSchema = z.object({
   full_name_ar: z.string().min(2, { message: "Arabic full name is required" }),
   full_name_en: z.string().optional(),

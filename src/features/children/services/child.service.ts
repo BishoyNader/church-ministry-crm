@@ -18,6 +18,16 @@ import type {
 
 type ServiceResult<T> = { data: T | null; error: string | null };
 
+function emptyPaginatedResult(
+  page: number,
+  pageSize: number,
+): ServiceResult<PaginatedResult<ChildListItem>> {
+  return {
+    data: { data: [], total: 0, page, pageSize, totalPages: 0 },
+    error: null,
+  };
+}
+
 export async function listChildren(
   supabase: SupabaseClient,
   churchId: string,
@@ -25,6 +35,7 @@ export async function listChildren(
     search?: string;
     service_id?: string;
     stage_id?: string;
+    stageIds?: string[];
     status?: string;
   },
   pagination?: PaginationInput,
@@ -34,6 +45,10 @@ export async function listChildren(
     const pageSize = pagination?.pageSize ?? 20;
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
+
+    if (filters?.stageIds && filters.stageIds.length === 0) {
+      return emptyPaginatedResult(page, pageSize);
+    }
 
     let query = supabase
       .from("beneficiaries")
@@ -62,6 +77,10 @@ export async function listChildren(
 
     if (filters?.stage_id) {
       query = query.eq("beneficiary_assignments.stage_id", filters.stage_id);
+    }
+
+    if (filters?.stageIds) {
+      query = query.in("beneficiary_assignments.stage_id", filters.stageIds);
     }
 
     if (filters?.status) {
@@ -109,18 +128,28 @@ export async function getChildById(
   supabase: SupabaseClient,
   childId: string,
   churchId: string,
+  stageIds?: string[],
 ): Promise<ServiceResult<ChildDetail>> {
   try {
-    const { data: child, error } = await supabase
+    if (stageIds && stageIds.length === 0) {
+      return { data: null, error: "Child not found." };
+    }
+
+    let query = supabase
       .from("beneficiaries")
       .select(
-        "*, beneficiary_assignments(service_id, stage_id, services(name_ar), stages(name_ar))",
+        "*, beneficiary_assignments!inner(service_id, stage_id, services(name_ar), stages(name_ar))",
       )
       .eq("id", childId)
       .eq("church_id", churchId)
       .eq("beneficiary_assignments.is_current", true)
-      .is("deleted_at", null)
-      .single();
+      .is("deleted_at", null);
+
+    if (stageIds) {
+      query = query.in("beneficiary_assignments.stage_id", stageIds);
+    }
+
+    const { data: child, error } = await query.single();
 
     if (error || !child) {
       return { data: null, error: "Child not found." };
@@ -136,7 +165,9 @@ export async function getChildById(
         .limit(50),
       supabase
         .from("followups")
-        .select("*, servants:assigned_to(profiles(full_name_ar))")
+        .select(
+          "*, servants!followups_assigned_to_fkey(profiles!servants_id_fkey(full_name_ar))",
+        )
         .eq("church_id", churchId)
         .eq("beneficiary_id", childId)
         .order("created_at", { ascending: false })
@@ -338,7 +369,7 @@ export async function createAttendance(
         session_date: input.attendance_date,
         created_by: user.id,
       }, {
-        onConflict: "church_id,service_id,stage_id,session_date",
+        onConflict: "stage_id,session_date",
       })
       .select("id")
       .single();
@@ -401,7 +432,7 @@ export async function batchAttendance(
         session_date: input.attendance_date,
         created_by: user.id,
       }, {
-        onConflict: "church_id,service_id,stage_id,session_date",
+        onConflict: "stage_id,session_date",
       })
       .select("id")
       .single();
@@ -421,38 +452,27 @@ export async function batchAttendance(
 
     const existingIds = new Set((existing ?? []).map((r) => r.beneficiary_id));
 
-    let created = 0;
-    let updated = 0;
+    // Sprint 2 (Phase 5): one multi-row upsert instead of N per-record
+    // requests (removes the N+1 on the bulk-attendance screen).
+    const rows = input.records.map((record) => ({
+      church_id: profile.church_id,
+      session_id: session.id,
+      beneficiary_id: record.beneficiary_id,
+      status: record.status,
+      notes: record.notes ?? null,
+      recorded_by: user.id,
+    }));
 
-    const results = await Promise.all(
-      input.records.map((record) =>
-        supabase.from("attendance_records").upsert(
-          {
-            church_id: profile.church_id,
-            session_id: session.id,
-            beneficiary_id: record.beneficiary_id,
-            status: record.status,
-            notes: record.notes ?? null,
-            recorded_by: user.id,
-          },
-          {
-            onConflict: "church_id,session_id,beneficiary_id",
-          },
-        ),
-      ),
-    );
+    const { error: upsertError } = await supabase
+      .from("attendance_records")
+      .upsert(rows, { onConflict: "church_id,session_id,beneficiary_id" });
 
-    for (let i = 0; i < results.length; i++) {
-      const result = results[i];
-      if (result.error) {
-        return { data: null, error: result.error.message };
-      }
-      if (existingIds.has(input.records[i].beneficiary_id)) {
-        updated++;
-      } else {
-        created++;
-      }
+    if (upsertError) {
+      return { data: null, error: upsertError.message };
     }
+
+    const created = rows.filter((r) => !existingIds.has(r.beneficiary_id)).length;
+    const updated = rows.length - created;
 
     return { data: { created, updated }, error: null };
   } catch {
@@ -466,11 +486,16 @@ export async function listAttendance(
   filters?: {
     beneficiary_id?: string;
     stage_id?: string;
+    stageIds?: string[];
     from_date?: string;
     to_date?: string;
   },
 ): Promise<ServiceResult<AttendanceListItem[]>> {
   try {
+    if (filters?.stageIds && filters.stageIds.length === 0) {
+      return { data: [], error: null };
+    }
+
     let query = supabase
       .from("attendance_records")
       .select(
@@ -485,6 +510,10 @@ export async function listAttendance(
 
     if (filters?.stage_id) {
       query = query.eq("attendance_sessions.stage_id", filters.stage_id);
+    }
+
+    if (filters?.stageIds) {
+      query = query.in("attendance_sessions.stage_id", filters.stageIds);
     }
 
     if (filters?.from_date) {
@@ -605,15 +634,21 @@ export async function listFollowups(
     beneficiary_id?: string;
     status?: string;
     assigned_to?: string;
+    stageIds?: string[];
   },
 ): Promise<ServiceResult<FollowupListItem[]>> {
   try {
+    if (filters?.stageIds && filters.stageIds.length === 0) {
+      return { data: [], error: null };
+    }
+
     let query = supabase
       .from("followups")
       .select(
-        "*, beneficiaries!inner(full_name_ar, beneficiary_assignments(stage_id, stages(name_ar))), servants:assigned_to(profiles(full_name_ar))",
+        "*, beneficiaries!inner(full_name_ar, beneficiary_assignments!inner(stage_id, stages(name_ar))), servants!followups_assigned_to_fkey(profiles!servants_id_fkey(full_name_ar))",
       )
       .eq("church_id", churchId)
+      .eq("beneficiaries.beneficiary_assignments.is_current", true)
       .order("created_at", { ascending: false });
 
     if (filters?.beneficiary_id) {
@@ -626,6 +661,13 @@ export async function listFollowups(
 
     if (filters?.assigned_to) {
       query = query.eq("assigned_to", filters.assigned_to);
+    }
+
+    if (filters?.stageIds) {
+      query = query.in(
+        "beneficiaries.beneficiary_assignments.stage_id",
+        filters.stageIds,
+      );
     }
 
     const { data, error } = await query;
@@ -656,8 +698,13 @@ export async function listStages(
   supabase: SupabaseClient,
   churchId: string,
   serviceId?: string,
+  stageIds?: string[],
 ): Promise<ServiceResult<Pick<import("../types/child.types").StageRow, "id" | "name_ar" | "service_id">[]>> {
   try {
+    if (stageIds && stageIds.length === 0) {
+      return { data: [], error: null };
+    }
+
     let query = supabase
       .from("stages")
       .select("id, name_ar, service_id")
@@ -667,6 +714,10 @@ export async function listStages(
 
     if (serviceId) {
       query = query.eq("service_id", serviceId);
+    }
+
+    if (stageIds) {
+      query = query.in("id", stageIds);
     }
 
     const { data, error } = await query;
@@ -724,6 +775,30 @@ export async function getFollowupById(
     return { data, error: null };
   } catch {
     return { data: null, error: "Failed to load followup." };
+  }
+}
+
+export async function getBeneficiaryCurrentStage(
+  supabase: SupabaseClient,
+  churchId: string,
+  beneficiaryId: string,
+): Promise<ServiceResult<string | null>> {
+  try {
+    const { data, error } = await supabase
+      .from("beneficiary_assignments")
+      .select("stage_id")
+      .eq("church_id", churchId)
+      .eq("beneficiary_id", beneficiaryId)
+      .eq("is_current", true)
+      .maybeSingle();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data: data?.stage_id ?? null, error: null };
+  } catch {
+    return { data: null, error: "Failed to load beneficiary stage." };
   }
 }
 

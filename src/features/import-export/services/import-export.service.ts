@@ -537,7 +537,7 @@ export async function exportData(
     } else if (entity === "servants") {
       const { data, error } = await supabase
         .from("servants")
-        .select("id, approval_status, join_date, notes, profiles(full_name_ar, email, phone)")
+        .select("id, approval_status, join_date, notes, profiles!servants_id_fkey(full_name_ar, email, phone)")
         .eq("church_id", churchId)
         .is("deleted_at", null)
         .order("created_at", { ascending: false });

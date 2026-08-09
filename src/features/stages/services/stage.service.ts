@@ -15,9 +15,29 @@ type ServiceResult<T> = { data: T | null; error: string | null };
 export async function listMinistries(
   supabase: SupabaseClient,
   churchId: string,
+  stageIds?: string[],
 ): Promise<ServiceResult<MinistryListItem[]>> {
   try {
-    const { data: ministries, error } = await supabase
+    const scoped = stageIds !== undefined;
+
+    if (scoped && stageIds.length === 0) {
+      return { data: [], error: null };
+    }
+
+    let allowedMinistryIds: Set<string> | null = null;
+
+    if (scoped) {
+      const { data: scopedStages } = await supabase
+        .from("stages")
+        .select("service_id")
+        .eq("church_id", churchId)
+        .is("deleted_at", null)
+        .in("id", stageIds);
+
+      allowedMinistryIds = new Set((scopedStages ?? []).map((s) => s.service_id as string));
+    }
+
+    const ministriesQuery = supabase
       .from("services")
       .select("*")
       .eq("church_id", churchId)
@@ -25,19 +45,34 @@ export async function listMinistries(
       .order("sort_order")
       .order("name_ar");
 
+    const { data: ministries, error } = await ministriesQuery;
+
     if (error) {
       return { data: null, error: error.message };
     }
 
-    const ministryIds = (ministries ?? []).map((m) => m.id);
+    const scopedMinistries = (ministries ?? []).filter(
+      (m) => !allowedMinistryIds || allowedMinistryIds.has(m.id as string),
+    );
+
+    const ministryIds = scopedMinistries.map((m) => m.id);
+
+    let stageCountsQuery = supabase
+      .from("stages")
+      .select("service_id")
+      .eq("church_id", churchId)
+      .is("deleted_at", null);
+
+    if (ministryIds.length) {
+      stageCountsQuery = stageCountsQuery.in("service_id", ministryIds);
+    }
+
+    if (scoped) {
+      stageCountsQuery = stageCountsQuery.in("id", stageIds);
+    }
 
     const { data: stageCounts } = ministryIds.length
-      ? await supabase
-          .from("stages")
-          .select("service_id")
-          .eq("church_id", churchId)
-          .in("service_id", ministryIds)
-          .is("deleted_at", null)
+      ? await stageCountsQuery
       : { data: [] };
 
     const countsByService = new Map<string, number>();
@@ -48,7 +83,7 @@ export async function listMinistries(
       );
     }
 
-    const result: MinistryListItem[] = (ministries ?? []).map((m) => ({
+    const result: MinistryListItem[] = scopedMinistries.map((m) => ({
       ...m,
       stageCount: countsByService.get(m.id) ?? 0,
     }));
@@ -272,8 +307,15 @@ export async function listStages(
   supabase: SupabaseClient,
   churchId: string,
   ministryId?: string,
+  stageIds?: string[],
 ): Promise<ServiceResult<StageListItem[]>> {
   try {
+    const scoped = stageIds !== undefined;
+
+    if (scoped && stageIds.length === 0) {
+      return { data: [], error: null };
+    }
+
     let query = supabase
       .from("stages")
       .select("*")
@@ -286,29 +328,33 @@ export async function listStages(
       query = query.eq("service_id", ministryId);
     }
 
+    if (scoped) {
+      query = query.in("id", stageIds);
+    }
+
     const { data: stages, error } = await query;
 
     if (error) {
       return { data: null, error: error.message };
     }
 
-    const stageIds = (stages ?? []).map((s) => s.id);
+    const fetchedStageIds = (stages ?? []).map((s) => s.id);
 
     const [childrenCounts, usersCounts] = await Promise.all([
-      stageIds.length
+      fetchedStageIds.length
         ? supabase
             .from("beneficiaries")
             .select("stage_id")
             .eq("church_id", churchId)
-            .in("stage_id", stageIds)
+            .in("stage_id", fetchedStageIds)
             .eq("status", "active")
         : { data: [] as { stage_id: string }[] },
-      stageIds.length
+      fetchedStageIds.length
           ? supabase
             .from("servant_stage_assignments")
             .select("stage_id")
             .eq("church_id", churchId)
-            .in("stage_id", stageIds)
+            .in("stage_id", fetchedStageIds)
             .eq("is_active", true)
             .is("end_date", null)
         : { data: [] as { stage_id: string }[] },

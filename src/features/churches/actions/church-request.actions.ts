@@ -5,6 +5,7 @@ import { submitChurchRequest } from "../services/church-request.service";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendNotification } from "@/features/notifications/services/notification.service";
+import { assertRateLimit } from "@/lib/rate-limit";
 import { ZodError } from "zod";
 
 export type ChurchRequestActionResult = {
@@ -66,6 +67,14 @@ async function notifyPlatformOwnersForChurchRequest(
 export async function submitChurchRequestAction(
   values: ChurchRequestFormValues,
 ): Promise<ChurchRequestActionResult> {
+  const gate = await assertRateLimit({ scope: "church-request", limit: 3 });
+  if (!gate.ok) {
+    return {
+      success: false,
+      message: "Too many requests. Please wait a moment and try again.",
+    };
+  }
+
   try {
     churchRequestSchema.parse(values);
   } catch (error) {

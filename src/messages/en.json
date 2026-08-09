@@ -72,10 +72,7 @@
     "deleteConfirm": "Are you sure you want to delete this entry?",
     "emptyTitle": "No entries yet",
     "emptyDescription": "Start recording your daily spiritual practices.",
-    "loadError": "Failed to load spiritual journal entries.",
-    "pageInfo": "Page {page} of {totalPages}",
-    "prev": "Previous",
-    "next": "Next"
+    "loadError": "Failed to load spiritual journal entries."
   },
   "settings": {
     "title": "Settings",
@@ -196,7 +193,8 @@
       "submit": "Update password",
       "success": "Your password has been updated successfully.",
       "noToken": "The reset link appears to be invalid. Please request a new link.",
-      "generalError": "Unable to complete password reset."
+      "generalError": "Unable to complete password reset.",
+      "login": "Back to login"
     }
   },
   "servants": {
@@ -218,7 +216,8 @@
       "stages": "Stages",
       "approval": "Approval",
       "joined": "Joined",
-      "actions": "Actions"
+      "actions": "Actions",
+      "caption": "Servants list"
     },
     "status": {
       "pending": "Pending",
@@ -231,11 +230,6 @@
       "edit": "Edit servant",
       "assign": "Assign stages",
       "archive": "Archive servant"
-    },
-    "pagination": {
-      "showing": "Showing {from}–{to} of {total}",
-      "prev": "Previous",
-      "next": "Next"
     },
     "errors": {
       "general": "Something went wrong. Please try again."
@@ -253,7 +247,8 @@
       "processing": "Saving…",
       "errors": {
         "general": "Something went wrong. Please try again."
-      }
+      },
+      "confessionFather": "Confession Father"
     },
     "assign": {
       "title": "Assign Stages",
@@ -295,6 +290,7 @@
       "all": "All Roles",
       "superAdmin": "Ministry Admin",
       "admin": "Admin",
+      "stageManager": "Stage Manager",
       "servant": "Servant"
     },
     "searchPlaceholder": "Search by name or email…",
@@ -306,16 +302,12 @@
       "roles": "Roles",
       "status": "Status",
       "joined": "Joined",
-      "actions": "Actions"
+      "actions": "Actions",
+      "caption": "Users list"
     },
     "status": {
       "active": "Active",
       "inactive": "Inactive"
-    },
-    "pagination": {
-      "showing": "Showing {from}–{to} of {total}",
-      "prev": "Previous",
-      "next": "Next"
     },
     "form": {
       "createTitle": "Add User",
@@ -374,7 +366,8 @@
         "email": "Email",
         "phone": "Phone",
         "requestedOn": "Requested",
-        "actions": "Actions"
+        "actions": "Actions",
+        "caption": "Approval queue"
       },
       "errors": {
         "general": "Something went wrong. Please try again."
@@ -454,6 +447,10 @@
       "title": "No ministries found",
       "description": "Start by creating a ministry to organize your stages."
     },
+    "scope": {
+      "title": "No stages assigned to you",
+      "viewAssignedOnly": "You can only view the stages you are assigned to."
+    },
     "ministry": {
       "stagesCount": "{count} stages",
       "noStages": "No stages in this ministry.",
@@ -481,7 +478,8 @@
         "confirm": "Deactivate",
         "cancel": "Cancel",
         "processing": "Deactivating…"
-      }
+      },
+      "toggleStages": "Toggle stages"
     },
     "stage": {
       "createFormTitle": "Add Stage",
@@ -550,7 +548,8 @@
       "allStages": "All Stages",
       "allStatuses": "All Statuses",
       "allPipeline": "All Pipeline Stages",
-      "clearFilters": "Clear Filters"
+      "clearFilters": "Clear Filters",
+      "allServices": "All Services"
     },
     "table": {
       "name": "Name",
@@ -559,7 +558,12 @@
       "pipelineStage": "Pipeline",
       "parentPhone": "Parent Phone",
       "enrolledAt": "Enrolled",
-      "actions": "Actions"
+      "actions": "Actions",
+      "caption": "Beneficiaries list",
+      "delete": "Delete",
+      "edit": "Edit",
+      "mobile": "Mobile",
+      "view": "View"
     },
     "empty": {
       "title": "No beneficiaries yet",
@@ -571,11 +575,6 @@
       "transferred": "Transferred",
       "graduated": "Graduated"
     },
-    "pagination": {
-      "showing": "Showing {from}–{to} of {total}",
-      "prev": "Previous",
-      "next": "Next"
-    },
     "form": {
       "createTitle": "Add Beneficiary",
       "editTitle": "Edit Beneficiary",
@@ -585,7 +584,9 @@
         "parent": "Parent / Guardian",
         "medical": "Medical Information",
         "spiritual": "Spiritual Information",
-        "education": "Education Information"
+        "education": "Education Information",
+        "contact": "Contact Information",
+        "other": "Other Information"
       },
       "firstNameAr": "First Name (Arabic)",
       "firstNameEn": "First Name (English)",
@@ -621,7 +622,17 @@
       "photoUrl": "Photo URL",
       "save": "Save",
       "cancel": "Cancel",
-      "processing": "Processing…"
+      "processing": "Processing…",
+      "address": "Address",
+      "confessionFather": "Confession Father",
+      "fatherMobile": "Father's Mobile",
+      "fullNameAr": "Full Name (Arabic)",
+      "fullNameEn": "Full Name (English)",
+      "motherMobile": "Mother's Mobile",
+      "school": "School",
+      "selectService": "Select a service",
+      "service": "Service",
+      "whatsapp": "WhatsApp"
     },
     "delete": {
       "title": "Deactivate Beneficiary",
@@ -672,7 +683,8 @@
         "date": "Date",
         "status": "Status",
         "notes": "Notes",
-        "noRecords": "No attendance records found."
+        "noRecords": "No attendance records found.",
+        "caption": "Attendance history"
       },
       "attendanceStatus": {
         "present": "Present",
@@ -687,7 +699,8 @@
         "assignedTo": "Assigned To",
         "notes": "Notes",
         "outcome": "Outcome",
-        "noRecords": "No follow-ups found."
+        "noRecords": "No follow-ups found.",
+        "caption": "Follow-up history"
       },
       "followupStatus": {
         "scheduled": "Scheduled",
@@ -703,7 +716,16 @@
         "other": "Other"
       },
       "deactivateChild": "Deactivate",
-      "notFound": "Beneficiary not found."
+      "notFound": "Beneficiary not found.",
+      "confessionFather": "Confession Father",
+      "contactInfo": "Contact Information",
+      "fatherMobile": "Father's Mobile",
+      "fullNameAr": "Full Name (Arabic)",
+      "fullNameEn": "Full Name (English)",
+      "motherMobile": "Mother's Mobile",
+      "otherInfo": "Other Information",
+      "service": "Service",
+      "whatsapp": "WhatsApp"
     },
     "attendance": {
       "title": "Attendance",
@@ -722,7 +744,9 @@
       "saveSuccess": "Attendance saved successfully.",
       "saveError": "Failed to save attendance.",
       "noStageSelected": "Select a stage and date to begin.",
-      "noChildrenInStage": "No active beneficiaries found in this stage."
+      "noChildrenInStage": "No active beneficiaries found in this stage.",
+      "caption": "Attendance records",
+      "selectServiceFirst": "Please select a service first"
     },
     "followups": {
       "title": "Follow-ups",
@@ -758,7 +782,8 @@
       "deleteConfirm": "Are you sure you want to delete this follow-up?",
       "loadError": "Failed to load follow-ups.",
       "statusDialogTitle": "Change Status",
-      "statusDialogDescription": "Update the follow-up status and add any notes."
+      "statusDialogDescription": "Update the follow-up status and add any notes.",
+      "caption": "Follow-up records"
     }
   },
   "dashboard": {
@@ -797,7 +822,8 @@
       "children": "Beneficiaries",
       "followups": "Follow-ups",
       "attendance": "Attendance",
-      "attendanceRate": "Rate"
+      "attendanceRate": "Rate",
+      "caption": "Stage analytics"
     },
     "attendanceStatus": {
       "present": "Present",
@@ -870,7 +896,8 @@
         "email": "Email",
         "phone": "Phone",
         "requestedOn": "Requested",
-        "actions": "Actions"
+        "actions": "Actions",
+        "caption": "Servant approval requests"
       },
       "errors": {
         "general": "Something went wrong. Please try again."
@@ -1037,7 +1064,8 @@
         "gender": "Gender",
         "stage": "Stage",
         "class": "Class",
-        "errors": "Errors"
+        "errors": "Errors",
+        "caption": "Import results"
       }
     },
     "export": {
@@ -1070,9 +1098,6 @@
     "markRead": "Mark read",
     "noNotifications": "No notifications",
     "noNotificationsDescription": "Your inbox is clear for the selected filter.",
-    "pageInfo": "Page {page} of {totalPages}",
-    "prev": "Previous",
-    "next": "Next",
     "loadError": "Failed to load notifications.",
     "markReadError": "Failed to mark notification as read.",
     "markAllReadError": "Failed to mark all notifications as read.",
@@ -1137,7 +1162,8 @@
       "entityId": "Entity ID",
       "actor": "User",
       "details": "Details",
-      "viewDetails": "View details"
+      "viewDetails": "View details",
+      "caption": "Audit log entries"
     },
     "actions": {
       "create": "Create",
@@ -1190,11 +1216,6 @@
     "empty": {
       "title": "No audit entries",
       "description": "No events match the current filters. Try widening the date range or clearing the filters."
-    },
-    "pagination": {
-      "showing": "Showing {from}–{to} of {total}",
-      "prev": "Previous",
-      "next": "Next"
     }
   },
   "services": {
@@ -1215,7 +1236,8 @@
       "actions": "Actions",
       "edit": "Edit service",
       "archive": "Archive service",
-      "restore": "Restore service"
+      "restore": "Restore service",
+      "caption": "Services list"
     },
     "status": {
       "active": "Active",
@@ -1245,11 +1267,6 @@
     "empty": {
       "title": "No services found",
       "description": "No services match the current filters. Try a different search or clear the filters."
-    },
-    "pagination": {
-      "showing": "Showing {from}–{to} of {total}",
-      "prev": "Previous",
-      "next": "Next"
     },
     "errors": {
       "listFailed": "Failed to load services.",
@@ -1282,7 +1299,8 @@
       "actions": "Actions",
       "edit": "Edit class",
       "archive": "Archive class",
-      "restore": "Restore class"
+      "restore": "Restore class",
+      "caption": "Classes list"
     },
     "status": {
       "active": "Active",
@@ -1313,11 +1331,6 @@
     "empty": {
       "title": "No classes found",
       "description": "No classes match the current filters. Try a different search or clear the filters."
-    },
-    "pagination": {
-      "showing": "Showing {from}–{to} of {total}",
-      "prev": "Previous",
-      "next": "Next"
     },
     "errors": {
       "listFailed": "Failed to load classes.",
@@ -1371,9 +1384,6 @@
     "statusDisabled": "Disabled",
     "clearFilters": "Clear filters",
     "emptyState": "No churches found.",
-    "paginationLabel": "{total, plural, =0 {No results} =1 {1 result} other {# results}} — page {page} of {totalPages}",
-    "previous": "Previous",
-    "next": "Next",
     "back": "Back",
     "edit": "Edit",
     "activate": "Activate",
@@ -1513,7 +1523,9 @@
       "statsFailed": "Failed to load church statistics.",
       "passwordTooShort": "The password must be at least 8 characters long.",
       "managerNotFound": "No manager is assigned to this church.",
-      "resetPasswordFailed": "Failed to reset the password. Please try again."
+      "resetPasswordFailed": "Failed to reset the password. Please try again.",
+      "changeManagerFailed": "Failed to change the church manager.",
+      "deactivateUserFailed": "Failed to deactivate the user."
     },
     "wizard": {
       "title": "Provision a new church",
@@ -1584,6 +1596,47 @@
         "backToReview": "Back to review",
         "tryAgain": "Try again"
       }
+    },
+    "form": {
+      "createTitle": "Create Church",
+      "editTitle": "Edit Church",
+      "createDescription": "Fill in the church details below.",
+      "editDescription": "Update church details below.",
+      "nameAr": "Arabic Name",
+      "nameEn": "English Name",
+      "slug": "Slug",
+      "contactEmail": "Contact Email",
+      "contactPhone": "Contact Phone",
+      "addressAr": "Address (Arabic)",
+      "addressEn": "Address (English)",
+      "subscriptionTier": "Subscription Tier",
+      "subscriptionStatus": "Subscription Status",
+      "locale": "Locale",
+      "placeholderNameAr": "Arabic church name",
+      "placeholderNameEn": "English church name",
+      "placeholderSlug": "church-slug",
+      "placeholderEmail": "contact@church.org",
+      "placeholderPhone": "+20 123 456 7890",
+      "placeholderAddressAr": "Address in Arabic",
+      "placeholderAddressEn": "Address in English",
+      "placeholderTier": "trial",
+      "placeholderStatus": "active",
+      "placeholderLocale": "ar",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "create": "Create Church",
+      "saving": "Saving...",
+      "creating": "Creating..."
     }
+  },
+  "pagination": {
+    "showing": "Showing {from}–{to} of {total}",
+    "prev": "Previous",
+    "next": "Next",
+    "count": "{total, plural, =0 {No results} =1 {1 result} other {# results}} — page {page} of {totalPages}",
+    "page": "Page {page} of {totalPages}"
+  },
+  "common": {
+    "close": "Close"
   }
 }

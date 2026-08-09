@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Search, Pencil, ListChecks, Archive, CheckCircle2, XCircle } from "lucide-react";
+import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -367,32 +368,14 @@ export function ServantListPage() {
         </div>
 
         {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t px-4 py-3">
-            <p className="text-xs text-muted-foreground">
-              {t("pagination.showing", {
-                from: (page - 1) * PAGE_SIZE + 1,
-                to: Math.min(page * PAGE_SIZE, total),
-                total,
-              })}
-            </p>
-            <div className="flex gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                {t("pagination.prev")}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= totalPages}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                {t("pagination.next")}
-              </Button>
-            </div>
+          <div className="border-t px-0">
+            <PaginationBar
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </SectionCard>

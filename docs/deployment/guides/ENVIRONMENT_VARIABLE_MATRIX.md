@@ -1,6 +1,6 @@
 # Environment Variable Matrix — Church Ministry CRM
 
-**Last Updated:** 2026-07-30  
+**Last Updated:** 2026-08-06 (Sprint 2 hardening)  
 **Source of Truth:** Supabase Dashboard (keys) + Vercel Dashboard (deployment)  
 
 ---
@@ -60,7 +60,44 @@
 | **Rotation Procedure** | Same as `NEXT_PUBLIC_SUPABASE_URL` (never changes for the lifetime of a project) |
 | **Required** | NO — only used as fallback. Keep in sync with `NEXT_PUBLIC_SUPABASE_URL`. |
 
-### 5. `SUPABASE_ANON_KEY`
+### 5. `CRON_SECRET`
+
+| Property | Value |
+|----------|-------|
+| **Description** | Bearer token protecting `GET /api/cron/notifications` (Vercel Cron) and the `/api/monitoring/diagnostics` fallback gate. |
+| **Format** | Long random string (`openssl rand -hex 32`) |
+| **Source of Truth** | Operator-generated secret |
+| **Visibility** | 🔒 **Server-Only** — never in the client bundle |
+| **Environments Used** | Production (required), Preview (required for cron testing) |
+| **Rotation Procedure** | Generate new value, update Vercel, re-deploy, verify cron + diagnostics still work |
+| **Required** | YES for cron — cron route returns 401 without it |
+
+### 6. `DIAGNOSTICS_TOKEN`
+
+| Property | Value |
+|----------|-------|
+| **Description** | Bearer token for `GET /api/monitoring/diagnostics`. Falls back to `CRON_SECRET` when unset. |
+| **Format** | Long random string |
+| **Visibility** | 🔒 **Server-Only** |
+| **Required** | NO (falls back to `CRON_SECRET`) — recommended for operator isolation |
+
+### 7. `LOG_FORMAT`
+
+| Property | Value |
+|----------|-------|
+| **Description** | Structured log output: `json` forces JSON-lines; production defaults to JSON via `NODE_ENV`. |
+| **Format** | `json` (or unset) |
+| **Required** | NO |
+
+### 8. `NEXT_PUBLIC_BUILD_TIME`
+
+| Property | Value |
+|----------|-------|
+| **Description** | Build timestamp surfaced by `/api/health` (`runtime.buildTime`) for deploy verification. Injected at build time. |
+| **Format** | ISO-8601 string |
+| **Required** | NO (informational) |
+
+### 9. `SUPABASE_ANON_KEY`
 
 | Property | Value |
 |----------|-------|
@@ -85,6 +122,10 @@
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJ...` (production service key) | Supabase Dashboard → Settings → API |
 | `SUPABASE_URL` | Same as `NEXT_PUBLIC_SUPABASE_URL` | Same source |
 | `SUPABASE_ANON_KEY` | Same as `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Same source (rotated) |
+| `CRON_SECRET` | `openssl rand -hex 32` | Operator-generated |
+| `DIAGNOSTICS_TOKEN` | `openssl rand -hex 32` (recommended) | Operator-generated |
+| `LOG_FORMAT` | `json` | Operator |
+| `NEXT_PUBLIC_BUILD_TIME` | ISO timestamp at deploy | CI/CD pipeline |
 
 ### Preview (Staging)
 

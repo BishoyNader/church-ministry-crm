@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Archive, ArchiveRestore, Pencil, Plus, RotateCcw, SearchX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +32,7 @@ export function ClassesPage() {
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
+  const search = useDebouncedValue(searchInput, 300);
   const [statusFilter, setStatusFilter] = useState<ClassStatusFilter>("all");
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -51,14 +53,6 @@ export function ClassesPage() {
 
   const { data, isLoading, error } = useClassList(filters);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setSearch(searchInput);
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [searchInput]);
-
   const rows = data?.data?.rows ?? [];
   const total = data?.data?.total ?? 0;
   const totalPages = data?.data?.totalPages ?? 0;
@@ -67,7 +61,6 @@ export function ClassesPage() {
 
   const clearFilters = () => {
     setSearchInput("");
-    setSearch("");
     setStatusFilter("all");
     setPage(1);
   };
@@ -240,34 +233,14 @@ export function ClassesPage() {
         </div>
       )}
 
-      {!isLoading && totalPages > 1 && (
-        <SectionCard className="flex items-center justify-between px-4 py-3">
-          <p className="text-xs text-muted-foreground">
-            {t("pagination.showing", {
-              from: (page - 1) * PAGE_SIZE + 1,
-              to: Math.min(page * PAGE_SIZE, total),
-              total,
-            })}
-          </p>
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => setPage((current) => current - 1)}
-            >
-              {t("pagination.prev")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages}
-              onClick={() => setPage((current) => current + 1)}
-            >
-              {t("pagination.next")}
-            </Button>
-          </div>
-        </SectionCard>
+      {!isLoading && (
+        <PaginationBar
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          pageSize={PAGE_SIZE}
+          onPageChange={setPage}
+        />
       )}
 
       {createOpen && (

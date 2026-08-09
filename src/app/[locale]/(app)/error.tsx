@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/feedback/error-state";
+import { reportClientError } from "@/lib/client-error";
 
 export default function AppErrorBoundary({
   error,
@@ -15,6 +16,8 @@ export default function AppErrorBoundary({
   const t = useTranslations("errorBoundary");
 
   useEffect(() => {
+    // Report to the monitoring endpoint (rate-limited server side).
+    void reportClientError(error, { digest: error.digest });
     console.error("App route error boundary captured an error:", error);
   }, [error]);
 

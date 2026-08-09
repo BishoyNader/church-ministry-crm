@@ -28,8 +28,14 @@ export function DashboardPage() {
   const { data: accessState } = useAccessState();
 
   const roles = accessState?.roles ?? [];
+  // Servants and stage managers are stage-scoped by RLS (servant_stage_assignments);
+  // the scope notice explains why the dashboard shows their assigned stages only.
   const isScopedServant =
-    roles.length > 0 && roles.every((role) => role.role_type === "servant");
+    roles.length > 0 &&
+    roles.every(
+      (role) =>
+        role.role_type === "servant" || role.role_type === "stage_manager",
+    );
 
   if (error) {
     return (

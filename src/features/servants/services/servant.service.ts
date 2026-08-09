@@ -63,15 +63,23 @@ export async function listServants(
   supabase: SupabaseClient,
   churchId: string,
   params: ServantListParams,
+  stageIds?: string[],
 ): Promise<ServiceResult<ServantListResult>> {
-  const { page, pageSize, search, approvalStatus } = params;
+  const { page, pageSize, search, approvalStatus, stageId } = params;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
   try {
+    if (stageIds && stageIds.length === 0) {
+      return { data: { servants: [], total: 0, page, pageSize }, error: null };
+    }
+
+    const scoped = stageIds !== undefined;
+    const assignmentEmbed = `servant_stage_assignments${scoped ? "!inner" : ""}(stage_id)`;
+
     let query = supabase
       .from("servants")
-      .select(`id, church_id, approval_status, confession_father_name, join_date, notes, approved_by, approved_at, deleted_at, created_at, updated_at, profiles(${PROFILES_SELECT})`, {
+      .select(`id, church_id, approval_status, confession_father_name, join_date, notes, approved_by, approved_at, deleted_at, created_at, updated_at, profiles!servants_id_fkey(${PROFILES_SELECT}), ${assignmentEmbed}`, {
         count: "exact",
       })
       .eq("church_id", churchId)
@@ -87,6 +95,12 @@ export async function listServants(
       query = query.or(
         `profiles.full_name_ar.ilike.%${search}%,profiles.full_name_en.ilike.%${search}%,profiles.email.ilike.%${search}%`,
       );
+    }
+
+    if (stageId) {
+      query = query.in("servant_stage_assignments.stage_id", [stageId]);
+    } else if (stageIds) {
+      query = query.in("servant_stage_assignments.stage_id", stageIds);
     }
 
     const { data, count, error } = await query;
@@ -116,15 +130,28 @@ export async function getServantById(
   supabase: SupabaseClient,
   churchId: string,
   servantId: string,
+  stageIds?: string[],
 ): Promise<ServiceResult<ServantDetail>> {
   try {
-    const { data: servant, error } = await supabase
+    if (stageIds && stageIds.length === 0) {
+      return { data: null, error: "Servant not found." };
+    }
+
+    const scoped = stageIds !== undefined;
+    const assignmentEmbed = `servant_stage_assignments${scoped ? "!inner" : ""}(stage_id)`;
+
+    let query = supabase
       .from("servants")
-      .select(`id, church_id, approval_status, confession_father_name, join_date, notes, approved_by, approved_at, deleted_at, created_at, updated_at, profiles(${PROFILES_SELECT})`)
+      .select(`id, church_id, approval_status, confession_father_name, join_date, notes, approved_by, approved_at, deleted_at, created_at, updated_at, profiles!servants_id_fkey(${PROFILES_SELECT}), ${assignmentEmbed}`)
       .eq("id", servantId)
       .eq("church_id", churchId)
-      .is("deleted_at", null)
-      .single();
+      .is("deleted_at", null);
+
+    if (stageIds) {
+      query = query.in("servant_stage_assignments.stage_id", stageIds);
+    }
+
+    const { data: servant, error } = await query.single();
 
     if (error || !servant) {
       return { data: null, error: "Servant not found." };
@@ -290,15 +317,26 @@ export async function archiveServant(
 export async function listServantStages(
   supabase: SupabaseClient,
   churchId: string,
+  stageIds?: string[],
 ): Promise<ServiceResult<ServantStage[]>> {
   try {
-    const { data, error } = await supabase
+    if (stageIds && stageIds.length === 0) {
+      return { data: [], error: null };
+    }
+
+    let query = supabase
       .from("stages")
       .select("id, name_ar, name_en")
       .eq("church_id", churchId)
       .eq("is_active", true)
       .is("deleted_at", null)
       .order("sort_order");
+
+    if (stageIds) {
+      query = query.in("id", stageIds);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       return { data: null, error: error.message };

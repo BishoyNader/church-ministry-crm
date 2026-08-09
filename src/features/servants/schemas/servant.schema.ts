@@ -5,6 +5,7 @@ export const servantListSchema = z.object({
   pageSize: z.number().int().min(1).max(100).default(20),
   search: z.string().optional(),
   approvalStatus: z.enum(["pending", "approved", "rejected"]).optional(),
+  stageId: z.string().uuid().optional(),
 });
 
 export const updateServantSchema = z.object({

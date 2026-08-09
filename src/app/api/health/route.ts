@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getRuntimeDiagnostics } from "@/lib/monitoring";
+import { createLogger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
+
+const log = createLogger("health");
 
 // Track process start time for uptime reporting
 const PROCESS_START_TIME = Date.now();
@@ -17,6 +21,7 @@ const PROCESS_START_TIME = Date.now();
  * Exposes only booleans and latency — never schema, counts, or data.
  * Uses the server-side service-role client (bypasses RLS, read-only probe);
  * the service-role key never leaves the server and no rows are returned.
+ * Includes coarse runtime diagnostics for operator dashboards.
  */
 export async function GET() {
   const startedAt = Date.now();
@@ -35,14 +40,13 @@ export async function GET() {
     const { error } = await supabase.from("profiles").select("id").limit(1);
     if (error) {
       database = "error";
-      console.error("Health check DB read failed:", error.message);
+      await log.error("health_check_db_failed", { message: error.message });
     } else {
       database = "ok";
     }
   } catch (err) {
     database = "unconfigured";
-    const message = err instanceof Error ? err.message : "Health check failed.";
-    console.error("Health check client error:", message);
+    await log.error("health_check_client_failed", { err });
   }
 
   const latencyMs = Date.now() - startedAt;
@@ -51,6 +55,8 @@ export async function GET() {
     database === "ok" &&
     checks.supabaseUrlConfigured &&
     checks.supabaseAnonConfigured;
+
+  const runtime = getRuntimeDiagnostics();
 
   return NextResponse.json(
     {
@@ -62,6 +68,13 @@ export async function GET() {
       uptimeSeconds,
       timestamp: new Date().toISOString(),
       version: process.env.npm_package_version ?? "0.1.0",
+      runtime: {
+        nodeVersion: runtime.nodeVersion,
+        runtime: runtime.runtime,
+        memoryMb: runtime.memoryMb,
+        loadAvg: runtime.loadAvg,
+      },
+      buildTime: runtime.buildTime,
     },
     {
       status: ok ? 200 : 503,

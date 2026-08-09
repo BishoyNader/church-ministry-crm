@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { writeAuditLog } from "@/lib/audit";
 import { hasPermission } from "@/features/rbac/utils/permission-check";
+import { getActorStageScope } from "@/features/rbac/utils/stage-scope";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
   createMinistrySchema,
@@ -75,7 +76,16 @@ export async function listMinistriesAction(): Promise<
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await stageService.listMinistries(supabase, profile.church_id);
+  const { scope, error } = await getActorStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: error ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await stageService.listMinistries(
+    supabase,
+    profile.church_id,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
 
   if (result.error) {
     return { success: false, message: result.error };
@@ -297,7 +307,17 @@ export async function listStagesAction(
     return { success: false, message: "User profile not found." };
   }
 
-  const result = await stageService.listStages(supabase, profile.church_id, ministryId);
+  const { scope, error } = await getActorStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: error ?? "Failed to resolve stage scope." };
+  }
+
+  const result = await stageService.listStages(
+    supabase,
+    profile.church_id,
+    ministryId,
+    scope.churchWide ? undefined : scope.stageIds,
+  );
 
   if (result.error) {
     return { success: false, message: result.error };

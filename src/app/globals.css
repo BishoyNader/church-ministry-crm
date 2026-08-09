@@ -200,6 +200,28 @@
     background-color: var(--primary);
     color: var(--primary-foreground);
   }
+
+  /* Accessibility: guarantee a visible keyboard focus indicator on every
+     interactive element, even where components set focus-visible:outline-none
+     in favour of a soft ring. The !important outline ensures a WCAG 2.4.7
+     (Focus Visible) baseline regardless of the decorative ring utilities. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--ring) !important;
+    outline-offset: 2px !important;
+    border-radius: var(--radius-md);
+  }
+
+  /* Keep anchor targets clear of the sticky header. */
+  :where([id]) {
+    scroll-margin-top: 6rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,5 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/types/database.types";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("audit");
 
 export interface AuditMetadata {
   reason?: string;
@@ -41,15 +44,19 @@ export async function writeAuditLog(
     });
 
     if (error) {
-      console.error(
-        `[audit] Failed to write audit log for ${entityType}:${entityId}:`,
-        error.message,
-      );
+      await log.error("audit_write_failed", {
+        entityType,
+        entityId,
+        action,
+        message: error.message,
+      });
     }
   } catch (err) {
-    console.error(
-      `[audit] Unexpected error writing audit log for ${entityType}:${entityId}:`,
+    await log.error("audit_write_unexpected", {
+      entityType,
+      entityId,
+      action,
       err,
-    );
+    });
   }
 }

@@ -37,7 +37,7 @@ export async function listPendingRegistrations(
     const { data, error } = await supabase
       .from("servants")
       .select(
-        "id, church_id, approval_status, created_at, profiles(id, full_name_ar, full_name_en, email, phone)",
+        "id, church_id, approval_status, created_at, profiles!servants_id_fkey(id, full_name_ar, full_name_en, email, phone)",
       )
       .eq("church_id", churchId)
       .eq("approval_status", "pending")

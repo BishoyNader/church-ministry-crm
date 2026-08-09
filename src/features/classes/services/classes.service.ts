@@ -69,8 +69,18 @@ export async function listClasses(
   supabase: SupabaseClient<Database>,
   churchId: string,
   filters: ClassFilters = {},
+  stageIds?: string[],
 ): Promise<ClassResult<ClassPageData>> {
   try {
+    const scoped = stageIds !== undefined;
+
+    if (scoped && stageIds.length === 0) {
+      return {
+        data: { rows: [], total: 0, page: 1, pageSize: DEFAULT_PAGE_SIZE, totalPages: 0 },
+        error: null,
+      };
+    }
+
     const page = Math.max(1, filters.page ?? 1);
     const pageSize = Math.min(100, Math.max(1, filters.pageSize ?? DEFAULT_PAGE_SIZE));
     const from = (page - 1) * pageSize;
@@ -81,6 +91,10 @@ export async function listClasses(
       .select("*", { count: "exact" })
       .eq("church_id", churchId)
       .is("deleted_at", null);
+
+    if (scoped) {
+      query = query.in("stage_id", stageIds);
+    }
 
     const search = filters.search?.trim();
     if (search) {
@@ -104,9 +118,9 @@ export async function listClasses(
     if (error) return { data: null, error: error.message };
 
     const classRows = data ?? [];
-    const stageIds = classRows.map((classRow) => classRow.stage_id);
+    const classStageIds = classRows.map((classRow) => classRow.stage_id);
 
-    const stageMap = await fetchStageMap(supabase, churchId, stageIds);
+    const stageMap = await fetchStageMap(supabase, churchId, classStageIds);
 
     const total = count ?? 0;
     const rows: ClassListItem[] = classRows.map((classRow) => {
@@ -136,15 +150,28 @@ export async function listClasses(
 export async function listStageOptions(
   supabase: SupabaseClient<Database>,
   churchId: string,
+  stageIds?: string[],
 ): Promise<ClassResult<StageOption[]>> {
   try {
-    const { data, error } = await supabase
+    const scoped = stageIds !== undefined;
+
+    if (scoped && stageIds.length === 0) {
+      return { data: [], error: null };
+    }
+
+    let query = supabase
       .from("stages")
       .select("id, name_ar, name_en, service_id, services:service_id(name_ar, name_en)")
       .eq("church_id", churchId)
       .is("deleted_at", null)
       .order("sort_order")
       .order("name_ar");
+
+    if (scoped) {
+      query = query.in("id", stageIds);
+    }
+
+    const { data, error } = await query;
 
     if (error) return { data: null, error: error.message };
 

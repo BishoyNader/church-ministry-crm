@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BellRing, CheckCheck, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -156,21 +157,13 @@ export function NotificationCenterPage() {
           </div>
         )}
 
-        <div className="flex items-center justify-between border-t border-border p-4">
-          <p className="text-sm text-muted-foreground">{t("pageInfo", { page, totalPages })}</p>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((current) => current - 1)}>
-              {t("prev")}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages}
-              onClick={() => setPage((current) => current + 1)}
-            >
-              {t("next")}
-            </Button>
-          </div>
+        <div className="border-t border-border">
+          <PaginationBar
+            page={page}
+            totalPages={totalPages}
+            labelMode="page"
+            onPageChange={setPage}
+          />
         </div>
       </SectionCard>
     </section>

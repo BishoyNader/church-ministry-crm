@@ -72,10 +72,7 @@
     "deleteConfirm": "هل أنت متأكد من حذف هذه اليومية؟",
     "emptyTitle": "لا توجد يوميات بعد",
     "emptyDescription": "ابدأ بتسجيل ممارساتك الروحية اليومية.",
-    "loadError": "فشل تحميل اليوميات الروحية.",
-    "pageInfo": "صفحة {page} من {totalPages}",
-    "prev": "السابق",
-    "next": "التالي"
+    "loadError": "فشل تحميل اليوميات الروحية."
   },
   "settings": {
     "title": "الإعدادات",
@@ -196,7 +193,8 @@
       "submit": "تحديث كلمة المرور",
       "success": "تم تحديث كلمة المرور بنجاح.",
       "noToken": "رابط إعادة التعيين غير صالح. الرجاء طلب رابط جديد.",
-      "generalError": "تعذر إكمال إعادة تعيين كلمة المرور."
+      "generalError": "تعذر إكمال إعادة تعيين كلمة المرور.",
+      "login": "العودة لتسجيل الدخول"
     }
   },
   "servants": {
@@ -218,7 +216,8 @@
       "stages": "المراحل",
       "approval": "الموافقة",
       "joined": "تاريخ الانضمام",
-      "actions": "إجراءات"
+      "actions": "إجراءات",
+      "caption": "قائمة الخدام"
     },
     "status": {
       "pending": "قيد الانتظار",
@@ -231,11 +230,6 @@
       "edit": "تعديل الخادم",
       "assign": "تعيين المراحل",
       "archive": "أرشفة الخادم"
-    },
-    "pagination": {
-      "showing": "عرض {from}–{to} من {total}",
-      "prev": "السابق",
-      "next": "التالي"
     },
     "errors": {
       "general": "حدث خطأ ما. حاول مرة أخرى."
@@ -253,7 +247,8 @@
       "processing": "جارٍ الحفظ…",
       "errors": {
         "general": "حدث خطأ ما. حاول مرة أخرى."
-      }
+      },
+      "confessionFather": "أب الاعتراف"
     },
     "assign": {
       "title": "تعيين المراحل",
@@ -295,6 +290,7 @@
       "all": "جميع الأدوار",
       "superAdmin": "مدير الخدمة",
       "admin": "مشرف",
+      "stageManager": "مدير المرحلة",
       "servant": "خادم"
     },
     "searchPlaceholder": "بحث بالاسم أو البريد الإلكتروني…",
@@ -306,16 +302,12 @@
       "roles": "الأدوار",
       "status": "الحالة",
       "joined": "تاريخ الانضمام",
-      "actions": "الإجراءات"
+      "actions": "الإجراءات",
+      "caption": "قائمة المستخدمين"
     },
     "status": {
       "active": "نشط",
       "inactive": "غير نشط"
-    },
-    "pagination": {
-      "showing": "عرض {from}–{to} من {total}",
-      "prev": "السابق",
-      "next": "التالي"
     },
     "form": {
       "createTitle": "إضافة مستخدم",
@@ -374,7 +366,8 @@
         "email": "البريد الإلكتروني",
         "phone": "الهاتف",
         "requestedOn": "تاريخ الطلب",
-        "actions": "الإجراءات"
+        "actions": "الإجراءات",
+        "caption": "قائمة الموافقات"
       },
       "errors": {
         "general": "حدث خطأ. الرجاء المحاولة مرة أخرى."
@@ -454,6 +447,10 @@
       "title": "لم يتم العثور على مجموعات",
       "description": "ابدأ بإنشاء مجموعة لإدارة المراحل."
     },
+    "scope": {
+      "title": "لا توجد مراحل معيّنة لك",
+      "viewAssignedOnly": "يمكنك فقط عرض المراحل المعيّنة لك."
+    },
     "ministry": {
       "stagesCount": "{count} مراحل",
       "noStages": "لا توجد مراحل في هذه المجموعة.",
@@ -481,7 +478,8 @@
         "confirm": "تعطيل",
         "cancel": "إلغاء",
         "processing": "جارٍ التعطيل…"
-      }
+      },
+      "toggleStages": "إظهار/إخفاء المراحل"
     },
     "stage": {
       "createFormTitle": "إضافة مرحلة",
@@ -550,7 +548,8 @@
       "allStages": "جميع المراحل",
       "allStatuses": "جميع الحالات",
       "allPipeline": "جميع مراحل التطور",
-      "clearFilters": "إزالة الفلاتر"
+      "clearFilters": "إزالة الفلاتر",
+      "allServices": "جميع الخدمات"
     },
     "table": {
       "name": "الاسم",
@@ -559,7 +558,12 @@
       "pipelineStage": "مرحلة التطور",
       "parentPhone": "هاتف ولي الأمر",
       "enrolledAt": "تاريخ التسجيل",
-      "actions": "الإجراءات"
+      "actions": "الإجراءات",
+      "caption": "قائمة المستفيدين",
+      "delete": "حذف",
+      "edit": "تعديل",
+      "mobile": "الموبايل",
+      "view": "عرض"
     },
     "empty": {
       "title": "لا يوجد مخدومين بعد",
@@ -571,11 +575,6 @@
       "transferred": "منقول",
       "graduated": "تخرج"
     },
-    "pagination": {
-      "showing": "عرض {from}–{to} من {total}",
-      "prev": "السابق",
-      "next": "التالي"
-    },
     "form": {
       "createTitle": "إضافة مخدوم",
       "editTitle": "تعديل بيانات المخدوم",
@@ -585,7 +584,9 @@
         "parent": "ولي الأمر",
         "medical": "المعلومات الطبية",
         "spiritual": "المعلومات الروحية",
-        "education": "المعلومات التعليمية"
+        "education": "المعلومات التعليمية",
+        "contact": "بيانات التواصل",
+        "other": "معلومات أخرى"
       },
       "firstNameAr": "الاسم الأول (عربي)",
       "firstNameEn": "الاسم الأول (إنجليزي)",
@@ -621,7 +622,17 @@
       "photoUrl": "رابط الصورة",
       "save": "حفظ",
       "cancel": "إلغاء",
-      "processing": "جارٍ المعالجة…"
+      "processing": "جارٍ المعالجة…",
+      "address": "العنوان",
+      "confessionFather": "أب الاعتراف",
+      "fatherMobile": "موبايل الأب",
+      "fullNameAr": "الاسم الكامل (عربي)",
+      "fullNameEn": "الاسم الكامل (إنجليزي)",
+      "motherMobile": "موبايل الأم",
+      "school": "المدرسة",
+      "selectService": "اختر خدمة",
+      "service": "الخدمة",
+      "whatsapp": "واتساب"
     },
     "delete": {
       "title": "تعطيل المخدوم",
@@ -672,7 +683,8 @@
         "date": "التاريخ",
         "status": "الحالة",
         "notes": "ملاحظات",
-        "noRecords": "لا توجد سجلات حضور."
+        "noRecords": "لا توجد سجلات حضور.",
+        "caption": "سجل الحضور"
       },
       "attendanceStatus": {
         "present": "حاضر",
@@ -687,7 +699,8 @@
         "assignedTo": "مسند إلى",
         "notes": "ملاحظات",
         "outcome": "النتيجة",
-        "noRecords": "لا توجد متابعات."
+        "noRecords": "لا توجد متابعات.",
+        "caption": "سجل المتابعات"
       },
       "followupStatus": {
         "scheduled": "مجدول",
@@ -703,7 +716,16 @@
         "other": "أخرى"
       },
       "deactivateChild": "إلغاء تنشيط",
-      "notFound": "المخدوم غير موجود."
+      "notFound": "المخدوم غير موجود.",
+      "confessionFather": "أب الاعتراف",
+      "contactInfo": "بيانات التواصل",
+      "fatherMobile": "موبايل الأب",
+      "fullNameAr": "الاسم الكامل (عربي)",
+      "fullNameEn": "الاسم الكامل (إنجليزي)",
+      "motherMobile": "موبايل الأم",
+      "otherInfo": "معلومات أخرى",
+      "service": "الخدمة",
+      "whatsapp": "واتساب"
     },
     "attendance": {
       "title": "الحضور",
@@ -722,7 +744,9 @@
       "saveSuccess": "تم حفظ الحضور بنجاح.",
       "saveError": "فشل حفظ الحضور.",
       "noStageSelected": "اختر مرحلة وتاريخ للبدء.",
-      "noChildrenInStage": "لا يوجد مخدومين نشطين في هذه المرحلة."
+      "noChildrenInStage": "لا يوجد مخدومين نشطين في هذه المرحلة.",
+      "caption": "سجلات الحضور",
+      "selectServiceFirst": "يرجى اختيار الخدمة أولاً"
     },
     "followups": {
       "title": "المتابعات",
@@ -758,7 +782,8 @@
       "deleteConfirm": "هل أنت متأكد من حذف هذه المتابعة؟",
       "loadError": "فشل تحميل المتابعات.",
       "statusDialogTitle": "تغيير الحالة",
-      "statusDialogDescription": "قم بتحديث حالة المتابعة وإضافة أي ملاحظات."
+      "statusDialogDescription": "قم بتحديث حالة المتابعة وإضافة أي ملاحظات.",
+      "caption": "سجلات المتابعات"
     }
   },
   "dashboard": {
@@ -797,7 +822,8 @@
       "children": "المخدومين",
       "followups": "المتابعات",
       "attendance": "الحضور",
-      "attendanceRate": "النسبة"
+      "attendanceRate": "النسبة",
+      "caption": "تحليلات المراحل"
     },
     "attendanceStatus": {
       "present": "حاضر",
@@ -870,7 +896,8 @@
         "email": "البريد الإلكتروني",
         "phone": "الهاتف",
         "requestedOn": "تاريخ الطلب",
-        "actions": "الإجراءات"
+        "actions": "الإجراءات",
+        "caption": "طلبات الموافقة على الخدام"
       },
       "errors": {
         "general": "حدث خطأ. الرجاء المحاولة مرة أخرى."
@@ -1037,7 +1064,8 @@
         "gender": "الجنس",
         "stage": "المرحلة",
         "class": "الفصل",
-        "errors": "الأخطاء"
+        "errors": "الأخطاء",
+        "caption": "نتائج الاستيراد"
       }
     },
     "export": {
@@ -1070,9 +1098,6 @@
     "markRead": "تعليم كمقروء",
     "noNotifications": "لا توجد إشعارات",
     "noNotificationsDescription": "صندوق الوارد الخاص بك فارغ للمرشح المحدد.",
-    "pageInfo": "صفحة {page} من {totalPages}",
-    "prev": "السابق",
-    "next": "التالي",
     "loadError": "تعذّر تحميل الإشعارات.",
     "markReadError": "تعذّر تعليم الإشعار كمقروء.",
     "markAllReadError": "تعذّر تعليم جميع الإشعارات كمقروءة.",
@@ -1137,7 +1162,8 @@
       "entityId": "معرّف السجل",
       "actor": "المستخدم",
       "details": "التفاصيل",
-      "viewDetails": "عرض التفاصيل"
+      "viewDetails": "عرض التفاصيل",
+      "caption": "سجلات التدقيق"
     },
     "actions": {
       "create": "إنشاء",
@@ -1190,11 +1216,6 @@
     "empty": {
       "title": "لا توجد سجلات مراجعة",
       "description": "لا توجد أحداث تطابق الفلاتر الحالية. جرّب توسيع نطاق التاريخ أو مسح الفلاتر."
-    },
-    "pagination": {
-      "showing": "عرض {from}–{to} من {total}",
-      "prev": "السابق",
-      "next": "التالي"
     }
   },
   "services": {
@@ -1215,7 +1236,8 @@
       "actions": "إجراءات",
       "edit": "تعديل الخدمة",
       "archive": "أرشفة الخدمة",
-      "restore": "استعادة الخدمة"
+      "restore": "استعادة الخدمة",
+      "caption": "قائمة الخدمات"
     },
     "status": {
       "active": "نشطة",
@@ -1245,11 +1267,6 @@
     "empty": {
       "title": "لا توجد خدمات",
       "description": "لا توجد خدمات تطابق الفلاتر الحالية. جرّب بحثاً مختلفاً أو امسح الفلاتر."
-    },
-    "pagination": {
-      "showing": "عرض {from}–{to} من {total}",
-      "prev": "السابق",
-      "next": "التالي"
     },
     "errors": {
       "listFailed": "تعذّر تحميل الخدمات.",
@@ -1282,7 +1299,8 @@
       "actions": "إجراءات",
       "edit": "تعديل الفصل",
       "archive": "أرشفة الفصل",
-      "restore": "استعادة الفصل"
+      "restore": "استعادة الفصل",
+      "caption": "قائمة الفصول"
     },
     "status": {
       "active": "نشط",
@@ -1313,11 +1331,6 @@
     "empty": {
       "title": "لا توجد فصول",
       "description": "لا توجد فصول تطابق الفلاتر الحالية. جرّب بحثاً مختلفاً أو امسح الفلاتر."
-    },
-    "pagination": {
-      "showing": "عرض {from}–{to} من {total}",
-      "prev": "السابق",
-      "next": "التالي"
     },
     "errors": {
       "listFailed": "تعذّر تحميل الفصول.",
@@ -1371,9 +1384,6 @@
     "statusDisabled": "معطّلة",
     "clearFilters": "مسح الفلاتر",
     "emptyState": "لا توجد كنائس.",
-    "paginationLabel": "{total, plural, =0 {لا توجد نتائج} =1 {نتيجة واحدة} other {# نتائج}} — صفحة {page} من {totalPages}",
-    "previous": "السابق",
-    "next": "التالي",
     "back": "رجوع",
     "edit": "تعديل",
     "activate": "تفعيل",
@@ -1513,7 +1523,9 @@
       "statsFailed": "تعذّر تحميل إحصائيات الكنيسة.",
       "passwordTooShort": "كلمة المرور يجب ألا تقل عن 8 أحرف.",
       "managerNotFound": "لا يوجد مسؤول معيّن لهذه الكنيسة.",
-      "resetPasswordFailed": "فشلت إعادة تعيين كلمة المرور. حاول مرة أخرى."
+      "resetPasswordFailed": "فشلت إعادة تعيين كلمة المرور. حاول مرة أخرى.",
+      "changeManagerFailed": "فشل تغيير مدير الكنيسة.",
+      "deactivateUserFailed": "فشل تعطيل المستخدم."
     },
     "wizard": {
       "title": "إنشاء كنيسة جديدة",
@@ -1584,6 +1596,47 @@
         "backToReview": "العودة إلى المراجعة",
         "tryAgain": "إعادة المحاولة"
       }
+    },
+    "form": {
+      "createTitle": "إنشاء كنيسة",
+      "editTitle": "تعديل الكنيسة",
+      "createDescription": "املأ تفاصيل الكنيسة أدناه.",
+      "editDescription": "حدّث تفاصيل الكنيسة أدناه.",
+      "nameAr": "الاسم (عربي)",
+      "nameEn": "الاسم (إنجليزي)",
+      "slug": "المعرّف المختصر",
+      "contactEmail": "البريد الإلكتروني للتواصل",
+      "contactPhone": "هاتف التواصل",
+      "addressAr": "العنوان (عربي)",
+      "addressEn": "العنوان (إنجليزي)",
+      "subscriptionTier": "باقة الاشتراك",
+      "subscriptionStatus": "حالة الاشتراك",
+      "locale": "اللغة",
+      "placeholderNameAr": "اسم الكنيسة بالعربية",
+      "placeholderNameEn": "اسم الكنيسة بالإنجليزية",
+      "placeholderSlug": "church-slug",
+      "placeholderEmail": "contact@church.org",
+      "placeholderPhone": "+20 123 456 7890",
+      "placeholderAddressAr": "العنوان بالعربية",
+      "placeholderAddressEn": "العنوان بالإنجليزية",
+      "placeholderTier": "trial",
+      "placeholderStatus": "active",
+      "placeholderLocale": "ar",
+      "cancel": "إلغاء",
+      "save": "حفظ التغييرات",
+      "create": "إنشاء كنيسة",
+      "saving": "جارٍ الحفظ...",
+      "creating": "جارٍ الإنشاء..."
     }
+  },
+  "pagination": {
+    "showing": "عرض {from}–{to} من {total}",
+    "prev": "السابق",
+    "next": "التالي",
+    "count": "{total, plural, =0 {لا توجد نتائج} =1 {نتيجة واحدة} other {# نتائج}} — صفحة {page} من {totalPages}",
+    "page": "صفحة {page} من {totalPages}"
+  },
+  "common": {
+    "close": "إغلاق"
   }
 }
