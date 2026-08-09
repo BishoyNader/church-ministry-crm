@@ -25,6 +25,7 @@
   },
   "nav": {
     "dashboard": "لوحة المعلومات",
+    "adminDashboard": "لوحة المنصة",
     "reports": "التقارير",
     "children": "المخدومون",
     "attendance": "الحضور",
@@ -1007,7 +1008,40 @@
         "successDescription": "تم إنشاء الكنيسة وتجهيز حساب مقدم الطلب.",
         "errorTitle": "فشل الاعتماد",
         "close": "تم",
-        "closeError": "إغلاق"
+        "closeError": "إغلاق",
+        "inviteLabel": "رابط الدعوة"
+      }
+    },
+    "dashboard": {
+      "title": "نظرة عامة على المنصة",
+      "description": "تابع الكنائس والمستخدمين والنشاط عبر المنصة.",
+      "kpis": {
+        "totalChurches": "إجمالي الكنائس",
+        "activeChurches": "الكنائس النشطة",
+        "pendingRequests": "طلبات معلقة",
+        "approvalRate": "نسبة القبول",
+        "totalUsers": "إجمالي المستخدمين",
+        "totalServants": "إجمالي الخدام",
+        "totalBeneficiaries": "إجمالي المخدومين"
+      },
+      "pendingRequests": {
+        "title": "طلبات إنشاء الكنائس المعلقة",
+        "empty": "لا توجد طلبات معلقة",
+        "submitted": "أُرسل في {date}",
+        "reviewAll": "مراجعة جميع الطلبات"
+      },
+      "churches": {
+        "title": "أحدث الكنائس",
+        "viewAll": "عرض الكل",
+        "empty": "لا توجد كنائس بعد"
+      },
+      "recentAudit": {
+        "title": "آخر النشاطات",
+        "viewAll": "عرض الكل",
+        "empty": "لا يوجد نشاط بعد"
+      },
+      "errors": {
+        "statsFailed": "تعذّر تحميل النظرة العامة على المنصة."
       }
     }
   },

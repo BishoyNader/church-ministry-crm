@@ -56,7 +56,7 @@ export function ApprovalCenterPage() {
 
         {canReviewChurchRequests ? (
           <TabsContent value="churches">
-            <AdminChurchRequestsPage />
+            <AdminChurchRequestsPage embedded />
           </TabsContent>
         ) : null}
       </Tabs>

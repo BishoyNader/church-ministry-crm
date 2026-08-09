@@ -25,6 +25,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "adminDashboard": "Platform Overview",
     "reports": "Reports",
     "children": "Beneficiaries",
     "attendance": "Attendance",
@@ -1007,7 +1008,40 @@
         "successDescription": "The church has been created and the applicant's account provisioned.",
         "errorTitle": "Approval failed",
         "close": "Done",
-        "closeError": "Close"
+        "closeError": "Close",
+        "inviteLabel": "Invitation link"
+      }
+    },
+    "dashboard": {
+      "title": "Platform Overview",
+      "description": "Monitor churches, users, and activity across the platform.",
+      "kpis": {
+        "totalChurches": "Total Churches",
+        "activeChurches": "Active Churches",
+        "pendingRequests": "Pending Requests",
+        "approvalRate": "Approval Rate",
+        "totalUsers": "Total Users",
+        "totalServants": "Total Servants",
+        "totalBeneficiaries": "Total Beneficiaries"
+      },
+      "pendingRequests": {
+        "title": "Pending Church Requests",
+        "empty": "No pending requests",
+        "submitted": "Submitted {date}",
+        "reviewAll": "Review all requests"
+      },
+      "churches": {
+        "title": "Recent Churches",
+        "viewAll": "View all",
+        "empty": "No churches yet"
+      },
+      "recentAudit": {
+        "title": "Recent Activity",
+        "viewAll": "View all",
+        "empty": "No activity yet"
+      },
+      "errors": {
+        "statsFailed": "Failed to load platform overview."
       }
     }
   },
