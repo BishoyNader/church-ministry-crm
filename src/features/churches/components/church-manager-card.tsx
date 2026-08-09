@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { KeyRound, ShieldCheck, UserX } from "lucide-react";
+import { KeyRound, Pencil, ShieldCheck, UserPlus, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,6 +21,7 @@ import {
   useResetChurchManagerPassword,
 } from "../hooks/use-churches";
 import { ChangeChurchManagerDialog } from "./change-church-manager-dialog";
+import { UserForm } from "@/features/users/components/user-form";
 import type { ChurchDetail } from "../types/church.types";
 
 type ChurchManagerCardProps = {
@@ -34,6 +35,7 @@ export function ChurchManagerCard({ church }: ChurchManagerCardProps) {
   const [changeOpen, setChangeOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [disableOpen, setDisableOpen] = useState(false);
+  const [manageUserOpen, setManageUserOpen] = useState(false);
   const [password, setPassword] = useState("");
 
   const resetMutation = useResetChurchManagerPassword();
@@ -88,12 +90,16 @@ export function ChurchManagerCard({ church }: ChurchManagerCardProps) {
 
         <PermissionGuard permission="tenants.update">
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => setChangeOpen(true)}>
-              <ShieldCheck className="size-4" />
-              {t("manager.change")}
-            </Button>
-            {manager && (
+            {manager ? (
               <>
+                <Button type="button" variant="outline" size="sm" onClick={() => setChangeOpen(true)}>
+                  <ShieldCheck className="size-4" />
+                  {t("manager.change")}
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setManageUserOpen(true)}>
+                  <Pencil className="size-4" />
+                  {t("manager.manageUser")}
+                </Button>
                 <Button type="button" variant="outline" size="sm" onClick={() => setResetOpen(true)}>
                   <KeyRound className="size-4" />
                   {t("manager.resetPassword")}
@@ -109,6 +115,11 @@ export function ChurchManagerCard({ church }: ChurchManagerCardProps) {
                   {t("manager.disable")}
                 </Button>
               </>
+            ) : (
+              <Button type="button" onClick={() => setChangeOpen(true)} className="gap-2">
+                <UserPlus className="size-4" />
+                {t("manager.add")}
+              </Button>
             )}
           </div>
         </PermissionGuard>
@@ -120,6 +131,15 @@ export function ChurchManagerCard({ church }: ChurchManagerCardProps) {
         churchId={church.id}
         currentManagerId={manager?.userId}
       />
+
+      {manager ? (
+        <UserForm
+          open={manageUserOpen}
+          onOpenChange={setManageUserOpen}
+          userId={manager.userId}
+          churchId={church.id}
+        />
+      ) : null}
 
       <Dialog open={resetOpen} onOpenChange={setResetOpen}>
         <DialogPopup className="sm:max-w-[440px]">

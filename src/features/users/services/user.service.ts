@@ -15,6 +15,39 @@ import type {
   UserListItem,
 } from "../types/user.types";
 
+/**
+ * Splits the requested role IDs for the Church Manager replacement flow.
+ *
+ * Invariant: the new user must NEVER hold an active super_admin grant before
+ * change_church_manager runs — that RPC's `SELECT ... LIMIT 1` "current manager"
+ * lookup (035) could otherwise select the new user's own just-created grant and
+ * early-return, leaving the real manager's grant active (two active Church
+ * Managers). super_admin is therefore excluded from the initial grant and
+ * change_church_manager is the ONLY operation that assigns the manager role.
+ * Because create_church_user requires at least one role, when super_admin was
+ * the ONLY requested role the church's servant role is used as a temporary
+ * membership placeholder (revoked right after the swap).
+ */
+export function splitManagerReplacementRoles(
+  requestedRoleIds: string[],
+  superAdminRoleId: string | null,
+  placeholderRoleId: string | null,
+): { initialRoleIds: string[]; placeholderRoleId: string | null } {
+  if (!superAdminRoleId || !requestedRoleIds.includes(superAdminRoleId)) {
+    return { initialRoleIds: requestedRoleIds, placeholderRoleId: null };
+  }
+  const nonManagerRoleIds = requestedRoleIds.filter(
+    (roleId) => roleId !== superAdminRoleId,
+  );
+  if (nonManagerRoleIds.length > 0) {
+    return { initialRoleIds: nonManagerRoleIds, placeholderRoleId: null };
+  }
+  return {
+    initialRoleIds: placeholderRoleId ? [placeholderRoleId] : [],
+    placeholderRoleId,
+  };
+}
+
 export async function listUsers(
   supabase: SupabaseClient,
   churchId: string,

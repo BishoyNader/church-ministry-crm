@@ -335,8 +335,9 @@
       "selectChurchFirst": "Select a church first to choose roles and stages.",
       "noRoles": "No roles are available for this church.",
       "managerWarningTitle": "Church Manager replacement",
-      "managerWarning": "This church already has a Church Manager ({name}). Creating this user with the Church Manager role will end the current manager's assignment and make the new user the manager.",
-      "confirmReplaceManager": "I understand — replace the current Church Manager"
+      "managerWarning": "This will replace the current Church Manager with the new Church Manager.",
+      "confirmReplaceManager": "I understand — replace the current Church Manager",
+      "noChurches": "No churches available."
     },
     "roles": {
       "title": "Manage Roles",
@@ -427,6 +428,7 @@
       "missingRequired": "{count} rows are missing required fields.",
       "unknownRoles": "{count} rows reference an unknown role.",
       "unknownStages": "{count} rows reference an unknown stage.",
+      "managerConflicts": "{count, plural, =1 {# Church Manager row was rejected — this church already has a Church Manager} other {# Church Manager rows were rejected — this church already has a Church Manager}}",
       "showingFirst": "Showing the first {count} additional rows…",
       "downloadErrorsCsv": "Download errors (CSV)",
       "downloadErrorsXlsx": "Download errors (XLSX)",
@@ -440,6 +442,7 @@
         "duplicate": "An account already exists for this email.",
         "invalidRole": "Role not found in this church.",
         "invalidStage": "Stage not found in this church.",
+        "managerConflict": "The church already has a Church Manager; the manager is assigned from Church Management, not a spreadsheet.",
         "authFailed": "Failed to create the account.",
         "rpcFailure": "The account could not be provisioned.",
         "row": "Row {row} — {email}",
@@ -1524,7 +1527,15 @@
       "passwordPlaceholder": "New password",
       "confirmDisable": "Deactivate user",
       "disableTitle": "Deactivate manager",
-      "disableDescription": "This will remove the manager's access to the church. It cannot be undone from this screen."
+      "disableDescription": "This will remove the manager's access to the church. It cannot be undone from this screen.",
+      "add": "Add Church Manager",
+      "addTitle": "Add Church Manager",
+      "addDescription": "Select an existing user or create a new one to manage this church.",
+      "manageUser": "Manage user",
+      "noUsersYet": "This church has no users yet. Create a user to assign as Church Manager.",
+      "orCreateNew": "or create a new user",
+      "createNew": "Create new user",
+      "confirmReplace": "I understand — the current Church Manager will be replaced."
     },
     "users": {
       "searchPlaceholder": "Search users…",

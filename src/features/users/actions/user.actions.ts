@@ -30,6 +30,7 @@ import {
   assertUserAdminPermission,
   resolveUserManagementChurch,
 } from "./context";
+import type { ActorContext } from "./context";
 
 export type UserActionResult<T = unknown> = {
   success: boolean;
@@ -55,6 +56,34 @@ const CREATE_USER_ERROR_MESSAGES: Record<string, string> = {
 
 function mapCreateUserError(raw: string): string {
   return CREATE_USER_ERROR_MESSAGES[raw] ?? raw;
+}
+
+/**
+ * Removes every artifact of a user created mid-operation when a later step
+ * fails (e.g. the manager swap): role grants, stage assignments, the servants
+ * row, the profile, and finally the auth account.
+ */
+async function rollbackCreatedUser(
+  ctx: ActorContext,
+  userId: string,
+  churchId: string,
+): Promise<void> {
+  try {
+    await ctx.admin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId)
+      .eq("church_id", churchId);
+    await ctx.admin
+      .from("servant_stage_assignments")
+      .delete()
+      .eq("servant_id", userId);
+    await ctx.admin.from("servants").delete().eq("id", userId);
+    await ctx.admin.from("profiles").delete().eq("id", userId);
+    await ctx.admin.auth.admin.deleteUser(userId).catch(() => undefined);
+  } catch (error) {
+    console.error("[users] Failed to roll back created user:", error);
+  }
 }
 
 export async function listUsersAction(
@@ -256,30 +285,33 @@ export async function createUserAction(
 
   const targetChurchId = ctx.churchId ?? values.churchId!;
 
-  // Church Manager safety (PO only): a church keeps a single active manager.
-  // When the requested role set includes super_admin and the church already has
-  // an active manager, require explicit confirmation; on confirmation the
-  // existing change_church_manager RPC (035) ends the previous manager's grant
-  // and activates the new one, so the whole flow feels like one operation.
+  // Church Manager safety (every authorized actor): a church keeps a single
+  // active manager. When the requested role set includes super_admin and the
+  // church already has an active manager, require explicit confirmation; on
+  // confirmation the existing change_church_manager RPC (035) ends the previous
+  // manager's grant and activates the new one, so the whole flow feels like one
+  // operation. Church-scoped actors are hard-locked to their own church by the
+  // scope checks above; the PO may manage any church.
   let managerReplacementNeeded = false;
-  if (isPlatformOwner) {
-    const { data: superAdminRole } = await ctx.admin
-      .from("roles")
-      .select("id")
-      .eq("church_id", targetChurchId)
-      .eq("role_type", "super_admin")
-      .maybeSingle();
+  let superAdminRoleId: string | null = null;
+  const { data: superAdminRole } = await ctx.admin
+    .from("roles")
+    .select("id")
+    .eq("church_id", targetChurchId)
+    .eq("role_type", "super_admin")
+    .maybeSingle();
+  superAdminRoleId = superAdminRole?.id ?? null;
 
-    if (superAdminRole && values.roleIds.includes(superAdminRole.id)) {
-      const { data: activeManager } = await ctx.admin
-        .from("user_roles")
-        .select("user_id")
-        .eq("church_id", targetChurchId)
-        .eq("role_id", superAdminRole.id)
-        .is("end_date", null)
-        .maybeSingle();
-      managerReplacementNeeded = !!activeManager;
-    }
+  if (superAdminRoleId && values.roleIds.includes(superAdminRoleId)) {
+    const { data: activeManager } = await ctx.admin
+      .from("user_roles")
+      .select("user_id")
+      .eq("church_id", targetChurchId)
+      .eq("role_id", superAdminRoleId)
+      .is("end_date", null)
+      .limit(1)
+      .maybeSingle();
+    managerReplacementNeeded = !!activeManager;
   }
 
   if (managerReplacementNeeded && !values.confirmReplaceManager) {
@@ -287,6 +319,45 @@ export async function createUserAction(
       success: false,
       message: mapCreateUserError("manager_replacement_required"),
     };
+  }
+
+  // Manager-replacement invariant: the new user must NEVER hold an active
+  // super_admin grant before change_church_manager runs. Otherwise that RPC's
+  // `SELECT ... LIMIT 1` "current manager" lookup (035) can select the new
+  // user's own just-created grant and early-return, leaving the real manager's
+  // grant active — two active Church Managers (reproduced on staging).
+  //
+  // So super_admin is excluded from the initial grant and change_church_manager
+  // is the ONLY operation that assigns the manager role. Because
+  // create_church_user requires at least one role, when the only requested role
+  // is super_admin the church's servant role is used as a temporary membership
+  // placeholder and revoked immediately after the swap, so the final grants
+  // equal exactly the requested role set.
+  let initialRoleIds = values.roleIds;
+  let placeholderServantRoleId: string | null = null;
+  if (managerReplacementNeeded && superAdminRoleId) {
+    const { data: servantRole } = await ctx.admin
+      .from("roles")
+      .select("id")
+      .eq("church_id", targetChurchId)
+      .eq("role_type", "servant")
+      .maybeSingle();
+
+    const split = userService.splitManagerReplacementRoles(
+      values.roleIds,
+      superAdminRoleId,
+      servantRole?.id ?? null,
+    );
+
+    if (split.initialRoleIds.length === 0) {
+      return {
+        success: false,
+        message: "This church has no roles available for user creation.",
+      };
+    }
+
+    initialRoleIds = split.initialRoleIds;
+    placeholderServantRoleId = split.placeholderRoleId;
   }
 
   const result = await userService.createUser(
@@ -298,7 +369,7 @@ export async function createUserAction(
       full_name_en: values.full_name_en,
       phone: values.phone,
       preferred_locale: values.preferred_locale,
-      roleIds: values.roleIds,
+      roleIds: initialRoleIds,
       stageIds: values.stageIds ?? [],
     },
     targetChurchId,
@@ -309,7 +380,9 @@ export async function createUserAction(
   }
 
   // Swap the active manager grant through the existing secure RPC when the new
-  // user replaces an existing Church Manager.
+  // user replaces an existing Church Manager. At this point the new user holds
+  // NO super_admin grant, so the RPC's current-manager lookup can only match the
+  // real (old) manager and the swap is deterministic.
   if (managerReplacementNeeded && result.data) {
     const { error: swapError } = await ctx.supabase.rpc("change_church_manager", {
       p_church_id: targetChurchId,
@@ -317,8 +390,35 @@ export async function createUserAction(
     });
 
     if (swapError) {
-      await ctx.admin.auth.admin.deleteUser(result.data.id).catch(() => undefined);
+      await rollbackCreatedUser(ctx, result.data.id, targetChurchId);
       return { success: false, message: mapCreateUserError("manager_swap_failed") };
+    }
+
+    // Revoke the temporary membership placeholder (used only when the manager
+    // role was the sole requested role), keeping the final grants exactly equal
+    // to the requested role set.
+    if (placeholderServantRoleId) {
+      const { error: revokeError } = await ctx.admin
+        .from("user_roles")
+        .update({ end_date: new Date().toISOString().split("T")[0] })
+        .eq("user_id", result.data.id)
+        .eq("church_id", targetChurchId)
+        .eq("role_id", placeholderServantRoleId)
+        .is("end_date", null);
+
+      if (revokeError) {
+        console.error("[users] Failed to revoke manager placeholder role:", revokeError);
+      }
+
+      await writeUserAudit(
+        ctx,
+        targetChurchId,
+        "update",
+        "user",
+        result.data.id,
+        { roleIds: values.roleIds, placeholderRevocationFailed: !!revokeError },
+        { roleIds: initialRoleIds },
+      );
     }
   }
 

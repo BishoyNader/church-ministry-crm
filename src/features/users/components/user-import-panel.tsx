@@ -96,6 +96,8 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
         return t("failure.invalidRole");
       case "invalid_stage":
         return t("failure.invalidStage");
+      case "manager_conflict":
+        return t("failure.managerConflict");
       case "auth_failed":
         return t("failure.authFailed");
       case "rpc_failure":
@@ -330,6 +332,9 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
                   ) : null}
                   {summary.unknownStages > 0 ? (
                     <li>{t("unknownStages", { count: summary.unknownStages })}</li>
+                  ) : null}
+                  {summary.managerConflicts > 0 ? (
+                    <li>{t("managerConflicts", { count: summary.managerConflicts })}</li>
                   ) : null}
                 </ul>
               </div>
