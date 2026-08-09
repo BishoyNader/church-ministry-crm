@@ -23,6 +23,7 @@ import { ChildDeleteDialog } from "./child-delete-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
+import { BeneficiaryBulkPanel } from "@/features/import-export/components/beneficiary-bulk-panel";
 import type { ChildListItem } from "../types/child.types";
 
 const PAGE_SIZE = 20;
@@ -114,6 +115,15 @@ export function ChildListPage() {
             </Button>
           </PermissionGuard>
         }
+      />
+
+      <BeneficiaryBulkPanel
+        filters={{
+          search: search || undefined,
+          status: statusFilter !== "all" ? statusFilter : undefined,
+          service_id: serviceFilter !== "all" ? serviceFilter : undefined,
+          stage_id: stageFilter !== "all" ? stageFilter : undefined,
+        }}
       />
 
       <SectionCard className="p-4">

@@ -27,6 +27,7 @@ import { ChurchUsersTable } from "./church-users-table";
 import { ChurchEntityTable } from "./church-entity-table";
 import { ChurchAuditTable } from "./church-audit-table";
 import { ChurchReportsTab } from "./church-reports-tab";
+import { ChurchChildrenTab } from "./church-children-tab";
 
 type ChurchDetailPageProps = {
   churchId: string;
@@ -197,6 +198,7 @@ export function ChurchDetailPage({ churchId, initialTab = "overview", onBack }: 
           <TabsTrigger value="services">{t("tabs.services")}</TabsTrigger>
           <TabsTrigger value="stages">{t("tabs.stages")}</TabsTrigger>
           <TabsTrigger value="classes">{t("tabs.classes")}</TabsTrigger>
+          <TabsTrigger value="children">{t("tabs.children")}</TabsTrigger>
           <TabsTrigger value="reports">{t("tabs.reports")}</TabsTrigger>
           <TabsTrigger value="audit">{t("tabs.audit")}</TabsTrigger>
           <TabsTrigger value="settings">{t("tabs.settings")}</TabsTrigger>
@@ -256,6 +258,10 @@ export function ChurchDetailPage({ churchId, initialTab = "overview", onBack }: 
 
         <TabsContent value="classes" className="space-y-6">
           <ChurchEntityTable churchId={church.id} kind="classes" />
+        </TabsContent>
+
+        <TabsContent value="children" className="space-y-6">
+          <ChurchChildrenTab churchId={church.id} />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-6">

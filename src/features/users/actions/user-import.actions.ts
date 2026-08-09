@@ -35,6 +35,8 @@ import {
   writeUserAudit,
   assertUserManagementPermission,
 } from "./context";
+import { buildUserImportErrorsFile } from "../services/user-export.service";
+import type { ImportErrorFileRow } from "@/features/import-export/types/import-export.types";
 
 async function loadChurchCatalog(
   churchId: string,
@@ -302,5 +304,30 @@ export async function exportUsersTemplateAction(
   return {
     success: true,
     data: buildUserImportTemplate(format),
+  };
+}
+
+/**
+ * Builds a downloadable users-import-errors file. The invalid rows were already
+ * validated server-side during preview; this action only renders them into a
+ * spreadsheet under the same user-management permission gate.
+ */
+export async function exportUsersImportErrorsAction(
+  format: UserImportFileFormat,
+  rows: ImportErrorFileRow[],
+): Promise<UserActionResult<{ fileName: string; content: string; mimeType: string }>> {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  const gate = await assertUserManagementPermission(ctx);
+  if (!gate.ok) {
+    return { success: false, message: gate.message };
+  }
+
+  return {
+    success: true,
+    data: buildUserImportErrorsFile(format, rows),
   };
 }

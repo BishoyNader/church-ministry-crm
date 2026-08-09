@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Plus, MoreHorizontal } from "lucide-react";
+import { Search, Plus, MoreHorizontal, Download, Loader2 } from "lucide-react";
 import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
-import { useUserList, useDeactivateUser, useActorChurch } from "../hooks/use-users";
+import { useUserList, useDeactivateUser, useActorChurch, useExportUsers } from "../hooks/use-users";
 import { PendingRegistrationsQueue } from "./pending-registrations-queue";
 import { UserForm } from "./user-form";
 import { UserRoleAssignment } from "./user-role-assignment";
@@ -73,6 +73,9 @@ export function UserListPage() {
   });
 
   const deactivateMutation = useDeactivateUser();
+  const exportMutation = useExportUsers();
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [exportFormat, setExportFormat] = useState<"csv" | "xlsx">("csv");
 
   const handleSearch = () => {
     setPage(1);
@@ -81,6 +84,36 @@ export function UserListPage() {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSearch();
+  };
+
+  const triggerDownload = (fileName: string, content: string, mimeType: string) => {
+    const isBase64 = mimeType.includes("spreadsheetml");
+    const blob = isBase64
+      ? new Blob([Uint8Array.from(atob(content), (char) => char.charCodeAt(0))], { type: mimeType })
+      : new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExport = async () => {
+    setExportError(null);
+    const result = await exportMutation.mutateAsync({
+      format: exportFormat,
+      search: search || undefined,
+      roleFilter: roleFilter !== "all" ? roleFilter : undefined,
+      churchId: scopeChurchId ?? undefined,
+    });
+
+    if (!result.success || !result.data) {
+      setExportError(result.message ?? t("export.error"));
+      return;
+    }
+
+    triggerDownload(result.data.fileName, result.data.content, result.data.mimeType);
   };
 
   const handleDeactivate = async () => {
@@ -153,7 +186,32 @@ export function UserListPage() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={exportFormat} onValueChange={(val) => setExportFormat(val as "csv" | "xlsx")}>
+            <SelectTrigger className="w-full sm:w-28" aria-label={t("export.formatLabel")}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="csv">CSV</SelectItem>
+              <SelectItem value="xlsx">XLSX</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={exportMutation.isPending || (isPlatformOwner && scopeChurchId === null)}
+            className="gap-2"
+          >
+            {exportMutation.isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Download className="size-4" />
+            )}
+            {t("export.button")}
+          </Button>
         </div>
+        {exportError ? (
+          <p className="mt-3 text-sm text-destructive">{exportError}</p>
+        ) : null}
       </SectionCard>
 
       <UserImportPanel churchId={scopeChurchId} />

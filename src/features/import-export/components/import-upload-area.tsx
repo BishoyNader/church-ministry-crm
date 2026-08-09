@@ -2,13 +2,18 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Upload, FileSpreadsheet, FileText, CheckCircle2, XCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { Upload, FileSpreadsheet, FileText, FileDown, CheckCircle2, XCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "@/components/layout/section-card";
-import { usePreviewImport, useImportBeneficiaries } from "../hooks/use-import-export";
+import {
+  usePreviewImport,
+  useImportBeneficiaries,
+  useExportBeneficiariesTemplate,
+  useExportBeneficiariesImportErrors,
+} from "../hooks/use-import-export";
 import { MAX_IMPORT_FILE_BYTES } from "../constants";
-import type { ImportPreviewResult, ImportSummary, ImportRowFailureReason } from "../types/import-export.types";
+import type { ImportPreviewResult, ImportSummary, ImportRowFailureReason, ImportFileFormat } from "../types/import-export.types";
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
@@ -20,7 +25,20 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-export function ImportUploadArea() {
+function downloadFile(fileName: string, content: string, mimeType: string) {
+  const isBase64 = mimeType.includes("spreadsheetml");
+  const blob = isBase64
+    ? new Blob([Uint8Array.from(atob(content), (char) => char.charCodeAt(0))], { type: mimeType })
+    : new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+export function ImportUploadArea({ churchId }: { churchId?: string }) {
   const t = useTranslations("importExport");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<ImportPreviewResult | null>(null);
@@ -46,6 +64,8 @@ export function ImportUploadArea() {
 
   const previewMutation = usePreviewImport();
   const importMutation = useImportBeneficiaries();
+  const templateMutation = useExportBeneficiariesTemplate();
+  const errorsFileMutation = useExportBeneficiariesImportErrors();
 
   const handleFileChange = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,6 +94,7 @@ export function ImportUploadArea() {
         fileName: file.name,
         format,
         content: base64,
+        churchId,
       });
 
       if (!result.success || !result.data) {
@@ -83,7 +104,7 @@ export function ImportUploadArea() {
 
       setPreview(result.data);
     },
-    [previewMutation, t],
+    [previewMutation, t, churchId],
   );
 
   const handleImport = useCallback(async () => {
@@ -92,6 +113,7 @@ export function ImportUploadArea() {
 
     const result = await importMutation.mutateAsync({
       rows: preview.validation.validRows,
+      churchId,
     });
 
     if (!result.success || !result.data) {
@@ -102,7 +124,50 @@ export function ImportUploadArea() {
     setImportSummary(result.data);
     setPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [preview, importMutation, t]);
+  }, [preview, importMutation, t, churchId]);
+
+  const handleTemplateDownload = useCallback(
+    async (format: ImportFileFormat) => {
+      setError(null);
+      const result = await templateMutation.mutateAsync({ format, churchId });
+      if (!result.success || !result.data) {
+        setError(result.message ?? t("export.error"));
+        return;
+      }
+      downloadFile(result.data.fileName, result.data.content, result.data.mimeType);
+    },
+    [templateMutation, t, churchId],
+  );
+
+  const handleErrorsFileDownload = useCallback(
+    async (format: ImportFileFormat) => {
+      if (!preview?.validation.invalidRows.length) return;
+      setError(null);
+      const result = await errorsFileMutation.mutateAsync({
+        format,
+        rows: preview.validation.invalidRows.map((invalid) => ({
+          rowNumber: invalid.row.rowNumber,
+          values: {
+            name: invalid.row.name,
+            phone: invalid.row.phone ?? "",
+            birth_date: invalid.row.birthDate ?? "",
+            gender: invalid.row.gender ?? "",
+            stage: invalid.row.stage ?? "",
+            class: invalid.row.className ?? "",
+            address: invalid.row.address ?? "",
+            notes: invalid.row.notes ?? "",
+          },
+          messages: invalid.errors.map((err) => err.message),
+        })),
+      });
+      if (!result.success || !result.data) {
+        setError(result.message ?? t("export.error"));
+        return;
+      }
+      downloadFile(result.data.fileName, result.data.content, result.data.mimeType);
+    },
+    [errorsFileMutation, preview, t],
+  );
 
   const validation = preview?.validation;
   const summary = validation?.errorSummary;
@@ -142,6 +207,36 @@ export function ImportUploadArea() {
             )}
             {t("import.chooseFile")}
           </Button>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleTemplateDownload("csv")}
+              disabled={templateMutation.isPending}
+              className="gap-2 text-muted-foreground"
+            >
+              {templateMutation.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <FileDown className="size-3.5" />
+              )}
+              {t("import.downloadTemplateCsv")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleTemplateDownload("xlsx")}
+              disabled={templateMutation.isPending}
+              className="gap-2 text-muted-foreground"
+            >
+              {templateMutation.isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <FileDown className="size-3.5" />
+              )}
+              {t("import.downloadTemplateXlsx")}
+            </Button>
+          </div>
           <p className="mt-2 text-xs text-muted-foreground">{t("import.supportedFormats")}</p>
         </div>
 
@@ -262,6 +357,43 @@ export function ImportUploadArea() {
                     ))}
                   </tbody>
                 </table>
+                <div className="border-t bg-muted/20 px-3 py-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleErrorsFileDownload("csv")}
+                      disabled={errorsFileMutation.isPending}
+                      className="gap-2"
+                    >
+                      {errorsFileMutation.isPending ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <FileDown className="size-3.5" />
+                      )}
+                      {t("import.downloadErrorsCsv")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleErrorsFileDownload("xlsx")}
+                      disabled={errorsFileMutation.isPending}
+                      className="gap-2"
+                    >
+                      {errorsFileMutation.isPending ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <FileDown className="size-3.5" />
+                      )}
+                      {t("import.downloadErrorsXlsx")}
+                    </Button>
+                    {validation.invalidRows.length > 10 ? (
+                      <span className="text-xs text-muted-foreground">
+                        {t("import.invalidShown", { count: validation.invalidRows.length - 10 })}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
               </div>
             ) : null}
 

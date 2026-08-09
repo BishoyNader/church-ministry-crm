@@ -12,6 +12,7 @@ import {
   getRolesAction,
   getStagesAction,
   getActorChurchAction,
+  exportUsersAction,
 } from "../actions/user.actions";
 import type { CreateUserFormValues, UpdateUserFormValues } from "../schemas/user.schema";
 
@@ -166,6 +167,17 @@ export function useRoles(churchId: string | null) {
     },
     enabled: !!churchId,
     staleTime: 60_000,
+  });
+}
+
+export function useExportUsers() {
+  return useMutation({
+    mutationFn: (values: {
+      format: "csv" | "xlsx";
+      search?: string;
+      roleFilter?: string;
+      churchId?: string;
+    }) => exportUsersAction(values),
   });
 }
 

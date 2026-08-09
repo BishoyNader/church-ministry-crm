@@ -22,6 +22,8 @@ import type {
   UserListResult,
 } from "../types/user.types";
 import * as userService from "../services/user.service";
+import * as userExportService from "../services/user-export.service";
+import type { UserRoleType } from "../types/user.types";
 import { ZodError } from "zod";
 import {
   resolveActorContext,
@@ -153,6 +155,53 @@ export async function getActorChurchAction(): Promise<
     success: true,
     data: { churchId: ctx.churchId, isPlatformOwner: ctx.churchId === null },
   };
+}
+
+export async function exportUsersAction(values: {
+  format: "csv" | "xlsx";
+  search?: string;
+  roleFilter?: string;
+  churchId?: string;
+}): Promise<UserActionResult<{ fileName: string; content: string; mimeType: string }>> {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.USERS_READ))) {
+    return { success: false, message: "You do not have permission to export users." };
+  }
+
+  const targetChurchId = ctx.churchId ?? values.churchId;
+  if (!targetChurchId) {
+    return { success: false, message: "A church must be selected." };
+  }
+
+  if (ctx.churchId && targetChurchId !== ctx.churchId) {
+    return { success: false, message: "You cannot export users from another church." };
+  }
+
+  const result = await userExportService.exportUsers(
+    dataClientFor(ctx),
+    targetChurchId,
+    {
+      format: values.format,
+      search: values.search,
+      roleFilter: values.roleFilter as UserRoleType | undefined,
+    },
+  );
+
+  if (result.error || !result.data) {
+    return { success: false, message: result.error ?? "Failed to export users." };
+  }
+
+  await writeUserAudit(ctx, targetChurchId, "export", "user", "batch", {
+    format: values.format,
+    search: values.search ?? null,
+    roleFilter: values.roleFilter ?? null,
+  });
+
+  return { success: true, data: result.data };
 }
 
 export async function createUserAction(

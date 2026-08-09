@@ -6,8 +6,17 @@ import {
   previewImportAction,
   importBeneficiariesAction,
   exportDataAction,
+  exportBeneficiariesTemplateAction,
+  exportBeneficiariesImportErrorsAction,
 } from "../actions/import-export.actions";
-import type { BeneficiaryImportRow, ExportEntityType, ExportFileFormat } from "../types/import-export.types";
+import type {
+  BeneficiaryImportRow,
+  ExportEntityType,
+  ExportFileFormat,
+  BeneficiaryExportFilters,
+  ImportErrorFileRow,
+  ImportFileFormat,
+} from "../types/import-export.types";
 
 export const IMPORT_EXPORT_QUERY_KEYS = {
   all: ["import-export"] as const,
@@ -19,20 +28,43 @@ export const IMPORT_EXPORT_QUERY_KEYS = {
 export function usePreviewImport() {
   const locale = useLocale();
   return useMutation({
-    mutationFn: (values: { fileName: string; format: "xlsx" | "csv"; content: string }) =>
-      previewImportAction(values, locale),
+    mutationFn: (values: {
+      fileName: string;
+      format: "xlsx" | "csv";
+      content: string;
+      churchId?: string;
+    }) => previewImportAction(values, locale),
   });
 }
 
 export function useImportBeneficiaries() {
   return useMutation({
-    mutationFn: (values: { rows: BeneficiaryImportRow[] }) => importBeneficiariesAction(values),
+    mutationFn: (values: { rows: BeneficiaryImportRow[]; churchId?: string }) =>
+      importBeneficiariesAction(values),
   });
 }
 
 export function useExportData() {
   return useMutation({
-    mutationFn: (values: { entity: ExportEntityType; format: ExportFileFormat }) =>
-      exportDataAction(values),
+    mutationFn: (values: {
+      entity: ExportEntityType;
+      format: ExportFileFormat;
+      churchId?: string;
+      filters?: BeneficiaryExportFilters;
+    }) => exportDataAction(values),
+  });
+}
+
+export function useExportBeneficiariesTemplate() {
+  return useMutation({
+    mutationFn: (values: { format: ImportFileFormat; churchId?: string }) =>
+      exportBeneficiariesTemplateAction(values.format, values.churchId),
+  });
+}
+
+export function useExportBeneficiariesImportErrors() {
+  return useMutation({
+    mutationFn: (values: { format: ImportFileFormat; rows: ImportErrorFileRow[] }) =>
+      exportBeneficiariesImportErrorsAction(values.format, values.rows),
   });
 }
