@@ -26,6 +26,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "adminDashboard": "Platform Overview",
+    "churches": "Church Management",
+    "churchRequests": "Church Requests",
     "reports": "Reports",
     "children": "Beneficiaries",
     "attendance": "Attendance",
@@ -289,7 +291,8 @@
     "createUser": "Add User",
     "roleFilter": {
       "all": "All Roles",
-      "superAdmin": "Ministry Admin",
+      "platformOwner": "Platform Owner",
+      "superAdmin": "Church Manager",
       "admin": "Admin",
       "stageManager": "Stage Manager",
       "servant": "Servant"

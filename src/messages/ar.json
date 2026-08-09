@@ -26,6 +26,8 @@
   "nav": {
     "dashboard": "لوحة المعلومات",
     "adminDashboard": "لوحة المنصة",
+    "churches": "إدارة الكنائس",
+    "churchRequests": "طلبات الكنائس",
     "reports": "التقارير",
     "children": "المخدومون",
     "attendance": "الحضور",
@@ -289,8 +291,9 @@
     "createUser": "إضافة مستخدم",
     "roleFilter": {
       "all": "جميع الأدوار",
-      "superAdmin": "مدير الخدمة",
-      "admin": "مشرف",
+      "platformOwner": "مدير النظام",
+      "superAdmin": "مدير الكنيسة",
+      "admin": "مدير الخدمة",
       "stageManager": "مدير المرحلة",
       "servant": "خادم"
     },
