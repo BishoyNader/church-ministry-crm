@@ -37,6 +37,8 @@ import type {
 import * as childService from "../services/child.service";
 import { sendNotification } from "@/features/notifications/services/notification.service";
 import { ZodError } from "zod";
+import { getTranslations } from "next-intl/server";
+import { mapChildErrorKey } from "../utils/error-mapper";
 
 export type ChildActionResult<T = unknown> = {
   success: boolean;
@@ -82,6 +84,30 @@ async function getStageScope(
     return { scope: null, message: result.error ?? "Failed to resolve stage scope." };
   }
   return { scope: result.scope, message: null };
+}
+
+// ─── Locale-aware error mapping ─────────────────────────────
+//
+// Server actions resolve the requester's locale (the next-intl client provider
+// forwards it on every server action request) and translate known failure
+// codes/keys into user-facing messages via `children.errors`. Everything else
+// passes through unchanged, preserving the previous raw-message behavior.
+
+async function translateChildErrorKey(key: string): Promise<string> {
+  try {
+    const t = await getTranslations("children.errors");
+    return t(key);
+  } catch {
+    return key;
+  }
+}
+
+async function translateChildError(message: string): Promise<string> {
+  const key = mapChildErrorKey(message);
+  if (!key) {
+    return message;
+  }
+  return translateChildErrorKey(key);
 }
 
 // ─── Child Actions ──────────────────────────────────────────
@@ -224,7 +250,7 @@ export async function createChildAction(
   }
 
   if (!isStageInScope(scope, values.stage_id)) {
-    return { success: false, message: "You do not have permission to create children in this stage." };
+    return { success: false, message: await translateChildErrorKey("createStageDenied") };
   }
 
   const result = await childService.createChild(supabase, {
@@ -246,7 +272,7 @@ export async function createChildAction(
   });
 
   if (result.error) {
-    return { success: false, message: result.error };
+    return { success: false, message: await translateChildError(result.error) };
   }
 
   if (result.data) {
@@ -354,8 +380,20 @@ export async function updateChildAction(
     (existing.data.serviceId !== values.service_id ||
       existing.data.stageId !== values.stage_id);
 
-  if (movedStage && !isStageInScope(scope, values.stage_id)) {
-    return { success: false, message: "You do not have permission to move children to this stage." };
+  // Moving a beneficiary between stages is a transfer: the dedicated
+  // 'beneficiaries.transfer' permission and BOTH source + destination stage
+  // scopes are required. Checks run before the UPDATE so a blocked move never
+  // triggers a partial write.
+  if (movedStage) {
+    if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_TRANSFER))) {
+      return { success: false, message: await translateChildErrorKey("transferPermissionDenied") };
+    }
+    if (!isStageInScope(scope, existing.data.stageId)) {
+      return { success: false, message: await translateChildErrorKey("transferFromStageDenied") };
+    }
+    if (!isStageInScope(scope, values.stage_id)) {
+      return { success: false, message: await translateChildErrorKey("transferToStageDenied") };
+    }
   }
 
   const result = await childService.updateChild(supabase, childId, profile.church_id, {
@@ -378,7 +416,7 @@ export async function updateChildAction(
   });
 
   if (result.error) {
-    return { success: false, message: result.error };
+    return { success: false, message: await translateChildError(result.error) };
   }
 
   if (movedStage) {
@@ -387,7 +425,7 @@ export async function updateChildAction(
       stage_id: values.stage_id,
     });
     if (transferResult.error) {
-      return { success: false, message: transferResult.error };
+      return { success: false, message: await translateChildError(transferResult.error) };
     }
   }
 
@@ -422,8 +460,8 @@ export async function transferChildAction(
     return { success: false, message: "You must be logged in." };
   }
 
-  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_UPDATE))) {
-    return { success: false, message: "You do not have permission to update children." };
+  if (!(await hasPermission(PERMISSION_CODES.BENEFICIARIES_TRANSFER))) {
+    return { success: false, message: await translateChildErrorKey("transferPermissionDenied") };
   }
 
   const { data: profile } = await supabase
@@ -441,8 +479,25 @@ export async function transferChildAction(
     return { success: false, message: message ?? "Failed to resolve stage scope." };
   }
 
+  // Transfers need BOTH scopes: the source (the beneficiary's current stage)
+  // and the destination. A transfer out of a stage the actor does not manage
+  // would otherwise let a stage manager reassign church-wide beneficiaries.
+  const currentStage = await childService.getBeneficiaryCurrentStage(
+    supabase,
+    profile.church_id,
+    childId,
+  );
+  if (currentStage.error) {
+    return { success: false, message: currentStage.error };
+  }
+  if (!currentStage.data) {
+    return { success: false, message: await translateChildErrorKey("beneficiaryNotFound") };
+  }
+  if (!isStageInScope(scope, currentStage.data)) {
+    return { success: false, message: await translateChildErrorKey("transferFromStageDenied") };
+  }
   if (!isStageInScope(scope, values.stage_id)) {
-    return { success: false, message: "You do not have permission to transfer children to this stage." };
+    return { success: false, message: await translateChildErrorKey("transferToStageDenied") };
   }
 
   const result = await childService.transferChild(supabase, childId, profile.church_id, {
@@ -451,7 +506,7 @@ export async function transferChildAction(
   });
 
   if (result.error) {
-    return { success: false, message: result.error };
+    return { success: false, message: await translateChildError(result.error) };
   }
 
   await writeAuditLog(supabase, "update", "child", childId, undefined, {
