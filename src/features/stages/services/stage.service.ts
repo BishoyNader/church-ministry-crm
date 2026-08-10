@@ -475,6 +475,25 @@ export async function createStage(
       return { data: null, error: "Profile not found." };
     }
 
+    // Server-side validation (never client-trusted): the stage's service must
+    // belong to the actor's church, otherwise the child row would reference a
+    // service outside the church's tenant boundary.
+    const { data: service, error: serviceError } = await supabase
+      .from("services")
+      .select("id")
+      .eq("id", input.service_id)
+      .eq("church_id", profile.church_id)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (serviceError) {
+      return { data: null, error: serviceError.message };
+    }
+
+    if (!service) {
+      return { data: null, error: "Service not found." };
+    }
+
     const { data, error } = await supabase
       .from("stages")
       .insert({

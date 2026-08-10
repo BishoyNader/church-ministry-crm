@@ -33,6 +33,7 @@ type StageFormDialogProps = {
   onOpenChange: (open: boolean) => void;
   ministryId: string;
   stage?: StageListItem | null;
+  onSuccess?: () => void;
 };
 
 export function StageFormDialog({
@@ -40,6 +41,7 @@ export function StageFormDialog({
   onOpenChange,
   ministryId,
   stage,
+  onSuccess,
 }: StageFormDialogProps) {
   const t = useTranslations("stages.stage.form");
   const isEdit = !!stage;
@@ -96,7 +98,10 @@ export function StageFormDialog({
 
   const handleCreate = async (values: CreateStageFormValues) => {
     const result = await createMutation.mutateAsync(values);
-    if (result.success) onOpenChange(false);
+    if (result.success) {
+      onSuccess?.();
+      onOpenChange(false);
+    }
   };
 
   const handleUpdate = async (values: UpdateStageFormValues) => {
@@ -105,7 +110,10 @@ export function StageFormDialog({
       stageId: stage.id,
       values,
     });
-    if (result.success) onOpenChange(false);
+    if (result.success) {
+      onSuccess?.();
+      onOpenChange(false);
+    }
   };
 
   const isPending = createMutation.isPending || updateMutation.isPending;
