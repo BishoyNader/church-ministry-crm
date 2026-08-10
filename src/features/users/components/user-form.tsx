@@ -300,6 +300,7 @@ export function UserForm({
                     createForm.setValue("stageIds", []);
                     createForm.setValue("confirmReplaceManager", false);
                   }}
+                  items={churches.map((church) => ({ value: church.id, label: church.name_ar }))}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={t("churchPlaceholder")} />
@@ -315,7 +316,7 @@ export function UserForm({
                       </div>
                     ) : (
                       churches.map((church) => (
-                        <SelectItem key={church.id} value={church.id}>
+                        <SelectItem key={church.id} value={church.id} label={church.name_ar}>
                           <span className="flex items-center gap-2">
                             <span className="truncate">{church.name_ar}</span>
                             <span className="text-xs text-muted-foreground">

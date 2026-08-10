@@ -65,13 +65,14 @@ export function ChurchScopeSelector({
       value={value || undefined}
       onValueChange={(val) => onChange(val as string)}
       disabled={disabled}
+      items={churches.map((church) => ({ value: church.id, label: church.name_ar }))}
     >
       <SelectTrigger className="w-full sm:w-64" aria-label={t("label")}>
         <SelectValue placeholder={t("placeholder")} />
       </SelectTrigger>
       <SelectContent>
         {churches.map((church) => (
-          <SelectItem key={church.id} value={church.id}>
+          <SelectItem key={church.id} value={church.id} label={church.name_ar}>
             <span className="flex items-center gap-2">
               <span className="truncate">{church.name_ar}</span>
               <span className="text-xs text-muted-foreground">

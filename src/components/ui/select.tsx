@@ -74,8 +74,21 @@ function SelectContent({
 }: SelectPrimitive.Popup.Props) {
   return (
     <SelectPrimitive.Portal>
+      {/*
+        z-index lives on the POSITIONER, not just the popup. Base UI renders the
+        positioner as `position: fixed` (alignItemWithTrigger mode), and a fixed
+        element forms its own stacking context, so the popup's own `z-50` is
+        trapped INSIDE that context and cannot escape it. When a Select opens
+        inside a Dialog (e.g. the Add-User church picker), the dialog's z-50
+        backdrop would otherwise paint ON TOP of the popup — the dropdown opens
+        but the options are invisible and unclickable. Giving the positioner the
+        same overlay tier as the dialog content lifts the whole subtree above the
+        backdrop. (Verified in browser: popup z-index changes alone do nothing;
+        positioner z-50 fixes the hit-test and pointer events.)
+      */}
       <SelectPrimitive.Positioner
         data-slot="select-positioner"
+        className="z-50"
       >
         <SelectPrimitive.Popup
           data-slot="select-content"
