@@ -123,10 +123,28 @@ export async function listServices(
       );
     }
 
+    const { data: eventCountRows } = serviceIds.length
+      ? await supabase
+          .from("events")
+          .select("service_id")
+          .eq("church_id", churchId)
+          .is("deleted_at", null)
+          .in("service_id", serviceIds)
+      : { data: [] as { service_id: string }[] };
+
+    const eventCountsByService = new Map<string, number>();
+    for (const row of eventCountRows ?? []) {
+      eventCountsByService.set(
+        row.service_id,
+        (eventCountsByService.get(row.service_id) ?? 0) + 1,
+      );
+    }
+
     const total = count ?? 0;
     const rows: ServiceListItem[] = (data ?? []).map((service) => ({
       ...service,
       stageCount: countsByService.get(service.id) ?? 0,
+      eventCount: eventCountsByService.get(service.id) ?? 0,
     }));
 
     return {

@@ -47,11 +47,13 @@ export function dataClientFor(ctx: ActorContext) {
 }
 
 /**
- * Gate shared by single-user creation and bulk import. Super admins hold
- * servants.create; the PO has no servants.* permission, so it is gated on the
- * platform-scoped tenants/users bundle. The RPC's internal
- * user_is_platform_owner() / user_is_super_admin() guard remains the hard
- * enforcement boundary.
+ * Gate shared by single-user creation and bulk import. Church actors are gated
+ * on the same boundary the create_church_user RPC enforces — the actor must be
+ * the church's super_admin (checked via the shared user_is_super_admin() DB
+ * function). servants.create is kept as a compatibility path for custom roles
+ * that predate the servants.* catalog; such roles still cannot create users,
+ * because the RPC rejects non-super-admins. The PO has no servants.* permission
+ * and is gated on the platform-scoped tenants/users bundle.
  */
 export async function assertUserManagementPermission(
   ctx: ActorContext,
@@ -64,6 +66,17 @@ export async function assertUserManagementPermission(
     if (!allowed) {
       return { ok: false, message: "You do not have permission to manage users." };
     }
+    return { ok: true };
+  }
+
+  // Hard boundary: the same check create_church_user performs internally. This
+  // keeps bulk import working for church managers whose super_admin role was
+  // seeded before the servants.* catalog existed (or is otherwise missing the
+  // servants.create row), without changing any role's permissions.
+  const { data: isSuperAdmin } = await ctx.supabase.rpc("user_is_super_admin", {
+    p_church_id: ctx.churchId,
+  });
+  if (isSuperAdmin) {
     return { ok: true };
   }
 

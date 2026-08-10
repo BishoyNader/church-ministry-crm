@@ -83,9 +83,27 @@ export async function listMinistries(
       );
     }
 
+    const { data: eventCounts } = ministryIds.length
+      ? await supabase
+          .from("events")
+          .select("service_id")
+          .eq("church_id", churchId)
+          .is("deleted_at", null)
+          .in("service_id", ministryIds)
+      : { data: [] };
+
+    const eventCountsByService = new Map<string, number>();
+    for (const event of eventCounts ?? []) {
+      eventCountsByService.set(
+        event.service_id,
+        (eventCountsByService.get(event.service_id) ?? 0) + 1,
+      );
+    }
+
     const result: MinistryListItem[] = scopedMinistries.map((m) => ({
       ...m,
       stageCount: countsByService.get(m.id) ?? 0,
+      eventCount: eventCountsByService.get(m.id) ?? 0,
     }));
 
     return { data: result, error: null };

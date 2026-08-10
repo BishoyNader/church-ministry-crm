@@ -275,7 +275,15 @@ export async function createUserAction(
       return { success: false, message: "A church must be selected." };
     }
   } else {
-    if (!(await hasPermission(PERMISSION_CODES.SERVANTS_CREATE))) {
+    // Same boundary as the import gate: the create_church_user RPC only accepts
+    // the church's super_admin, so a manager (even with a legacy role missing
+    // servants.create) must be able to create users. servants.create stays as a
+    // compatibility path; the RPC remains the hard enforcement boundary.
+    const { data: isSuperAdmin } = await ctx.supabase.rpc("user_is_super_admin", {
+      p_church_id: ctx.churchId,
+    });
+    const allowed = isSuperAdmin || (await hasPermission(PERMISSION_CODES.SERVANTS_CREATE));
+    if (!allowed) {
       return { success: false, message: "You do not have permission to create users." };
     }
     if (values.churchId && values.churchId !== ctx.churchId) {

@@ -17,8 +17,8 @@ import type { ImportErrorFileRow } from "@/features/import-export/types/import-e
 
 const roleOptions: UserImportRoleOption[] = [
   { id: "r-super", name_ar: "مدير الكنيسة", name_en: "Church Manager", role_type: "super_admin" },
-  { id: "r-admin", name_ar: "مدير الخدمة", name_en: "Admin", role_type: "admin" },
-  { id: "r-stage", name_ar: "مدير المرحلة", name_en: "Stage Manager", role_type: "stage_manager" },
+  { id: "r-admin", name_ar: "أمين الخدمة أو الكاهن المسئول", name_en: "Admin", role_type: "admin" },
+  { id: "r-stage", name_ar: "أمين المرحلة", name_en: "Stage Manager", role_type: "stage_manager" },
   { id: "r-servant", name_ar: "خادم", name_en: "Servant", role_type: "servant" },
 ];
 

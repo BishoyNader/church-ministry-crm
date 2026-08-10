@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { PaginationBar } from "@/components/layout/pagination-bar";
-import { Archive, ArchiveRestore, CalendarDays, Pencil, Plus, RotateCcw, SearchX } from "lucide-react";
+import { CalendarDays, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,87 +20,83 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
-import { Link } from "@/i18n/navigation";
-import { useServiceList, useRestoreService } from "../hooks/use-services";
-import { ServiceFormDialog } from "./service-form-dialog";
-import { DeleteServiceDialog } from "./delete-service-dialog";
-import type { ServiceListItem, ServiceStatusFilter } from "../types/services.types";
+import { useEventList, useEventOptions } from "../hooks/use-events";
+import { EventFormDialog } from "./event-form-dialog";
+import { EventDeleteDialog } from "./event-delete-dialog";
+import type { EventListItem, EventTypeFilter } from "../types/events.types";
 
 const PAGE_SIZE = 20;
 
-export function ServicesPage() {
-  const t = useTranslations("services");
+function formatDateTime(iso: string, locale: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+type EventsPageProps = {
+  presetServiceId?: string;
+};
+
+export function EventsPage({ presetServiceId }: EventsPageProps) {
+  const t = useTranslations("events");
+  const locale = useLocale();
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const search = useDebouncedValue(searchInput, 300);
-  const [statusFilter, setStatusFilter] = useState<ServiceStatusFilter>("all");
+  const [eventTypeFilter, setEventTypeFilter] = useState<EventTypeFilter>("all");
+  const [serviceId, setServiceId] = useState<string | undefined>(presetServiceId);
 
   const [createOpen, setCreateOpen] = useState(false);
-  const [editService, setEditService] = useState<ServiceListItem | null>(null);
-  const [archiveService, setArchiveService] = useState<ServiceListItem | null>(null);
+  const [editEvent, setEditEvent] = useState<EventListItem | null>(null);
+  const [deleteEvent, setDeleteEvent] = useState<EventListItem | null>(null);
 
-  const restoreMutation = useRestoreService();
+  const optionsQuery = useEventOptions();
+  const services = optionsQuery.data?.data?.services ?? [];
 
   const filters = useMemo(
     () => ({
       page,
       pageSize: PAGE_SIZE,
       search: search || undefined,
-      status: statusFilter,
+      eventType: eventTypeFilter,
+      serviceId,
     }),
-    [page, search, statusFilter],
+    [page, search, eventTypeFilter, serviceId],
   );
 
-  const { data, isLoading, error } = useServiceList(filters);
+  const { data, isLoading, error } = useEventList(filters);
 
   const rows = data?.data?.rows ?? [];
   const total = data?.data?.total ?? 0;
   const totalPages = data?.data?.totalPages ?? 0;
 
-  const hasActiveFilters = search || statusFilter !== "all";
+  const hasActiveFilters = search || eventTypeFilter !== "all" || !!serviceId;
 
   const clearFilters = () => {
     setSearchInput("");
-    setStatusFilter("all");
+    setEventTypeFilter("all");
+    setServiceId(undefined);
     setPage(1);
-  };
-
-  const handleStatusChange = (value: unknown) => {
-    setStatusFilter(value as ServiceStatusFilter);
-    setPage(1);
-  };
-
-  const handleRestore = async (service: ServiceListItem) => {
-    try {
-      await restoreMutation.mutateAsync(service.id);
-    } catch {
-      // Error is surfaced via restoreMutation.error state below
-    }
   };
 
   if (error) {
     return <ErrorState title={t("errors.listFailed")} message={error.message} />;
   }
 
-  const restoreError = restoreMutation.error?.message ?? null;
-
   return (
     <section className="space-y-6">
-      {restoreError ? (
-        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {restoreError}
-        </div>
-      ) : null}
-
       <PageHeader
         title={t("title")}
         description={t("description")}
         actions={
-          <PermissionGuard permission="stages.create">
+          <PermissionGuard permission="events.create">
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="size-4" />
-              {t("addService")}
+              {t("addEvent")}
             </Button>
           </PermissionGuard>
         }
@@ -116,14 +112,31 @@ export function ServicesPage() {
             className="flex-1 min-w-[200px]"
           />
 
-          <Select value={statusFilter} onValueChange={handleStatusChange}>
+          <Select value={eventTypeFilter} onValueChange={(value) => { setEventTypeFilter(value as EventTypeFilter); setPage(1); }}>
             <SelectTrigger className="w-full sm:w-44">
-              <SelectValue placeholder={t("filters.allStatuses")} />
+              <SelectValue placeholder={t("filters.allTypes")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
-              <SelectItem value="active">{t("status.active")}</SelectItem>
-              <SelectItem value="inactive">{t("status.inactive")}</SelectItem>
+              <SelectItem value="all">{t("filters.allTypes")}</SelectItem>
+              <SelectItem value="meeting">{t("form.eventTypes.meeting")}</SelectItem>
+              <SelectItem value="camp">{t("form.eventTypes.camp")}</SelectItem>
+              <SelectItem value="conference">{t("form.eventTypes.conference")}</SelectItem>
+              <SelectItem value="trip">{t("form.eventTypes.trip")}</SelectItem>
+              <SelectItem value="other">{t("form.eventTypes.other")}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={serviceId ?? "all"} onValueChange={(value) => { setServiceId(value === "all" ? undefined : (value as string)); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-56">
+              <SelectValue placeholder={t("filters.allServices")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filters.allServices")}</SelectItem>
+              {services.map((service) => (
+                <SelectItem key={service.id} value={service.id}>
+                  {service.name_ar}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
@@ -145,7 +158,7 @@ export function ServicesPage() {
       ) : rows.length === 0 ? (
         <SectionCard className="flex flex-col items-center justify-center px-6 py-16 text-center">
           <div className="rounded-2xl bg-muted p-4 text-muted-foreground">
-            <SearchX className="size-8" aria-hidden="true" />
+            <CalendarDays className="size-8" aria-hidden="true" />
           </div>
           <h3 className="mt-4 text-lg font-semibold tracking-tight">{t("empty.title")}</h3>
           <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
@@ -159,72 +172,57 @@ export function ServicesPage() {
               <caption className="sr-only">{t("table.caption")}</caption>
               <thead>
                 <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th scope="col" className="px-4 py-3">{t("table.name")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.stages")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.events")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.title")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.type")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.service")}</th>
+                  <th scope="col" className="px-4 py-3">{t("table.date")}</th>
                   <th scope="col" className="px-4 py-3">{t("table.status")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.sortOrder")}</th>
                   <th scope="col" className="px-4 py-3 text-end">{t("table.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.map((service) => (
-                  <tr key={service.id} className="align-middle">
+                {rows.map((event) => (
+                  <tr key={event.id} className="align-middle">
                     <td className="px-4 py-3">
-                      <p className="font-medium">{service.name_ar}</p>
-                      {service.name_en ? (
-                        <p className="text-xs text-muted-foreground">{service.name_en}</p>
+                      <p className="font-medium">{event.title_ar}</p>
+                      {event.title_en ? (
+                        <p className="text-xs text-muted-foreground">{event.title_en}</p>
                       ) : null}
                     </td>
+                    <td className="px-4 py-3">
+                      <Badge variant="secondary">{t(`form.eventTypes.${event.event_type}`)}</Badge>
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {t("table.stageCount", { count: service.stageCount })}
+                      {event.serviceNameAr ?? "-"}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {formatDateTime(event.start_at, locale)}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        href={{ pathname: "/events", query: { serviceId: service.id } }}
-                        className="inline-flex items-center gap-1.5 font-medium text-ministry hover:underline"
-                        aria-label={t("table.viewEvents")}
-                      >
-                        <CalendarDays className="size-3.5" />
-                        {t("table.eventCount", { count: service.eventCount })}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant={service.is_active ? "default" : "secondary"}>
-                        {service.is_active ? t("status.active") : t("status.inactive")}
+                      <Badge variant={event.is_active ? "default" : "secondary"}>
+                        {event.is_active ? t("status.active") : t("status.inactive")}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{service.sort_order}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <PermissionGuard permission="stages.update">
-                          {service.is_active ? (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label={t("table.archive")}
-                              onClick={() => setArchiveService(service)}
-                            >
-                              <Archive className="size-4" />
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label={t("table.restore")}
-                              disabled={restoreMutation.isPending}
-                              onClick={() => handleRestore(service)}
-                            >
-                              <ArchiveRestore className="size-4" />
-                            </Button>
-                          )}
+                        <PermissionGuard permission="events.update">
                           <Button
                             variant="ghost"
                             size="icon"
                             aria-label={t("table.edit")}
-                            onClick={() => setEditService(service)}
+                            onClick={() => setEditEvent(event)}
                           >
                             <Pencil className="size-4" />
+                          </Button>
+                        </PermissionGuard>
+                        <PermissionGuard permission="events.delete">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={t("table.delete")}
+                            onClick={() => setDeleteEvent(event)}
+                          >
+                            <Trash2 className="size-4 text-destructive" />
                           </Button>
                         </PermissionGuard>
                       </div>
@@ -248,29 +246,30 @@ export function ServicesPage() {
       )}
 
       {createOpen && (
-        <ServiceFormDialog
+        <EventFormDialog
           open={createOpen}
           onOpenChange={setCreateOpen}
+          presetServiceId={serviceId}
         />
       )}
 
-      {editService && (
-        <ServiceFormDialog
-          open={!!editService}
+      {editEvent && (
+        <EventFormDialog
+          open={!!editEvent}
           onOpenChange={(open) => {
-            if (!open) setEditService(null);
+            if (!open) setEditEvent(null);
           }}
-          service={editService}
+          event={editEvent}
         />
       )}
 
-      {archiveService && (
-        <DeleteServiceDialog
-          open={!!archiveService}
+      {deleteEvent && (
+        <EventDeleteDialog
+          open={!!deleteEvent}
           onOpenChange={(open) => {
-            if (!open) setArchiveService(null);
+            if (!open) setDeleteEvent(null);
           }}
-          service={archiveService}
+          event={deleteEvent}
         />
       )}
     </section>
