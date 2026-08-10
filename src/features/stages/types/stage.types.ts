@@ -17,6 +17,7 @@ export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 
 export type MinistryListItem = MinistryRow & {
   stageCount: number;
+  eventCount: number;
 };
 
 export type StageListItem = StageRow & {

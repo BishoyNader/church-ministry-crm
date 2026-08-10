@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown, ChevronRight, Edit, Trash2, Plus } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronRight, Edit, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PermissionGuard } from "@/features/rbac";
 import { StageRow } from "./stage-row";
+import { EventsSection } from "@/features/events";
 import type { MinistryListItem, StageListItem } from "../types/stage.types";
 
 type MinistryCardProps = {
@@ -70,6 +71,12 @@ export function MinistryCard({
           <Badge variant="secondary" className="shrink-0 text-xs">
             {t("stagesCount", { count: ministry.stageCount })}
           </Badge>
+          {ministry.eventCount > 0 && (
+            <Badge variant="outline" className="shrink-0 text-xs gap-1">
+              <CalendarDays className="size-3" />
+              {t("eventsCount", { count: ministry.eventCount })}
+            </Badge>
+          )}
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
@@ -123,6 +130,8 @@ export function MinistryCard({
               {t("noStages")}
             </p>
           )}
+
+          <EventsSection serviceId={ministry.id} />
         </div>
       )}
     </div>

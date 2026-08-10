@@ -6,6 +6,7 @@ export type ServiceUpdate = Database["public"]["Tables"]["services"]["Update"];
 
 export type ServiceListItem = ServiceRow & {
   stageCount: number;
+  eventCount: number;
 };
 
 export type ServiceStatusFilter = "all" | "active" | "inactive";

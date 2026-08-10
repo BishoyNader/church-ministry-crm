@@ -478,6 +478,7 @@
     },
     "ministry": {
       "stagesCount": "{count} stages",
+      "eventsCount": "{count} events",
       "noStages": "No stages in this ministry.",
       "addStage": "Add stage",
       "status": {
@@ -1316,6 +1317,9 @@
       "name": "Name",
       "stages": "Stages",
       "stageCount": "{count}",
+      "events": "Events",
+      "eventCount": "{count}",
+      "viewEvents": "View events",
       "status": "Status",
       "sortOrder": "Sort order",
       "actions": "Actions",
@@ -1364,6 +1368,92 @@
       "archiveDenied": "You do not have permission to archive services.",
       "restoreDenied": "You do not have permission to restore services.",
       "notFound": "Service not found."
+    }
+  },
+  "events": {
+    "title": "Events",
+    "description": "Manage the events and activities of your church.",
+    "addEvent": "Add Event",
+    "searchPlaceholder": "Search by event title",
+    "filters": {
+      "allTypes": "All types",
+      "allServices": "All services",
+      "clearFilters": "Clear filters"
+    },
+    "table": {
+      "caption": "Events list",
+      "title": "Title",
+      "type": "Type",
+      "service": "Service",
+      "date": "Date",
+      "status": "Status",
+      "actions": "Actions",
+      "edit": "Edit event",
+      "delete": "Delete event"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "form": {
+      "createTitle": "Add Event",
+      "editTitle": "Edit Event",
+      "description": "Fill in the event details below.",
+      "titleAr": "Arabic title",
+      "titleEn": "English title",
+      "eventType": "Event type",
+      "eventTypes": {
+        "meeting": "Meeting",
+        "camp": "Camp",
+        "conference": "Conference",
+        "trip": "Trip",
+        "other": "Other"
+      },
+      "service": "Service",
+      "selectService": "Select a service",
+      "noServices": "No services available.",
+      "stage": "Stage",
+      "selectStage": "Select a stage",
+      "noStages": "No stages in this service.",
+      "locationAr": "Location (Arabic)",
+      "descriptionAr": "Description (Arabic)",
+      "descriptionEn": "Description (English)",
+      "startAt": "Start date",
+      "endAt": "End date",
+      "capacity": "Capacity",
+      "isActive": "Event is active",
+      "save": "Save",
+      "cancel": "Cancel",
+      "processing": "Processing…"
+    },
+    "delete": {
+      "title": "Delete Event",
+      "description": "Are you sure you want to delete {name}? This cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "processing": "Deleting…"
+    },
+    "empty": {
+      "title": "No events",
+      "description": "No events match the current filters. Try a different search or clear the filters."
+    },
+    "section": {
+      "title": "Events",
+      "addEvent": "Add event",
+      "noEvents": "No events for this service yet.",
+      "edit": "Edit event",
+      "delete": "Delete event"
+    },
+    "errors": {
+      "listFailed": "Failed to load events.",
+      "createFailed": "Failed to create the event.",
+      "updateFailed": "Failed to update the event.",
+      "deleteFailed": "Failed to delete the event.",
+      "optionsFailed": "Failed to load event options.",
+      "createDenied": "You do not have permission to create events.",
+      "updateDenied": "You do not have permission to update events.",
+      "deleteDenied": "You do not have permission to delete events.",
+      "notFound": "Event not found."
     }
   },
   "classes": {

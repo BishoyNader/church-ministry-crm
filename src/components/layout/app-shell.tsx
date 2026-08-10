@@ -12,7 +12,6 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { logoutAction } from "@/features/auth/actions/auth.actions";
 import { useAccessState, PERMISSION_CODES } from "@/features/rbac";
 import { useNotificationSummary } from "@/features/notifications/hooks/use-notifications";
-import type { PermissionCode } from "@/features/rbac/constants/permissions";
 import { cn } from "@/lib/utils";
 import { useDirection } from "@/lib/direction";
 
@@ -35,7 +34,7 @@ const navItems = [
   { labelKey: "adminDashboard", href: "/admin/dashboard", icon: LayoutDashboard, permission: PERMISSION_CODES.TENANTS_READ, disabled: false },
   { labelKey: "users", href: "/users", icon: Users, permission: PERMISSION_CODES.USERS_READ, disabled: false },
   { labelKey: "audit", href: "/audit", icon: ScrollText, permission: PERMISSION_CODES.AUDIT_READ, disabled: false },
-  { labelKey: "events", href: null, icon: CalendarDays, permission: undefined as PermissionCode | undefined, disabled: true },
+  { labelKey: "events", href: "/events", icon: CalendarDays, permission: PERMISSION_CODES.EVENTS_READ, disabled: false },
   { labelKey: "settings", href: "/settings", icon: Settings, permission: PERMISSION_CODES.SETTINGS_READ, disabled: false },
 ] as const;
 
