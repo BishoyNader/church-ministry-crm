@@ -11,7 +11,7 @@ type StageRowProps = {
   stage: StageListItem;
   onEdit: (stage: StageListItem) => void;
   onDeactivate: (stage: StageListItem) => void;
-  onAssignUsers: (stage: StageListItem) => void;
+  onAssignUsers?: (stage: StageListItem) => void;
 };
 
 export function StageRow({
@@ -65,16 +65,18 @@ export function StageRow({
       </div>
 
       <div className="flex items-center gap-1">
-         <PermissionGuard permission="servants.assign">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => onAssignUsers(stage)}
-            aria-label={t("assignUsers")}
-          >
-            <UserPlus className="size-3.5" />
-          </Button>
-        </PermissionGuard>
+         {onAssignUsers && (
+          <PermissionGuard permission="servants.assign">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => onAssignUsers(stage)}
+              aria-label={t("assignUsers")}
+            >
+              <UserPlus className="size-3.5" />
+            </Button>
+          </PermissionGuard>
+        )}
         <PermissionGuard permission="stages.update">
           <Button
             variant="ghost"
