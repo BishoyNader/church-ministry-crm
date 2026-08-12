@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { RegistrationFunctions } from "@/types/registration";
 import type {
+  DailyAttendanceRecord,
+  DailyAttendanceRow,
   ReportsData,
   ReportsFilterOption,
   ReportsFilterOptions,
@@ -559,4 +561,171 @@ export function toCsv(data: ReportsData): string {
 
 export function buildCsvFilename() {
   return `reports-${new Date().toISOString().slice(0, 10)}.csv`;
+}
+
+// --------------------------------------------------------------------------
+// Daily attendance breakdown (reports organized BY DAY)
+// --------------------------------------------------------------------------
+
+export type DailyAttendanceInput = {
+  sessionDate: string;
+  serviceName: string;
+  stageName: string;
+  beneficiaryId: string | null;
+  beneficiaryName: string;
+  status: string;
+  recordedByName: string | null;
+  recordedAt: string;
+};
+
+/**
+ * Groups attendance records by DAY (session date) and tallies the final
+ * statuses. Each attendee is counted exactly once per day because the DB
+ * enforces one record per attendee per session (migrations 048/055) — a
+ * status changed غائب → حاضر → معذور converges to a single row, so reports
+ * never count historical statuses. Pure function (unit-testable).
+ */
+export function aggregateDailyAttendance(
+  rows: DailyAttendanceInput[],
+): DailyAttendanceRow[] {
+  // Pass 1 — group the records by day.
+  const byDate = new Map<string, DailyAttendanceInput[]>();
+  for (const row of rows) {
+    if (!row.sessionDate) continue;
+    const list = byDate.get(row.sessionDate) ?? [];
+    list.push(row);
+    byDate.set(row.sessionDate, list);
+  }
+
+  const items: DailyAttendanceRow[] = [];
+  for (const [sessionDate, dayRows] of byDate) {
+    // Pass 2 — per day, keep at most ONE record per beneficiary. The LATEST
+    // one wins by recordedAt (ties keep the first occurrence in input order),
+    // mirroring the reconciliation rule in migration 055. The database
+    // invariant (048/055) already guarantees one row per attendee per session,
+    // so this is defense-in-depth only: reports can never count historical
+    // statuses even if a legacy duplicate ever reached this layer.
+    const latestByBeneficiary = new Map<string, DailyAttendanceInput>();
+    for (const row of dayRows) {
+      if (!row.beneficiaryId) continue;
+      const prev = latestByBeneficiary.get(row.beneficiaryId);
+      if (!prev || (row.recordedAt && row.recordedAt >= prev.recordedAt)) {
+        latestByBeneficiary.set(row.beneficiaryId, row);
+      }
+    }
+
+    const unique = [...latestByBeneficiary.values()];
+    const entry: DailyAttendanceRow = {
+      sessionDate,
+      total: unique.length,
+      present: unique.filter((r) => r.status === "present").length,
+      absent: unique.filter((r) => r.status === "absent").length,
+      excused: unique.filter((r) => r.status === "excused").length,
+      rate: 0,
+      records: unique.map((r) => ({
+        beneficiaryId: r.beneficiaryId!,
+        beneficiaryName: r.beneficiaryName,
+        serviceName: r.serviceName,
+        stageName: r.stageName,
+        status: r.status as DailyAttendanceRecord["status"],
+        recordedByName: r.recordedByName,
+        recordedAt: r.recordedAt,
+      })),
+    };
+    entry.rate = entry.total > 0 ? (entry.present / entry.total) * 100 : 0;
+    entry.records.sort((a, b) => a.beneficiaryName.localeCompare(b.beneficiaryName));
+    items.push(entry);
+  }
+
+  items.sort((a, b) => (a.sessionDate < b.sessionDate ? 1 : a.sessionDate > b.sessionDate ? -1 : 0));
+  return items;
+}
+
+/**
+ * Church-scoped daily attendance for the reports page. Reads beneficiary
+ * attendance records through the same RLS surface as the rest of the module
+ * (the actor scope is intersected server-side in the action via
+ * getActorStageScope). Records are limited to the 500 most recent so the
+ * page stays responsive; the existing from/to date filters narrow the window.
+ */
+export async function getDailyAttendanceBreakdown(
+  supabase: SupabaseClient,
+  churchId: string,
+  filters: ReportsFilters = {},
+  stageIds?: string[],
+): Promise<{ data: DailyAttendanceRow[] | null; error: string | null }> {
+  try {
+    if (stageIds !== undefined && stageIds.length === 0) {
+      return { data: [], error: null };
+    }
+
+    let query = supabase
+      .from("attendance_records")
+      .select(
+        "beneficiary_id, status, created_at, updated_at, " +
+          "attendance_sessions!inner(session_date, service_id, stage_id, services(name_ar, name_en), stages(name_ar, name_en)), " +
+          "beneficiaries(full_name_ar), " +
+          "profiles!attendance_records_recorded_by_fkey(full_name_ar)",
+      )
+      .eq("church_id", churchId)
+      .not("beneficiary_id", "is", null)
+      // PostgREST orders embedded relations via referencedTable (the dotted
+      // path form is rejected by the parser). Most recent sessions first.
+      .order("session_date", { referencedTable: "attendance_sessions", ascending: false })
+      .limit(500);
+
+    if (filters.fromDate) {
+      query = query.gte("attendance_sessions.session_date", filters.fromDate);
+    }
+    if (filters.toDate) {
+      query = query.lte("attendance_sessions.session_date", filters.toDate);
+    }
+    if (filters.serviceId) {
+      query = query.eq("attendance_sessions.service_id", filters.serviceId);
+    }
+    if (filters.stageId) {
+      query = query.eq("attendance_sessions.stage_id", filters.stageId);
+    }
+    if (stageIds) {
+      query = query.in("attendance_sessions.stage_id", stageIds);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    const rows: DailyAttendanceInput[] = (data ?? []).map((raw) => {
+      const row = raw as unknown as {
+        beneficiary_id: string | null;
+        status: string;
+        created_at: string | null;
+        updated_at: string | null;
+        attendance_sessions?: {
+          session_date?: string;
+          services?: { name_ar?: string | null; name_en?: string | null } | null;
+          stages?: { name_ar?: string | null; name_en?: string | null } | null;
+        } | null;
+        beneficiaries?: { full_name_ar?: string | null } | null;
+        profiles?: { full_name_ar?: string | null } | null;
+      };
+      const session = row.attendance_sessions;
+      return {
+        sessionDate: session?.session_date ?? "",
+        serviceName: session?.services?.name_ar ?? session?.services?.name_en ?? "",
+        stageName: session?.stages?.name_ar ?? session?.stages?.name_en ?? "",
+        beneficiaryId: row.beneficiary_id,
+        beneficiaryName: row.beneficiaries?.full_name_ar ?? "",
+        status: row.status,
+        recordedByName: row.profiles?.full_name_ar ?? null,
+        // updated_at (migration 056) is the true last-modification time;
+        // created_at is only the fallback for pre-056 rows.
+        recordedAt: row.updated_at ?? row.created_at ?? "",
+      };
+    });
+
+    return { data: aggregateDailyAttendance(rows), error: null };
+  } catch {
+    return { data: null, error: "Failed to load daily attendance." };
+  }
 }

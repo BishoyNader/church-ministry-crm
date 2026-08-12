@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
-import { Download } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,16 +10,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/feedback/error-state";
 import { useAccessState, PERMISSION_CODES } from "@/features/rbac";
-import { useReportsData, useReportsFilterOptions } from "../hooks/use-reports";
+import { useDailyAttendanceBreakdown, useReportsData, useReportsFilterOptions } from "../hooks/use-reports";
 import { exportReportsCsv } from "../hooks/use-reports";
 import type { ReportsFilters } from "../types/reports.types";
 
 export function ReportsPage() {
   const t = useTranslations("reports");
+  const locale = useLocale();
   const [filters, setFilters] = useState<ReportsFilters>({});
   const { data: reports, isLoading, error } = useReportsData(filters);
+  const { data: daily, isLoading: dailyLoading, error: dailyError } = useDailyAttendanceBreakdown(filters);
   const { data: filterOptions } = useReportsFilterOptions();
   const { data: accessState } = useAccessState();
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
 
   const permissions = new Set((accessState?.permissions ?? []).map((permission) => permission.code));
   const canExport = permissions.has(PERMISSION_CODES.REPORTS_EXPORT);
@@ -31,6 +34,17 @@ export function ReportsPage() {
   const attendanceRate = response?.attendanceRate.rate ?? 0;
 
   const [exportError, setExportError] = useState<string | null>(null);
+
+  const formatDay = (sessionDate: string) =>
+    new Date(`${sessionDate}T00:00:00`).toLocaleDateString(locale, {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+  const formatDateTime = (iso: string) =>
+    iso ? new Date(iso).toLocaleString(locale) : "—";
 
   const exportCsv = async () => {
     setExportError(null);
@@ -241,6 +255,85 @@ export function ReportsPage() {
               <span>{row.attendanceRate.toFixed(1)}% ({row.total})</span>
             </div>
           ))}
+        </CardContent>
+      </Card>
+
+      {/* Attendance organized BY DAY — each attendee counted once per day
+          (one record per attendee per session is enforced by the database).
+          Expand a day to drill into the individual records. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("dailyTitle")}</CardTitle>
+          <p className="text-sm text-muted-foreground">{t("dailyDescription")}</p>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          {dailyLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : dailyError ? (
+            <p className="text-sm text-destructive">{dailyError.message}</p>
+          ) : (daily?.data ?? []).length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("dailyEmpty")}</p>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground">{t("dailyLimit")}</p>
+              {(daily?.data ?? []).map((day) => {
+              const expanded = expandedDay === day.sessionDate;
+              return (
+                <div key={day.sessionDate} className="overflow-hidden rounded-lg border">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedDay(expanded ? null : day.sessionDate)}
+                    aria-expanded={expanded}
+                    className="flex w-full flex-wrap items-center justify-between gap-2 bg-muted/20 px-4 py-3 text-start transition hover:bg-accent"
+                  >
+                    <span className="flex items-center gap-2 font-semibold">
+                      {expanded ? <ChevronUp className="size-4 text-muted-foreground" /> : <ChevronDown className="size-4 text-muted-foreground" />}
+                      {formatDay(day.sessionDate)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {t("dailyTotal", { total: day.total })} · {t("present")}: {day.present} ·{" "}
+                      {t("absent")}: {day.absent} · {t("excused")}: {day.excused} ·{" "}
+                      {t("attendanceRate")}: {day.rate.toFixed(1)}%
+                    </span>
+                  </button>
+
+                  {expanded ? (
+                    <div className="overflow-x-auto border-t">
+                      <table className="w-full text-xs">
+                        <thead>
+                          <tr className="border-b bg-muted/40 text-muted-foreground">
+                            <th scope="col" className="px-3 py-2 text-start font-medium">{t("name")}</th>
+                            <th scope="col" className="px-3 py-2 text-start font-medium">{t("service")}</th>
+                            <th scope="col" className="px-3 py-2 text-start font-medium">{t("stage")}</th>
+                            <th scope="col" className="px-3 py-2 text-start font-medium">{t("status")}</th>
+                            <th scope="col" className="px-3 py-2 text-start font-medium">{t("recordedBy")}</th>
+                            <th scope="col" className="px-3 py-2 text-start font-medium">{t("recordedAt")}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {day.records.map((record, index) => (
+                            <tr key={`${day.sessionDate}-${record.beneficiaryId}-${index}`} className="border-b last:border-0">
+                              <td className="px-3 py-2">{record.beneficiaryName}</td>
+                              <td className="px-3 py-2">{record.serviceName}</td>
+                              <td className="px-3 py-2">{record.stageName}</td>
+                              <td className="px-3 py-2">{t(record.status)}</td>
+                              <td className="px-3 py-2">{record.recordedByName ?? "—"}</td>
+                              <td className="px-3 py-2">{formatDateTime(record.recordedAt)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })}
+            </>
+          )}
         </CardContent>
       </Card>
     </section>

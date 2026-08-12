@@ -66,16 +66,23 @@ export function ServantAttendancePage() {
   const isLoadingAttendees = attendanceQuery.isLoading;
   const loadError = attendanceQuery.error;
 
+  // Defensive date-scoping: only merge server records that belong to the
+  // CURRENTLY selected date. While the new date's query is still loading the
+  // previous response carries a different attendanceDate, which would otherwise
+  // briefly render the old day's statuses over the new selection.
   const records = useMemo(() => {
     const merged = { ...userRecords };
-    const existing = attendanceQuery.data?.data?.records ?? {};
+    const existing =
+      attendanceQuery.data?.data?.attendanceDate === date
+        ? (attendanceQuery.data?.data?.records ?? {})
+        : {};
     for (const [servantId, record] of Object.entries(existing)) {
       if (!merged[servantId]) {
         merged[servantId] = record;
       }
     }
     return merged;
-  }, [userRecords, attendanceQuery.data?.data?.records]);
+  }, [userRecords, attendanceQuery.data?.data?.attendanceDate, attendanceQuery.data?.data?.records, date]);
 
   const hasRecords = Object.keys(records).length > 0;
 
@@ -265,7 +272,11 @@ export function ServantAttendancePage() {
                 </div>
               </div>
 
+              {/* key forces a fresh table per (service, stage, date) so no
+                  stale row/input state survives a date switch — the screen
+                  always reflects the selected combination without refresh. */}
               <ServantAttendanceTable
+                key={`${serviceId}-${stageId}-${date}`}
                 servants={attendees}
                 records={records}
                 onRecordChange={handleRecordChange}

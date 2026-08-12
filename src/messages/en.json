@@ -1306,7 +1306,16 @@
     "overdue": "Overdue",
     "stageComparison": "Stage Comparison",
     "loadError": "Reports failed to load.",
-    "exportError": "Failed to export reports."
+    "exportError": "Failed to export reports.",
+    "dailyTitle": "Attendance by Day",
+    "dailyDescription": "Each attendee is counted once per day; expand a day to see the individual records.",
+    "dailyEmpty": "No attendance records in the selected period.",
+    "dailyTotal": "Total: {total}",
+    "name": "Name",
+    "status": "Status",
+    "recordedBy": "Recorded by",
+    "recordedAt": "Last updated",
+    "dailyLimit": "Showing the most recent 500 records — narrow the date range for older days."
   },
   "errorBoundary": {
     "title": "Something went wrong",

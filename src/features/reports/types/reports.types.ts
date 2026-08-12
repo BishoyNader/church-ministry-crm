@@ -67,6 +67,32 @@ export type TrendRow = {
   total: number;
 };
 
+export type DailyAttendanceRecord = {
+  beneficiaryId: string;
+  beneficiaryName: string;
+  serviceName: string;
+  stageName: string;
+  status: "present" | "absent" | "excused";
+  recordedByName: string | null;
+  recordedAt: string;
+};
+
+/**
+ * One attendance day: totals across every session of that date (scoped by the
+ * active filters), plus the drill-in record list. Because the DB enforces one
+ * record per attendee per session (048/055), each attendee is counted exactly
+ * once per day — repeated status changes never inflate these numbers.
+ */
+export type DailyAttendanceRow = {
+  sessionDate: string;
+  total: number;
+  present: number;
+  absent: number;
+  excused: number;
+  rate: number;
+  records: DailyAttendanceRecord[];
+};
+
 export type ReportsData = {
   attendanceRate: AttendanceRateSummary;
   servantAttendance: ServantAttendanceRow[];
