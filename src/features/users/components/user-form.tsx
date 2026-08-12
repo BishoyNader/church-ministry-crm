@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormField } from "@/components/ui/form-field";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Dialog,
   DialogPopup,
@@ -29,6 +30,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { createUserSchema, updateUserSchema } from "../schemas/user.schema";
 import type { CreateUserFormValues, UpdateUserFormValues } from "../schemas/user.schema";
+import { resolveRoleAssignments } from "../utils/role-assignment";
 import {
   useCreateUser,
   useUpdateUser,
@@ -165,12 +167,12 @@ export function UserForm({
     ? roles
     : roles.filter((role) => role.role_type !== "super_admin");
 
-  // Role-based assignment rules (050): the controls shown depend on the roles
-  // selected — admin -> multiple services, stage_manager -> one service,
-  // servant -> one service + one stage inside that service.
-  const selectedRoles = roles.filter((role) =>
-    createForm.watch("roleIds").includes(role.id),
-  );
+  // Role-based assignment rules (050): the controls shown depend on the SINGLE
+  // selected primary role — admin -> multiple services, stage_manager -> one
+  // service, servant -> one service + one stage inside that service.
+  const selectedRoleIds = createForm.watch("roleIds");
+  const selectedRoleId = selectedRoleIds[0] ?? null;
+  const selectedRoles = roles.filter((role) => role.id === selectedRoleId);
   const selectedRoleTypes = selectedRoles.map((role) => role.role_type);
   const hasServantRole = selectedRoleTypes.includes("servant");
   const hasStageManagerRole = selectedRoleTypes.includes("stage_manager");
@@ -194,13 +196,31 @@ export function UserForm({
   const churchDetailQuery = useChurchDetail(managerChurchId);
   const manager = churchDetailQuery.data?.data?.manager ?? null;
   const superAdminRole = roles.find((role) => role.role_type === "super_admin");
-  const selectedRoleIds = createForm.watch("roleIds");
   const showManagerWarning =
     !isEdit &&
     !!scopeChurchId &&
     !!superAdminRole &&
     selectedRoleIds.includes(superAdminRole.id) &&
     !!manager;
+
+  /**
+   * Single-role radio change: exactly one primary role is stored. Incompatible
+   * previously selected values are cleared here (and enforced server-side by
+   * createUserAction / validateRoleAssignmentRules).
+   */
+  const handleRoleChange = (value: unknown) => {
+    const roleId = typeof value === "string" ? value : "";
+    const next = resolveRoleAssignments(
+      roles,
+      roleId || null,
+      createForm.getValues("serviceIds") ?? [],
+      createForm.getValues("stageIds") ?? [],
+    );
+    createForm.setValue("roleIds", next.roleIds);
+    createForm.setValue("serviceIds", next.serviceIds);
+    createForm.setValue("stageIds", next.stageIds);
+    createForm.setValue("confirmReplaceManager", false);
+  };
 
   const handleCreate = async (values: CreateUserFormValues) => {
     setSubmitError(null);
@@ -430,39 +450,17 @@ export function UserForm({
                 <p className="text-sm text-muted-foreground">{t("noRoles")}</p>
               ) : (
                 <div className="space-y-1.5">
-                  {assignableRoles.map((role) => {
-                    const checked = createForm.watch("roleIds").includes(role.id);
-                    return (
+                  <RadioGroup
+                    value={selectedRoleId ?? ""}
+                    onValueChange={handleRoleChange}
+                    className="gap-1.5"
+                  >
+                    {assignableRoles.map((role) => (
                       <label
                         key={role.id}
-                        className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                        className="flex cursor-pointer items-center gap-3 rounded-md border px-3 py-2 text-sm transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"
                       >
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={(isChecked) => {
-                            const current = createForm.getValues("roleIds");
-                            const next = isChecked
-                              ? [...current, role.id]
-                              : current.filter((id) => id !== role.id);
-                            createForm.setValue("roleIds", next);
-                            const nextTypes = roles
-                              .filter((r) => next.includes(r.id))
-                              .map((r) => r.role_type);
-                            // Servant is the most restrictive role: leaving it
-                            // requires a clean stage + single service selection.
-                            if (!nextTypes.includes("servant")) {
-                              createForm.setValue("stageIds", []);
-                            }
-                            if (
-                              nextTypes.includes("servant") ||
-                              nextTypes.includes("stage_manager")
-                            ) {
-                              createForm.setValue("serviceIds",
-                                createForm.getValues("serviceIds")?.slice(0, 1) ?? [],
-                              );
-                            }
-                          }}
-                        />
+                        <RadioGroupItem value={role.id} />
                         <span>
                           <span className="font-medium">{role.name_ar}</span>
                           {role.description_ar ? (
@@ -472,8 +470,9 @@ export function UserForm({
                           ) : null}
                         </span>
                       </label>
-                    );
-                  })}
+                    ))}
+                  </RadioGroup>
+                  <p className="text-xs text-muted-foreground">{t("singleRoleHint")}</p>
                 </div>
               )}
               {createForm.formState.errors.roleIds?.message && (
