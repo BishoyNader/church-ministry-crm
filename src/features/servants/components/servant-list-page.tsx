@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Pencil, ListChecks, Archive, CheckCircle2, XCircle } from "lucide-react";
+import { Plus, Search, Pencil, ListChecks, Archive, CheckCircle2, XCircle } from "lucide-react";
 import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ import {
 } from "../hooks/use-servants";
 import { ServantEditDialog } from "./servant-edit-dialog";
 import { ServantAssignmentDialog } from "./servant-assignment-dialog";
+import { ServantCreateDialog } from "./servant-create-dialog";
 import type { ServantListItem } from "../types/servant.types";
 
 const APPROVAL_FILTER_OPTIONS = [
@@ -59,6 +60,7 @@ export function ServantListPage() {
   const [archiveTarget, setArchiveTarget] = useState<ServantListItem | null>(null);
   const [rejectTarget, setRejectTarget] = useState<ServantListItem | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
 
   const [approveError, setApproveError] = useState<string | null>(null);
   const [rejectError, setRejectError] = useState<string | null>(null);
@@ -87,6 +89,7 @@ export function ServantListPage() {
   const canAssign = permissionCodes.has("servants.assign");
   const canEdit = isSuperAdmin && permissionCodes.has("servants.update");
   const canArchive = isSuperAdmin && permissionCodes.has("servants.delete");
+  const canCreate = isSuperAdmin && permissionCodes.has("servants.create");
 
   const handleSearch = () => {
     setPage(1);
@@ -153,7 +156,18 @@ export function ServantListPage() {
 
   return (
     <section className="space-y-6">
-      <PageHeader title={t("title")} description={t("description")} />
+      <PageHeader
+        title={t("title")}
+        description={t("description")}
+        actions={
+          canCreate ? (
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="size-4" />
+              {t("create")}
+            </Button>
+          ) : undefined
+        }
+      />
 
       {approveError ? (
         <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -399,6 +413,8 @@ export function ServantListPage() {
           servant={assignServant}
         />
       ) : null}
+
+      <ServantCreateDialog open={createOpen} onOpenChange={setCreateOpen} />
 
       <Dialog
         open={!!rejectTarget}

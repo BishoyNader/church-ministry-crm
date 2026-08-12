@@ -261,6 +261,39 @@ export async function updateService(
   }
 }
 
+/**
+ * Compensation for a failed "create service + stages" operation. Soft-deletes
+ * every stage created during the operation and the service itself (church
+ * scoped), so a partial stage failure never leaves an orphaned service or
+ * silently inconsistent data.
+ */
+export async function compensateServiceWithStages(
+  supabase: SupabaseClient<Database>,
+  serviceId: string,
+  stageIds: string[],
+  churchId: string,
+): Promise<void> {
+  const now = new Date().toISOString();
+  try {
+    if (stageIds.length > 0) {
+      await supabase
+        .from("stages")
+        .update({ deleted_at: now })
+        .eq("church_id", churchId)
+        .in("id", stageIds)
+        .is("deleted_at", null);
+    }
+    await supabase
+      .from("services")
+      .update({ deleted_at: now })
+      .eq("id", serviceId)
+      .eq("church_id", churchId)
+      .is("deleted_at", null);
+  } catch (error) {
+    console.error("[services] Failed to compensate failed service creation:", error);
+  }
+}
+
 export async function setServiceActive(
   supabase: SupabaseClient<Database>,
   serviceId: string,

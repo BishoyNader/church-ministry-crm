@@ -4,6 +4,7 @@ export type {
   SpiritualJournalListResult,
   CreateSpiritualJournalInput,
   UpdateSpiritualJournalInput,
+  ChurchJournalServant,
 } from "./types/spiritual-journal.types";
 
 export {
@@ -24,6 +25,8 @@ export {
   createSpiritualJournalEntryAction,
   updateSpiritualJournalEntryAction,
   deleteSpiritualJournalEntryAction,
+  listChurchJournalServantsAction,
+  listServantJournalEntriesAction,
 } from "./actions/spiritual-journal.actions";
 
 export {
@@ -31,8 +34,11 @@ export {
   useCreateSpiritualJournalEntry,
   useUpdateSpiritualJournalEntry,
   useDeleteSpiritualJournalEntry,
+  useChurchJournalServants,
+  useServantJournalEntries,
   SPIRITUAL_JOURNAL_QUERY_KEYS,
 } from "./hooks/use-spiritual-journal";
 
 export { SpiritualJournalPage } from "./components/spiritual-journal-page";
 export { SpiritualJournalFormDialog } from "./components/spiritual-journal-form-dialog";
+export { SpiritualJournalOverview } from "./components/spiritual-journal-overview";

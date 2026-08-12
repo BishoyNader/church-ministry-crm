@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   listServantsAction,
   getServantAction,
+  createServantAction,
+  getServantCreateOptionsAction,
   updateServantAction,
   assignServantStagesAction,
   archiveServantAction,
@@ -13,7 +15,10 @@ import {
   approveServantAction,
   rejectServantAction,
 } from "@/features/users/actions/approval.actions";
-import type { UpdateServantFormValues } from "../schemas/servant.schema";
+import type {
+  CreateServantFormValues,
+  UpdateServantFormValues,
+} from "../schemas/servant.schema";
 
 export const SERVANT_QUERY_KEYS = {
   all: ["servants"] as const,
@@ -21,6 +26,7 @@ export const SERVANT_QUERY_KEYS = {
     ["servants", "list", params] as const,
   detail: (id: string) => ["servants", "detail", id] as const,
   stages: ["servants", "stages"] as const,
+  createOptions: ["servants", "create-options"] as const,
 };
 
 export function useServantList(params: {
@@ -73,6 +79,32 @@ export function useServantStages() {
       return result;
     },
     staleTime: 60_000,
+  });
+}
+
+export function useServantCreateOptions() {
+  return useQuery({
+    queryKey: SERVANT_QUERY_KEYS.createOptions,
+    queryFn: async () => {
+      const result = await getServantCreateOptionsAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load servant options.");
+      }
+      return result;
+    },
+    staleTime: 60_000,
+  });
+}
+
+export function useCreateServant() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (values: CreateServantFormValues) => createServantAction(values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: SERVANT_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
   });
 }
 

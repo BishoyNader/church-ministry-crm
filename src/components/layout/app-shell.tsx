@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Menu, Moon, Sun, Church, Users, Layers, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard } from "lucide-react";
+import { Menu, Moon, Sun, Church, Users, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,7 +26,6 @@ const navItems = [
   { labelKey: "spiritualJournal", href: "/spiritual-journal", icon: BookOpen, permission: PERMISSION_CODES.SPIRITUAL_READ, disabled: false },
   { labelKey: "notifications", href: "/notifications", icon: Bell, permission: PERMISSION_CODES.NOTIFICATIONS_READ, disabled: false },
   { labelKey: "importExport", href: "/import-export", icon: ArrowLeftRight, permission: PERMISSION_CODES.IMPORT_EXECUTE, disabled: false },
-  { labelKey: "stages", href: "/stages", icon: Layers, permission: PERMISSION_CODES.STAGES_READ, disabled: false },
   { labelKey: "services", href: "/services", icon: Building2, permission: PERMISSION_CODES.SERVICES_READ, disabled: false },
   { labelKey: "classes", href: "/classes", icon: School, permission: PERMISSION_CODES.CLASSES_READ, disabled: false },
   { labelKey: "churches", href: "/admin/churches", icon: Building2, permission: PERMISSION_CODES.TENANTS_READ, disabled: false },

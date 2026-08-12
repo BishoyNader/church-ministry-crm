@@ -6,6 +6,8 @@ import {
   createSpiritualJournalEntryAction,
   updateSpiritualJournalEntryAction,
   deleteSpiritualJournalEntryAction,
+  listChurchJournalServantsAction,
+  listServantJournalEntriesAction,
 } from "../actions/spiritual-journal.actions";
 import type {
   CreateSpiritualJournalFormValues,
@@ -16,6 +18,9 @@ import type { SpiritualJournalListParams } from "../types/spiritual-journal.type
 export const SPIRITUAL_JOURNAL_QUERY_KEYS = {
   all: ["spiritual-journal"] as const,
   list: (filters?: SpiritualJournalListParams) => ["spiritual-journal", "list", filters] as const,
+  churchServants: ["spiritual-journal", "church-servants"] as const,
+  servantEntries: (servantId: string, filters?: SpiritualJournalListParams) =>
+    ["spiritual-journal", "servant-entries", servantId, filters] as const,
 };
 
 export function useSpiritualJournalList(filters?: SpiritualJournalListParams) {
@@ -28,6 +33,38 @@ export function useSpiritualJournalList(filters?: SpiritualJournalListParams) {
       }
       return result;
     },
+    staleTime: 30_000,
+  });
+}
+
+export function useChurchJournalServants() {
+  return useQuery({
+    queryKey: SPIRITUAL_JOURNAL_QUERY_KEYS.churchServants,
+    queryFn: async () => {
+      const result = await listChurchJournalServantsAction();
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load servants.");
+      }
+      return result;
+    },
+    staleTime: 60_000,
+  });
+}
+
+export function useServantJournalEntries(
+  servantId: string | null,
+  filters?: SpiritualJournalListParams,
+) {
+  return useQuery({
+    queryKey: SPIRITUAL_JOURNAL_QUERY_KEYS.servantEntries(servantId ?? "", filters),
+    queryFn: async () => {
+      const result = await listServantJournalEntriesAction(servantId!, filters);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load servant journal entries.");
+      }
+      return result;
+    },
+    enabled: !!servantId,
     staleTime: 30_000,
   });
 }

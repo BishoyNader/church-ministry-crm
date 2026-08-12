@@ -2,14 +2,16 @@
 
 import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PermissionGuard } from "@/features/rbac";
+import { cn } from "@/lib/utils";
+import { PermissionGuard, useAccessState } from "@/features/rbac";
 import { useSpiritualJournalList, useDeleteSpiritualJournalEntry } from "../hooks/use-spiritual-journal";
 import { SpiritualJournalFormDialog } from "@/features/spiritual-journal/components/spiritual-journal-form-dialog";
+import { SpiritualJournalOverview } from "./spiritual-journal-overview";
 import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
@@ -23,6 +25,12 @@ export function SpiritualJournalPage() {
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<SpiritualJournalEntry | null>(null);
+  const [view, setView] = useState<"mine" | "overview">("mine");
+
+  const { data: accessState } = useAccessState();
+  const isSuperAdmin = (accessState?.roles ?? []).some(
+    (role) => role.role_type === "super_admin",
+  );
 
   const { data, isLoading, error } = useSpiritualJournalList({ page, pageSize });
   const deleteMutation = useDeleteSpiritualJournalEntry();
@@ -72,16 +80,47 @@ export function SpiritualJournalPage() {
         title={t("title")}
         description={t("description")}
         actions={
-          <PermissionGuard permission="spiritual.create">
-            <Button onClick={handleOpenCreate}>
-              <Plus className="size-4" />
-              {t("addEntry")}
-            </Button>
-          </PermissionGuard>
+          <div className="flex items-center gap-2">
+            {isSuperAdmin ? (
+              <div className="flex items-center gap-1 rounded-lg border bg-muted p-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={cn(view === "mine" && "bg-background shadow-sm")}
+                  onClick={() => setView("mine")}
+                >
+                  <BookOpen className="size-4" />
+                  {t("viewMine")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className={cn(view === "overview" && "bg-background shadow-sm")}
+                  onClick={() => setView("overview")}
+                >
+                  <Users className="size-4" />
+                  {t("viewOverview")}
+                </Button>
+              </div>
+            ) : null}
+
+            {view === "mine" ? (
+              <PermissionGuard permission="spiritual.create">
+                <Button onClick={handleOpenCreate}>
+                  <Plus className="size-4" />
+                  {t("addEntry")}
+                </Button>
+              </PermissionGuard>
+            ) : null}
+          </div>
         }
       />
 
-      {error ? (
+      {view === "overview" && isSuperAdmin ? (
+        <SpiritualJournalOverview onBack={() => setView("mine")} />
+      ) : error ? (
         <ErrorState title={t("loadError")} message={error.message} />
       ) : isLoading ? (
         <SectionCard>

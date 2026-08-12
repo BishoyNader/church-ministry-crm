@@ -69,3 +69,27 @@ export type ServantStage = {
   name_ar: string;
   name_en: string | null;
 };
+
+export type ServantCreateOptionRole = {
+  id: string;
+  role_type: string;
+  name_ar: string;
+  name_en: string | null;
+};
+
+export type ServantCreateOptionService = {
+  id: string;
+  name_ar: string;
+};
+
+export type ServantCreateOptionStage = {
+  id: string;
+  service_id: string;
+  name_ar: string;
+};
+
+export type ServantCreateOptions = {
+  roles: ServantCreateOptionRole[];
+  services: ServantCreateOptionService[];
+  stages: ServantCreateOptionStage[];
+};
