@@ -34,7 +34,7 @@ export function AttendancePage() {
 
   const serviceId = serviceFilter !== "all" ? serviceFilter : undefined;
   const stagesQuery = useChildStages(serviceId);
-  const stages = stagesQuery.data?.data ?? [];
+  const stages = useMemo(() => stagesQuery.data?.data ?? [], [stagesQuery.data?.data]);
 
   const childrenQuery = useChildList(
     stageId ? { stage_id: stageId, status: "active" } : undefined,
@@ -109,6 +109,18 @@ export function AttendancePage() {
         return;
       }
       setSaveError(null);
+      // Optimistic local update: the row highlights instantly and the explicit
+      // Save button stays enabled. Re-saving the same (session, beneficiary)
+      // is idempotent — the unique constraint upserts instead of inserting.
+      setUserRecords((prev) => {
+        const next = { ...prev };
+        if (status === null) {
+          delete next[childId];
+        } else {
+          next[childId] = { status, notes: notes ?? "" };
+        }
+        return next;
+      });
       toggleMutation.mutate(
         {
           beneficiary_id: childId,
@@ -129,6 +141,10 @@ export function AttendancePage() {
             // date) session data.
             setUserRecords({});
           },
+          // A thrown action (network/server error) must not vanish silently:
+          // surface it so the stale optimistic record can be recovered via
+          // the explicit Save button (idempotent batch upsert).
+          onError: () => setSaveError(tAttendance("saveError")),
         },
       );
     },
@@ -269,20 +285,18 @@ export function AttendancePage() {
             onQuickToggle={isAdmin ? handleQuickToggle : undefined}
           />
 
-          {!isAdmin ? (
-            <div className="flex items-center justify-end">
-              <PermissionGuard permission="attendance.create">
-                <Button
-                  onClick={handleSave}
-                  disabled={!hasRecords || batchMutation.isPending}
-                >
-                  {batchMutation.isPending
-                    ? tAttendance("saving")
-                    : tAttendance("saveAttendance")}
-                </Button>
-              </PermissionGuard>
-            </div>
-          ) : null}
+          <div className="flex items-center justify-end">
+            <PermissionGuard permission="attendance.create">
+              <Button
+                onClick={handleSave}
+                disabled={!hasRecords || batchMutation.isPending}
+              >
+                {batchMutation.isPending
+                  ? tAttendance("saving")
+                  : tAttendance("saveAttendance")}
+              </Button>
+            </PermissionGuard>
+          </div>
         </>
       )}
     </section>

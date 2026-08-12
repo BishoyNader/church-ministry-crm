@@ -256,7 +256,10 @@ export async function listServantAttendanceHistory(
       .eq("church_id", input.churchId)
       .eq("attendance_sessions.stage_id", input.stageId)
       .not("servant_id", "is", null)
-      .order("attendance_sessions.session_date", { ascending: false })
+      // PostgREST rejects dotted embedded order paths (PGRST100); order the
+      // embedded relation via referencedTable instead (same shape the reports
+      // daily-breakdown query uses).
+      .order("session_date", { referencedTable: "attendance_sessions", ascending: false })
       .limit(input.limit ?? 10);
 
     if (error) {

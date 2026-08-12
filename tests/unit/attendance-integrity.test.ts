@@ -3,7 +3,10 @@ import {
   createAttendance,
   toggleAttendance,
 } from "@/features/children/services/child.service";
-import { batchServantAttendance } from "@/features/servant-attendance/services/servant-attendance.service";
+import {
+  batchServantAttendance,
+  listServantAttendanceHistory,
+} from "@/features/servant-attendance/services/servant-attendance.service";
 import {
   aggregateDailyAttendance,
   type DailyAttendanceInput,
@@ -11,6 +14,7 @@ import {
 
 type UpsertCall = { table: string; rows: unknown[]; opts?: unknown };
 type InsertCall = { table: string; rows: unknown[] };
+type OrderCall = { table: string; col: string; opts?: unknown };
 
 /**
  * Mock Supabase whose responses for `attendance_records` are driven by an
@@ -25,6 +29,7 @@ function createMockSupabase(
 ) {
   const upsertCalls: UpsertCall[] = [];
   const insertCalls: InsertCall[] = [];
+  const orderCalls: OrderCall[] = [];
   let recordCall = 0;
 
   const buildChain = (table: string) => {
@@ -64,6 +69,12 @@ function createMockSupabase(
               return chain;
             };
           }
+          if (prop === "order") {
+            return (col: string, opts?: unknown) => {
+              orderCalls.push({ table, col, opts });
+              return chain;
+            };
+          }
           return () => chain;
         },
       },
@@ -86,6 +97,7 @@ function createMockSupabase(
     } as never,
     upsertCalls,
     insertCalls,
+    orderCalls,
   };
 }
 
@@ -194,6 +206,29 @@ describe("attendance data-integrity invariant — one record per attendee per se
         expect.objectContaining({ servant_id: "servant-2", status: "present" }),
       ]),
     );
+  });
+
+  it("listServantAttendanceHistory orders the embedded session by referencedTable (PGRST100 regression)", async () => {
+    const { supabase, orderCalls } = createMockSupabase([
+      { data: [{ session_id: "s-1", status: "present", attendance_sessions: { session_date: "2026-09-11" } }], error: null },
+    ]);
+
+    const result = await listServantAttendanceHistory(supabase, {
+      churchId: "church-1",
+      stageId: "stage-1",
+      limit: 10,
+    });
+
+    expect(result.error).toBeNull();
+    expect(result.data).toEqual([
+      expect.objectContaining({ sessionDate: "2026-09-11", present: 1, absent: 0, excused: 0 }),
+    ]);
+
+    // PostgREST rejects dotted embedded order paths ("failed to parse order")
+    // — the order must target the embedded relation via referencedTable.
+    const order = orderCalls.find((c) => c.table === "attendance_records");
+    expect(order?.col).toBe("session_date");
+    expect(order?.opts).toMatchObject({ referencedTable: "attendance_sessions", ascending: false });
   });
 });
 
