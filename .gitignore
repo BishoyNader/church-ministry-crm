@@ -98,3 +98,8 @@ skills/
 next-env.d.ts
 supabase/.temp/
 supabase/.branches/
+
+# diagnostic DB probes (never run against staging/production — they create
+# real auth users and test data)
+repro-*.mjs
+probe-*.mjs
