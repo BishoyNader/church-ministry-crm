@@ -17,6 +17,12 @@ type AttendanceTableProps = {
   children_: ChildListItem[];
   records: Record<string, AttendanceRecord>;
   onRecordChange: (childId: string, status: AttendanceStatus, notes: string) => void;
+  /**
+   * When provided (admin one-tap mode), clicking a status button persists that
+   * status immediately; clicking the already-active status toggles it off
+   * (status = null → record removed). Overrides onRecordChange for statuses.
+   */
+  onQuickToggle?: (childId: string, status: AttendanceStatus | null) => void;
   isLoading?: boolean;
 };
 
@@ -24,6 +30,7 @@ export function AttendanceTable({
   children_,
   records,
   onRecordChange,
+  onQuickToggle,
   isLoading,
 }: AttendanceTableProps) {
   const t = useTranslations("children.attendance");
@@ -98,7 +105,11 @@ export function AttendanceTable({
                           type="button"
                           variant={current?.status === option ? "default" : "outline"}
                           size="sm"
-                          onClick={() => onRecordChange(child.id, option, current?.notes ?? "")}
+                          onClick={() =>
+                            onQuickToggle
+                              ? onQuickToggle(child.id, current?.status === option ? null : option)
+                              : onRecordChange(child.id, option, current?.notes ?? "")
+                          }
                         >
                           {t(option)}
                         </Button>

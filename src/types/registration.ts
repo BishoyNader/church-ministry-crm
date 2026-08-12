@@ -41,6 +41,13 @@ export type RegistrationErrorCode =
   | "roles_required"
   | "role_not_in_church"
   | "stage_not_in_church"
+  | "service_not_in_church"
+  | "service_required"
+  | "stage_manager_single_service"
+  | "servant_single_service"
+  | "servant_stage_required"
+  | "stage_service_mismatch"
+  | "cannot_assign_manager_role"
   | "church_not_found"
   | "not_allowed"
   | "unknown";
@@ -165,6 +172,7 @@ export type RegistrationFunctions = {
       p_preferred_locale?: string | null;
       p_role_ids: string[];
       p_stage_ids?: string[] | null;
+      p_service_ids?: string[] | null;
     };
     Returns: string;
   };
@@ -230,6 +238,13 @@ const KNOWN_REGISTRATION_ERROR_CODES = new Set<RegistrationErrorCode>([
   "roles_required",
   "role_not_in_church",
   "stage_not_in_church",
+  "service_not_in_church",
+  "service_required",
+  "stage_manager_single_service",
+  "servant_single_service",
+  "servant_stage_required",
+  "stage_service_mismatch",
+  "cannot_assign_manager_role",
   "church_not_found",
   "not_allowed",
 ]);

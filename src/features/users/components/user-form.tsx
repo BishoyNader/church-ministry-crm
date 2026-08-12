@@ -35,6 +35,7 @@ import {
   useUserDetail,
   useRoles,
   useStages,
+  useServices,
   useActorChurch,
 } from "../hooks/use-users";
 import { useChurchList, useChurchDetail } from "@/features/churches/hooks/use-churches";
@@ -87,6 +88,7 @@ export function UserForm({
       churchId: churchId ?? undefined,
       roleIds: presetRoleIds ?? [],
       stageIds: [],
+      serviceIds: [],
       confirmReplaceManager: false,
     },
   });
@@ -150,9 +152,39 @@ export function UserForm({
 
   const rolesQuery = useRoles(scopeChurchId);
   const stagesQuery = useStages(scopeChurchId);
+  const servicesQuery = useServices(scopeChurchId);
 
   const roles = rolesQuery.data?.data ?? [];
   const stages = stagesQuery.data?.data ?? [];
+  const services = servicesQuery.data?.data ?? [];
+
+  // Church-scoped actors (Church Manager) can never grant the super_admin role
+  // (050): the Church Manager is a Platform Owner operation. super_admin is
+  // hidden from the role picker for church actors.
+  const assignableRoles = isPlatformOwner
+    ? roles
+    : roles.filter((role) => role.role_type !== "super_admin");
+
+  // Role-based assignment rules (050): the controls shown depend on the roles
+  // selected — admin -> multiple services, stage_manager -> one service,
+  // servant -> one service + one stage inside that service.
+  const selectedRoles = roles.filter((role) =>
+    createForm.watch("roleIds").includes(role.id),
+  );
+  const selectedRoleTypes = selectedRoles.map((role) => role.role_type);
+  const hasServantRole = selectedRoleTypes.includes("servant");
+  const hasStageManagerRole = selectedRoleTypes.includes("stage_manager");
+  const hasAdminRole = selectedRoleTypes.includes("admin");
+  const requiresService = hasServantRole || hasStageManagerRole || hasAdminRole;
+  const singleServiceMode = hasServantRole || hasStageManagerRole;
+
+  const watchedServiceIds = createForm.watch("serviceIds") ?? [];
+  const selectedServiceId =
+    singleServiceMode && watchedServiceIds.length > 0 ? watchedServiceIds[0] : null;
+  // Stage choices for a servant are limited to the selected service.
+  const serviceStages = selectedServiceId
+    ? stages.filter((stage) => stage.service_id === selectedServiceId)
+    : [];
 
   // Manager replacement warning: shown whenever this creation would replace an
   // existing Church Manager — for the PO (any selected church) and for church
@@ -394,30 +426,54 @@ export function UserForm({
                     <Skeleton key={i} className="h-9 w-full" />
                   ))}
                 </div>
-              ) : roles.length === 0 ? (
+              ) : assignableRoles.length === 0 ? (
                 <p className="text-sm text-muted-foreground">{t("noRoles")}</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
-                  {roles.map((role) => (
-                    <label
-                      key={role.id}
-                      className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"
-                    >
-                      <Checkbox
-                        checked={createForm.watch("roleIds").includes(role.id)}
-                        onCheckedChange={(checked) => {
-                          const current = createForm.getValues("roleIds");
-                          createForm.setValue(
-                            "roleIds",
-                            checked
+                <div className="space-y-1.5">
+                  {assignableRoles.map((role) => {
+                    const checked = createForm.watch("roleIds").includes(role.id);
+                    return (
+                      <label
+                        key={role.id}
+                        className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(isChecked) => {
+                            const current = createForm.getValues("roleIds");
+                            const next = isChecked
                               ? [...current, role.id]
-                              : current.filter((id) => id !== role.id),
-                          );
-                        }}
-                      />
-                      {role.name_ar}
-                    </label>
-                  ))}
+                              : current.filter((id) => id !== role.id);
+                            createForm.setValue("roleIds", next);
+                            const nextTypes = roles
+                              .filter((r) => next.includes(r.id))
+                              .map((r) => r.role_type);
+                            // Servant is the most restrictive role: leaving it
+                            // requires a clean stage + single service selection.
+                            if (!nextTypes.includes("servant")) {
+                              createForm.setValue("stageIds", []);
+                            }
+                            if (
+                              nextTypes.includes("servant") ||
+                              nextTypes.includes("stage_manager")
+                            ) {
+                              createForm.setValue("serviceIds",
+                                createForm.getValues("serviceIds")?.slice(0, 1) ?? [],
+                              );
+                            }
+                          }}
+                        />
+                        <span>
+                          <span className="font-medium">{role.name_ar}</span>
+                          {role.description_ar ? (
+                            <span className="ms-2 text-xs text-muted-foreground">
+                              {role.description_ar}
+                            </span>
+                          ) : null}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
               )}
               {createForm.formState.errors.roleIds?.message && (
@@ -425,33 +481,108 @@ export function UserForm({
               )}
             </div>
 
-            {stages.length > 0 && (
+            {requiresService ? (
               <div className="space-y-2">
-                <Label>{t("stages")}</Label>
-                <div className="flex flex-wrap gap-2">
-                  {stages.map((stage) => (
-                    <label
-                      key={stage.id}
-                      className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"
-                    >
-                      <Checkbox
-                        checked={createForm.watch("stageIds")?.includes(stage.id) ?? false}
-                        onCheckedChange={(checked) => {
-                          const current = createForm.getValues("stageIds") ?? [];
-                          createForm.setValue(
-                            "stageIds",
-                            checked
-                              ? [...current, stage.id]
-                              : current.filter((id) => id !== stage.id),
-                          );
-                        }}
-                      />
-                      {stage.name_ar}
-                    </label>
-                  ))}
-                </div>
+                <Label>
+                  {t("services")} *
+                </Label>
+                {servicesQuery.isLoading ? (
+                  <div className="space-y-2">
+                    {Array.from({ length: 2 }).map((_, i) => (
+                      <Skeleton key={i} className="h-9 w-full" />
+                    ))}
+                  </div>
+                ) : services.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t("noServices")}</p>
+                ) : singleServiceMode ? (
+                  <Select
+                    value={selectedServiceId ?? ""}
+                    onValueChange={(value) => {
+                      createForm.setValue(
+                        "serviceIds",
+                        value ? [value as string] : [],
+                      );
+                      // A changed service invalidates any previously chosen stage.
+                      createForm.setValue("stageIds", []);
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t("selectService")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {services.map((service) => (
+                        <SelectItem key={service.id} value={service.id}>
+                          {service.name_ar}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {services.map((service) => (
+                      <label
+                        key={service.id}
+                        className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                      >
+                        <Checkbox
+                          checked={watchedServiceIds.includes(service.id)}
+                          onCheckedChange={(checked) => {
+                            const current = createForm.getValues("serviceIds") ?? [];
+                            createForm.setValue(
+                              "serviceIds",
+                              checked
+                                ? [...current, service.id]
+                                : current.filter((id) => id !== service.id),
+                            );
+                          }}
+                        />
+                        {service.name_ar}
+                      </label>
+                    ))}
+                  </div>
+                )}
+                {createForm.formState.errors.serviceIds?.message && (
+                  <p className="text-xs text-destructive">{createForm.formState.errors.serviceIds.message}</p>
+                )}
+                {singleServiceMode ? (
+                  <p className="text-xs text-muted-foreground">{t("singleServiceHint")}</p>
+                ) : hasAdminRole ? (
+                  <p className="text-xs text-muted-foreground">{t("multiServiceHint")}</p>
+                ) : null}
               </div>
-            )}
+            ) : null}
+
+            {hasServantRole && selectedServiceId ? (
+              <div className="space-y-2">
+                <Label>{t("stages")} *</Label>
+                <Select
+                  value={createForm.watch("stageIds")?.[0] ?? ""}
+                  onValueChange={(value) =>
+                    createForm.setValue("stageIds", value ? [value as string] : [])
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t("selectStage")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {serviceStages.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {t("noStagesInService")}
+                      </div>
+                    ) : (
+                      serviceStages.map((stage) => (
+                        <SelectItem key={stage.id} value={stage.id}>
+                          {stage.name_ar}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {createForm.formState.errors.stageIds?.message && (
+                  <p className="text-xs text-destructive">{createForm.formState.errors.stageIds.message}</p>
+                )}
+              </div>
+            ) : null}
 
             {showManagerWarning ? (
               <div className="space-y-2 rounded-lg border border-amber-300/50 bg-amber-50 p-4 dark:bg-amber-950/20">

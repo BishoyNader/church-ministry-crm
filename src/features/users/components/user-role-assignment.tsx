@@ -14,7 +14,12 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useUserDetail, useAssignRoles, useRoles } from "../hooks/use-users";
+import {
+  useUserDetail,
+  useAssignRoles,
+  useRoles,
+  useActorChurch,
+} from "../hooks/use-users";
 
 type UserRoleAssignmentProps = {
   open: boolean;
@@ -41,6 +46,14 @@ export function UserRoleAssignment({
   const scopeChurchId = churchId ?? user?.church_id ?? null;
   const rolesQuery = useRoles(scopeChurchId);
   const roles = rolesQuery.data?.data ?? [];
+
+  const actorChurchQuery = useActorChurch();
+  const isPlatformOwner = actorChurchQuery.data?.isPlatformOwner ?? false;
+  // Church-scoped actors can never grant the super_admin (Church Manager) role
+  // (050): changing the Church Manager is a Platform Owner operation.
+  const assignableRoles = isPlatformOwner
+    ? roles
+    : roles.filter((role) => role.role_type !== "super_admin");
 
   const toggle = (roleId: string) => {
     setSelectedIds((prev) =>
@@ -72,7 +85,7 @@ export function UserRoleAssignment({
             ? Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} className="h-10 w-full" />
               ))
-            : roles.map((role) => (
+            : assignableRoles.map((role) => (
                 <label
                   key={role.id}
                   className="flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition hover:bg-muted has-[:checked]:border-primary has-[:checked]:bg-primary/5"

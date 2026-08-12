@@ -59,6 +59,8 @@ export type CreateStageInput = {
   description_en?: string;
   age_min?: number | null;
   age_max?: number | null;
+  /** Internal academic code used by the promotion engine (never shown in UI). */
+  stage_code?: string | null;
   sort_order?: number;
 };
 

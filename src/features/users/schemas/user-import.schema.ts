@@ -9,6 +9,7 @@ export const userImportRowSchema = z.object({
   phone: z.string().nullable().optional(),
   roleName: z.string().nullable().optional(),
   stageName: z.string().nullable().optional(),
+  serviceName: z.string().nullable().optional(),
 });
 
 export const previewUsersImportSchema = z.object({

@@ -32,7 +32,7 @@ import { useUserList, useDeactivateUser, useActorChurch, useExportUsers } from "
 import { PendingRegistrationsQueue } from "./pending-registrations-queue";
 import { UserForm } from "./user-form";
 import { UserRoleAssignment } from "./user-role-assignment";
-import { UserStageAssignment } from "./user-stage-assignment";
+import { UserAssignmentsDialog } from "./user-assignments-dialog";
 import { ChurchScopeSelector } from "./church-scope-selector";
 import { UserImportPanel } from "./user-import-panel";
 import type { UserListItem } from "../types/user.types";
@@ -299,8 +299,8 @@ export function UserListPage() {
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => setStagesUser(user)}
-                            aria-label={t("actions.assignStages")}
-                            title={t("actions.assignStages")}
+                            aria-label={t("actions.assignments")}
+                            title={t("actions.assignments")}
                           >
                             <Layers className="size-4" />
                           </Button>
@@ -370,7 +370,7 @@ export function UserListPage() {
       )}
 
       {stagesUser && (
-        <UserStageAssignment
+        <UserAssignmentsDialog
           open={!!stagesUser}
           onOpenChange={(open) => { if (!open) setStagesUser(null); }}
           userId={stagesUser.id}

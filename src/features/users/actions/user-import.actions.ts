@@ -20,6 +20,7 @@ import {
   buildUserImportTemplate,
   CHURCH_MANAGER_CONFLICT_MESSAGE,
   type UserImportRoleOption,
+  type UserImportServiceOption,
   type UserImportStageOption,
 } from "../services/user-import.service";
 import type {
@@ -44,6 +45,7 @@ async function loadChurchCatalog(
 ): Promise<{
   roleOptions: UserImportRoleOption[];
   stageOptions: UserImportStageOption[];
+  serviceOptions: UserImportServiceOption[];
   existingEmails: string[];
   activeSuperAdminExists: boolean;
 } | null> {
@@ -52,10 +54,11 @@ async function loadChurchCatalog(
 
   const db = dataClientFor(ctx);
 
-  const [rolesResult, stagesResult, profilesResult, managerGrants] =
+  const [rolesResult, stagesResult, servicesResult, profilesResult, managerGrants] =
     await Promise.all([
       userService.listRoles(db, churchId),
       userService.listStages(db, churchId),
+      userService.listServices(db, churchId),
       db
         .from("profiles")
         .select("email")
@@ -72,7 +75,7 @@ async function loadChurchCatalog(
         .limit(1),
     ]);
 
-  if (rolesResult.error || stagesResult.error) return null;
+  if (rolesResult.error || stagesResult.error || servicesResult.error) return null;
 
   const roleOptions: UserImportRoleOption[] = (rolesResult.data ?? []).map(
     (role) => ({
@@ -91,13 +94,27 @@ async function loadChurchCatalog(
     }),
   );
 
+  const serviceOptions: UserImportServiceOption[] = (servicesResult.data ?? []).map(
+    (service) => ({
+      id: service.id,
+      name_ar: service.name_ar ?? null,
+      name_en: service.name_en ?? null,
+    }),
+  );
+
   const existingEmails = (profilesResult.data ?? [])
     .map((p) => p.email)
     .filter((email): email is string => typeof email === "string" && email.length > 0);
 
   const activeSuperAdminExists = (managerGrants.data?.length ?? 0) > 0;
 
-  return { roleOptions, stageOptions, existingEmails, activeSuperAdminExists };
+  return {
+    roleOptions,
+    stageOptions,
+    serviceOptions,
+    existingEmails,
+    activeSuperAdminExists,
+  };
 }
 
 export async function previewUsersImportAction(
@@ -138,6 +155,7 @@ export async function previewUsersImportAction(
     catalog.stageOptions,
     catalog.existingEmails,
     { activeSuperAdminExists: catalog.activeSuperAdminExists },
+    catalog.serviceOptions,
   );
 
   return {
@@ -201,13 +219,15 @@ export async function importUsersAction(
     phone: row.phone ?? null,
     roleName: row.roleName ?? null,
     stageName: row.stageName ?? null,
+    serviceName: row.serviceName ?? null,
   }));
 
   for (const row of rows) {
-    const { roleIds, stageIds } = resolveUserImportRow(
+    const { roleIds, stageIds, serviceIds: serviceIdsFromName } = resolveUserImportRow(
       row,
       catalog.roleOptions,
       catalog.stageOptions,
+      catalog.serviceOptions,
     );
 
     if (roleIds.length === 0) {
@@ -268,6 +288,20 @@ export async function importUsersAction(
 
     const userId = authData.user.id;
 
+    // Service assignments come from the service column, falling back to the
+    // resolved stage(s) so imports keep working under the 050 role rules (a
+    // servant's stage implies its service). Unique service ids are passed.
+    let serviceIds: string[] = serviceIdsFromName;
+    if (serviceIds.length === 0 && stageIds.length > 0) {
+      const { data: stageRows } = await ctx.admin
+        .from("stages")
+        .select("service_id")
+        .in("id", stageIds);
+      serviceIds = [
+        ...new Set((stageRows ?? []).map((s) => s.service_id as string)),
+      ];
+    }
+
     const { error: rpcError } = await ctx.supabase.rpc<
       "create_church_user",
       RegistrationFunctions["create_church_user"]["Args"]
@@ -281,6 +315,7 @@ export async function importUsersAction(
       p_preferred_locale: "ar",
       p_role_ids: roleIds,
       p_stage_ids: stageIds.length > 0 ? stageIds : null,
+      p_service_ids: serviceIds.length > 0 ? serviceIds : null,
     });
 
     if (rpcError) {
@@ -291,7 +326,15 @@ export async function importUsersAction(
           ? "invalid_role"
           : mapped.code === "stage_not_in_church"
             ? "invalid_stage"
-            : "rpc_failure";
+            : mapped.code === "service_not_in_church"
+              ? "invalid_service"
+              : mapped.code === "service_required" ||
+                  mapped.code === "stage_manager_single_service" ||
+                  mapped.code === "servant_single_service" ||
+                  mapped.code === "servant_stage_required" ||
+                  mapped.code === "stage_service_mismatch"
+                ? "service_required"
+                : "rpc_failure";
       failures.push({
         rowNumber: row.rowNumber,
         email: row.email,

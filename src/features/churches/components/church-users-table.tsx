@@ -44,7 +44,7 @@ import {
 } from "@/features/users/hooks/use-users";
 import { UserForm } from "@/features/users/components/user-form";
 import { UserRoleAssignment } from "@/features/users/components/user-role-assignment";
-import { UserStageAssignment } from "@/features/users/components/user-stage-assignment";
+import { UserAssignmentsDialog } from "@/features/users/components/user-assignments-dialog";
 import { UserImportPanel } from "@/features/users/components/user-import-panel";
 import type { UserListItem } from "@/features/users/types/user.types";
 import { useChurchDetail } from "../hooks/use-churches";
@@ -80,7 +80,7 @@ export function ChurchUsersTable({ churchId }: ChurchUsersTableProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editUser, setEditUser] = useState<UserListItem | null>(null);
   const [rolesUser, setRolesUser] = useState<UserListItem | null>(null);
-  const [stagesUser, setStagesUser] = useState<UserListItem | null>(null);
+  const [assignmentsUser, setAssignmentsUser] = useState<UserListItem | null>(null);
   const [deactivateUser, setDeactivateUser] = useState<UserListItem | null>(null);
   const [changeManagerOpen, setChangeManagerOpen] = useState(false);
 
@@ -291,7 +291,7 @@ export function ChurchUsersTable({ churchId }: ChurchUsersTableProps) {
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          onClick={() => setStagesUser(user)}
+                          onClick={() => setAssignmentsUser(user)}
                           aria-label={ut("actions.assignStages")}
                           title={ut("actions.assignStages")}
                         >
@@ -361,13 +361,13 @@ export function ChurchUsersTable({ churchId }: ChurchUsersTableProps) {
         />
       )}
 
-      {stagesUser && (
-        <UserStageAssignment
-          open={!!stagesUser}
+      {assignmentsUser && (
+        <UserAssignmentsDialog
+          open={!!assignmentsUser}
           onOpenChange={(open) => {
-            if (!open) setStagesUser(null);
+            if (!open) setAssignmentsUser(null);
           }}
-          userId={stagesUser.id}
+          userId={assignmentsUser.id}
           churchId={churchId}
         />
       )}

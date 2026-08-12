@@ -28,8 +28,8 @@ export function SpiritualJournalPage() {
   const [view, setView] = useState<"mine" | "overview">("mine");
 
   const { data: accessState } = useAccessState();
-  const isSuperAdmin = (accessState?.roles ?? []).some(
-    (role) => role.role_type === "super_admin",
+  const isChurchViewer = (accessState?.roles ?? []).some(
+    (role) => role.role_type === "super_admin" || role.role_type === "admin",
   );
 
   const { data, isLoading, error } = useSpiritualJournalList({ page, pageSize });
@@ -81,7 +81,7 @@ export function SpiritualJournalPage() {
         description={t("description")}
         actions={
           <div className="flex items-center gap-2">
-            {isSuperAdmin ? (
+            {isChurchViewer ? (
               <div className="flex items-center gap-1 rounded-lg border bg-muted p-1">
                 <Button
                   type="button"
@@ -118,7 +118,7 @@ export function SpiritualJournalPage() {
         }
       />
 
-      {view === "overview" && isSuperAdmin ? (
+      {view === "overview" && isChurchViewer ? (
         <SpiritualJournalOverview onBack={() => setView("mine")} />
       ) : error ? (
         <ErrorState title={t("loadError")} message={error.message} />

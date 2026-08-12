@@ -96,6 +96,10 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
         return t("failure.invalidRole");
       case "invalid_stage":
         return t("failure.invalidStage");
+      case "invalid_service":
+        return t("failure.invalidService");
+      case "service_required":
+        return t("failure.serviceRequired");
       case "manager_conflict":
         return t("failure.managerConflict");
       case "auth_failed":
@@ -332,6 +336,12 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
                   ) : null}
                   {summary.unknownStages > 0 ? (
                     <li>{t("unknownStages", { count: summary.unknownStages })}</li>
+                  ) : null}
+                  {summary.unknownServices > 0 ? (
+                    <li>{t("unknownServices", { count: summary.unknownServices })}</li>
+                  ) : null}
+                  {summary.serviceRequired > 0 ? (
+                    <li>{t("serviceRequired", { count: summary.serviceRequired })}</li>
                   ) : null}
                   {summary.managerConflicts > 0 ? (
                     <li>{t("managerConflicts", { count: summary.managerConflicts })}</li>

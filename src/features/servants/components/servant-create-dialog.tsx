@@ -73,6 +73,11 @@ export function ServantCreateDialog({
   const selectedRoleId = useWatch({ control: form.control, name: "roleId" });
   const selectedRole = roles.find((role) => role.id === selectedRoleId);
   const isStageManager = selectedRole?.role_type === "stage_manager";
+  const isServant = selectedRole?.role_type === "servant";
+  const isAdmin = selectedRole?.role_type === "admin";
+  // 050 rules: admin / stage_manager / servant all need a service; only the
+  // servant additionally needs a stage (inside that service).
+  const requiresService = isStageManager || isServant || isAdmin;
 
   const selectedServiceId = useWatch({ control: form.control, name: "serviceId" });
   const serviceStages = selectedServiceId
@@ -85,8 +90,8 @@ export function ServantCreateDialog({
   const handleRoleChange = (roleId: unknown) => {
     if (typeof roleId !== "string") return;
     form.setValue("roleId", roleId);
-    // Stage manager binding is role-specific; clear any stale selection when
-    // the role changes.
+    // Assignment requirements are role-specific; clear any stale selection
+    // when the role changes.
     form.setValue("serviceId", undefined);
     form.setValue("stageId", undefined);
   };
@@ -222,67 +227,67 @@ export function ServantCreateDialog({
               </Select>
             </FormField>
 
-            {isStageManager ? (
-              <>
-                <FormField
-                  label={t("service")}
-                  error={form.formState.errors.serviceId?.message}
-                  required
+            {requiresService ? (
+              <FormField
+                label={t("service")}
+                error={form.formState.errors.serviceId?.message}
+                required
+              >
+                <Select
+                  value={selectedServiceId ?? ""}
+                  onValueChange={handleServiceChange}
                 >
-                  <Select
-                    value={selectedServiceId ?? ""}
-                    onValueChange={handleServiceChange}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("servicePlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {services.length === 0 ? (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                          {t("noServices")}
-                        </div>
-                      ) : (
-                        services.map((service) => (
-                          <SelectItem key={service.id} value={service.id}>
-                            {service.name_ar}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </FormField>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("servicePlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {services.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {t("noServices")}
+                      </div>
+                    ) : (
+                      services.map((service) => (
+                        <SelectItem key={service.id} value={service.id}>
+                          {service.name_ar}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormField>
+            ) : null}
 
-                <FormField
-                  label={t("stage")}
-                  error={form.formState.errors.stageId?.message}
-                  required
+            {isServant ? (
+              <FormField
+                label={t("stage")}
+                error={form.formState.errors.stageId?.message}
+                required
+              >
+                <Select
+                  value={selectedStageId ?? ""}
+                  onValueChange={(value) => {
+                    if (typeof value === "string") form.setValue("stageId", value);
+                  }}
+                  disabled={!selectedServiceId}
                 >
-                  <Select
-                    value={selectedStageId ?? ""}
-                    onValueChange={(value) => {
-                      if (typeof value === "string") form.setValue("stageId", value);
-                    }}
-                    disabled={!selectedServiceId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t("stagePlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {!selectedServiceId || serviceStages.length === 0 ? (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">
-                          {t("noStages")}
-                        </div>
-                      ) : (
-                        serviceStages.map((stage) => (
-                          <SelectItem key={stage.id} value={stage.id}>
-                            {stage.name_ar}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
-                </FormField>
-              </>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("stagePlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {!selectedServiceId || serviceStages.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        {t("noStages")}
+                      </div>
+                    ) : (
+                      serviceStages.map((stage) => (
+                        <SelectItem key={stage.id} value={stage.id}>
+                          {stage.name_ar}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormField>
             ) : null}
 
             {submitError ? (

@@ -9,8 +9,10 @@ import {
   deactivateUserAction,
   assignRolesAction,
   assignStagesAction,
+  assignServicesAction,
   getRolesAction,
   getStagesAction,
+  getServicesAction,
   getActorChurchAction,
   exportUsersAction,
 } from "../actions/user.actions";
@@ -29,6 +31,7 @@ export const USER_QUERY_KEYS = {
   detail: (id: string) => ["users", "detail", id] as const,
   roles: (churchId: string) => ["users", "roles", churchId] as const,
   stages: (churchId: string) => ["users", "stages", churchId] as const,
+  services: (churchId: string) => ["users", "services", churchId] as const,
 };
 
 export function useActorChurch() {
@@ -177,6 +180,28 @@ export function useAssignStages() {
   });
 }
 
+export function useAssignServices() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      serviceIds,
+      churchId,
+    }: {
+      userId: string;
+      serviceIds: string[];
+      churchId?: string;
+    }) => assignServicesAction(userId, serviceIds, churchId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: USER_QUERY_KEYS.all });
+      queryClient.invalidateQueries({
+        queryKey: USER_QUERY_KEYS.detail(variables.userId),
+      });
+    },
+  });
+}
+
 export function useRoles(churchId: string | null) {
   return useQuery({
     queryKey: USER_QUERY_KEYS.roles(churchId ?? ""),
@@ -210,6 +235,21 @@ export function useStages(churchId: string | null) {
       const result = await getStagesAction(churchId!);
       if (!result.success) {
         throw new Error(result.message ?? "Failed to load stages.");
+      }
+      return result;
+    },
+    enabled: !!churchId,
+    staleTime: 60_000,
+  });
+}
+
+export function useServices(churchId: string | null) {
+  return useQuery({
+    queryKey: USER_QUERY_KEYS.services(churchId ?? ""),
+    queryFn: async () => {
+      const result = await getServicesAction(churchId!);
+      if (!result.success) {
+        throw new Error(result.message ?? "Failed to load services.");
       }
       return result;
     },

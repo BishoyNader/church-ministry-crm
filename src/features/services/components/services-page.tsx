@@ -24,6 +24,7 @@ import { Link } from "@/i18n/navigation";
 import { useServiceList, useRestoreService } from "../hooks/use-services";
 import { ServiceFormDialog } from "./service-form-dialog";
 import { DeleteServiceDialog } from "./delete-service-dialog";
+import { ACADEMIC_PRESETS } from "../constants/presets";
 import type { ServiceListItem, ServiceStatusFilter } from "../types/services.types";
 
 const PAGE_SIZE = 20;
@@ -171,7 +172,17 @@ export function ServicesPage() {
                 {rows.map((service) => (
                   <tr key={service.id} className="align-middle">
                     <td className="px-4 py-3">
-                      <p className="font-medium">{service.name_ar}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium">{service.name_ar}</p>
+                        {service.service_type &&
+                        service.service_type in ACADEMIC_PRESETS ? (
+                          <Badge variant="outline" className="text-xs">
+                            {ACADEMIC_PRESETS[
+                              service.service_type as keyof typeof ACADEMIC_PRESETS
+                            ].name_ar}
+                          </Badge>
+                        ) : null}
+                      </div>
                       {service.name_en ? (
                         <p className="text-xs text-muted-foreground">{service.name_en}</p>
                       ) : null}

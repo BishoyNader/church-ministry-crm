@@ -217,6 +217,8 @@ export async function createService(
         description_ar: input.description_ar ?? null,
         description_en: input.description_en ?? null,
         sort_order: input.sort_order ?? 0,
+        service_type: input.service_type ?? null,
+        next_service_id: input.next_service_id ?? null,
       })
       .select("id")
       .single();
@@ -247,6 +249,7 @@ export async function updateService(
         description_en: input.description_en ?? null,
         sort_order: input.sort_order,
         is_active: input.is_active,
+        next_service_id: input.next_service_id ?? null,
       })
       .eq("id", serviceId)
       .eq("church_id", churchId);

@@ -4,6 +4,7 @@ import { runAbsenceScan } from "./absence-scan.service";
 import { runApprovalScan } from "./approval-scan.service";
 import { runBirthdayScan } from "./birthday-scan.service";
 import { runFollowupScan } from "./followup-scan.service";
+import { runPromotionReminderScan } from "./promotion-reminder-scan.service";
 import {
   type NotificationScanResult,
   type NotificationScanSummary,
@@ -58,13 +59,15 @@ export async function runNotificationScheduler(
   let absence: NotificationScanResult = emptyScanResult();
   let followup: NotificationScanResult = emptyScanResult();
   let approval: NotificationScanResult = emptyScanResult();
+  let promotion: NotificationScanResult = emptyScanResult();
 
   try {
-    [birthday, absence, followup, approval] = await Promise.all([
+    [birthday, absence, followup, approval, promotion] = await Promise.all([
       runBirthdayScan(now),
       runAbsenceScan(now),
       runFollowupScan(now),
       runApprovalScan(now, thresholdDays),
+      runPromotionReminderScan(now),
     ]);
   } catch (error) {
     await writeSchedulerAudit(admin, {
@@ -74,12 +77,12 @@ export async function runNotificationScheduler(
       thresholdDays,
       status: "failed",
       error: error instanceof Error ? error.message : "Unknown failure",
-      scans: { birthday, absence, followup, approval },
+      scans: { birthday, absence, followup, approval, promotion },
     });
     throw error;
   }
 
-  const scans: NotificationScanSummary = { birthday, absence, followup, approval };
+  const scans: NotificationScanSummary = { birthday, absence, followup, approval, promotion };
 
   await writeSchedulerAudit(admin, {
     runId,
@@ -126,6 +129,7 @@ async function writeSchedulerAudit(
         absence: input.scans.absence,
         followup: input.scans.followup,
         approval: input.scans.approval,
+        promotion: input.scans.promotion,
       },
     });
   } catch {

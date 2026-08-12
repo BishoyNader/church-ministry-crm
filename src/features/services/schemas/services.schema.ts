@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { SERVICE_TYPE_KEYS } from "../constants/presets";
+
+export const serviceTypeSchema = z.enum(SERVICE_TYPE_KEYS);
 
 export const createServiceSchema = z.object({
   name_ar: z.string().min(2, { message: "Arabic name is required" }),
@@ -6,6 +9,10 @@ export const createServiceSchema = z.object({
   description_ar: z.string().optional(),
   description_en: z.string().optional(),
   sort_order: z.number().int().min(0).optional(),
+  /** Academic preset the service was created from (informational only). */
+  service_type: serviceTypeSchema.optional(),
+  /** Explicit promotion destination service (configured progression). */
+  next_service_id: z.string().uuid().nullable().optional(),
 });
 
 export const updateServiceSchema = z.object({
@@ -15,6 +22,7 @@ export const updateServiceSchema = z.object({
   description_en: z.string().optional(),
   sort_order: z.number().int().min(0),
   is_active: z.boolean(),
+  next_service_id: z.string().uuid().nullable().optional(),
 });
 
 /**
@@ -46,6 +54,8 @@ export const stageInputSchema = z.object({
   description_en: z.string().optional(),
   age_min: optionalAge(),
   age_max: optionalAge(),
+  /** Internal academic code used by the promotion engine (never shown in UI). */
+  stage_code: z.string().trim().max(40).optional(),
 });
 
 /**

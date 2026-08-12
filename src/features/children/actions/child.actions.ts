@@ -13,6 +13,7 @@ import {
   transferChildSchema,
   createAttendanceSchema,
   batchAttendanceSchema,
+  toggleAttendanceSchema,
   createFollowupSchema,
   updateFollowupSchema,
   uuidParamSchema,
@@ -23,6 +24,7 @@ import type {
   TransferChildFormValues,
   CreateAttendanceFormValues,
   BatchAttendanceFormValues,
+  ToggleAttendanceFormValues,
   CreateFollowupFormValues,
   UpdateFollowupFormValues,
 } from "../schemas/child.schema";
@@ -641,6 +643,72 @@ export async function createAttendanceAction(
   return {
     success: true,
     message: "Attendance recorded.",
+    data: result.data ?? undefined,
+  };
+}
+
+export async function toggleAttendanceAction(
+  values: ToggleAttendanceFormValues,
+): Promise<ChildActionResult<boolean>> {
+  try {
+    toggleAttendanceSchema.parse(values);
+  } catch (error) {
+    return handleZodError(error);
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.ATTENDANCE_CREATE))) {
+    return { success: false, message: "You do not have permission to record attendance." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const { scope, message } = await getStageScope(supabase, profile.church_id, user.id);
+  if (!scope) {
+    return { success: false, message: message ?? "Failed to resolve stage scope." };
+  }
+
+  if (!isStageInScope(scope, values.stage_id)) {
+    return { success: false, message: "You do not have permission to record attendance for this stage." };
+  }
+
+  const result = await childService.toggleAttendance(supabase, {
+    beneficiary_id: values.beneficiary_id,
+    stage_id: values.stage_id,
+    service_id: values.service_id,
+    attendance_date: values.attendance_date,
+    status: values.status,
+  });
+
+  if (result.error) {
+    return { success: false, message: result.error };
+  }
+
+  await writeAuditLog(supabase, values.status ? "update" : "delete", "attendance", values.beneficiary_id, undefined, {
+    beneficiary_id: values.beneficiary_id,
+    stage_id: values.stage_id,
+    status: values.status ?? "removed",
+  });
+
+  return {
+    success: true,
+    message: values.status ? "Attendance updated." : "Attendance removed.",
     data: result.data ?? undefined,
   };
 }
