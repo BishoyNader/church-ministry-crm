@@ -38,16 +38,21 @@ CREATE TABLE IF NOT EXISTS servant_service_assignments (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_ssa_servant_active
+-- Idempotent (IF NOT EXISTS / DROP POLICY IF EXISTS): the table and its
+-- indexes may already exist when this migration is (re)applied after an
+-- interrupted/out-of-band apply — a failed push must be retryable.
+CREATE INDEX IF NOT EXISTS idx_ssa_servant_active
   ON servant_service_assignments (church_id, servant_id, is_active);
-CREATE INDEX idx_ssa_service
+CREATE INDEX IF NOT EXISTS idx_ssa_service
   ON servant_service_assignments (service_id);
 
 ALTER TABLE servant_service_assignments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS tenant_isolation ON servant_service_assignments;
 CREATE POLICY tenant_isolation ON servant_service_assignments
   FOR SELECT USING (church_id = get_user_church_id());
 
+DROP POLICY IF EXISTS assignment_write ON servant_service_assignments;
 CREATE POLICY assignment_write ON servant_service_assignments
   FOR ALL
   USING (
@@ -59,6 +64,7 @@ CREATE POLICY assignment_write ON servant_service_assignments
     AND user_has_permission_in_church('servants.assign', church_id)
   );
 
+DROP POLICY IF EXISTS admin_write ON servant_service_assignments;
 CREATE POLICY admin_write ON servant_service_assignments
   FOR ALL USING (user_is_admin(church_id))
   WITH CHECK (user_is_admin(church_id) AND church_id = get_user_church_id());
@@ -73,9 +79,18 @@ CREATE POLICY admin_write ON servant_service_assignments
 -- the ONLY create_church_user that exists after this migration.
 -- ============================================================================
 
-REVOKE ALL ON FUNCTION create_church_user(
-  uuid, uuid, text, text, uuid[], text, text, text, uuid[]
-) FROM PUBLIC, anon, authenticated, service_role;
+-- REVOKE on a missing function raises undefined_function, so guard it: an
+-- out-of-band apply may already have dropped the old overload.
+DO $$
+BEGIN
+  BEGIN
+    REVOKE ALL ON FUNCTION create_church_user(
+      uuid, uuid, text, text, uuid[], text, text, text, uuid[]
+    ) FROM PUBLIC, anon, authenticated, service_role;
+  EXCEPTION WHEN undefined_function THEN
+    NULL;
+  END;
+END $$;
 
 DROP FUNCTION IF EXISTS create_church_user(
   uuid, uuid, text, text, uuid[], text, text, text, uuid[]
@@ -359,9 +374,18 @@ $$;
 -- PART 3 — RPC privilege lockdown (new signature)
 -- ============================================================================
 
-REVOKE ALL ON FUNCTION create_church_user(
-  uuid, uuid, text, text, uuid[], text, text, text, uuid[], uuid[]
-) FROM PUBLIC, anon, authenticated, service_role;
+-- REVOKE on a missing function raises undefined_function, so guard it: the
+-- 10-arg signature may not exist yet on a partially-applied database.
+DO $$
+BEGIN
+  BEGIN
+    REVOKE ALL ON FUNCTION create_church_user(
+      uuid, uuid, text, text, uuid[], text, text, text, uuid[], uuid[]
+    ) FROM PUBLIC, anon, authenticated, service_role;
+  EXCEPTION WHEN undefined_function THEN
+    NULL;
+  END;
+END $$;
 
 GRANT EXECUTE ON FUNCTION create_church_user(
   uuid, uuid, text, text, uuid[], text, text, text, uuid[], uuid[]
