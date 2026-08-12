@@ -396,14 +396,17 @@
       "managerWarningTitle": "Church Manager replacement",
       "managerWarning": "This will replace the current Church Manager with the new Church Manager.",
       "confirmReplaceManager": "I understand — replace the current Church Manager",
-      "noChurches": "No churches available."
+      "noChurches": "No churches available.",
+      "singleRoleHint": "Select a single primary role for this servant."
     },
     "roles": {
       "title": "Manage Roles",
       "description": "Assign roles for {name}.",
       "save": "Save roles",
       "cancel": "Cancel",
-      "processing": "Saving…"
+      "processing": "Saving…",
+      "singleRoleHint": "Select one primary role.",
+      "protectedRoleNotice": "This user holds the Church Manager role, which can only be changed by the Platform Owner."
     },
     "stages": {
       "title": "Manage Stage Assignments",
