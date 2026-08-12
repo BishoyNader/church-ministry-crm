@@ -378,16 +378,24 @@ export async function createAttendance(
       return { data: null, error: sessionError.message };
     }
 
+    // Idempotent write (data-integrity invariant): the SAME beneficiary can
+    // never hold two records in one session. A plain INSERT would raise 23505
+    // when a status is re-saved; an upsert on the 048/055 unique constraint
+    // (session_id, beneficiary_id) UPDATES the existing record instead, so
+    // غائب → حاضر converges to exactly one row.
     const { data, error } = await supabase
       .from("attendance_records")
-      .insert({
-        church_id: profile.church_id,
-        session_id: session.id,
-        beneficiary_id: input.beneficiary_id,
-        status: input.status,
-        notes: input.notes ?? null,
-        recorded_by: user.id,
-      })
+      .upsert(
+        {
+          church_id: profile.church_id,
+          session_id: session.id,
+          beneficiary_id: input.beneficiary_id,
+          status: input.status,
+          notes: input.notes ?? null,
+          recorded_by: user.id,
+        },
+        { onConflict: "session_id,beneficiary_id" },
+      )
       .select("id")
       .single();
 
@@ -416,6 +424,7 @@ export async function toggleAttendance(
     service_id: string;
     attendance_date: string;
     status: "present" | "absent" | "excused" | null;
+    notes?: string | null;
   },
 ): Promise<ServiceResult<boolean>> {
   try {
@@ -476,7 +485,7 @@ export async function toggleAttendance(
           session_id: session.id,
           beneficiary_id: input.beneficiary_id,
           status: input.status,
-          notes: null,
+          notes: input.notes ?? null,
           recorded_by: user.id,
         },
         { onConflict: "session_id,beneficiary_id" },

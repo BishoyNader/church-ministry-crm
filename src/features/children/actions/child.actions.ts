@@ -694,6 +694,7 @@ export async function toggleAttendanceAction(
     service_id: values.service_id,
     attendance_date: values.attendance_date,
     status: values.status,
+    notes: values.notes ?? null,
   });
 
   if (result.error) {

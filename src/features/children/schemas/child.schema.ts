@@ -85,6 +85,7 @@ export const toggleAttendanceSchema = z.object({
   service_id: z.string().uuid({ message: "Service is required" }),
   attendance_date: z.string().regex(isoDateRegex, { message: "Date must be in YYYY-MM-DD format" }),
   status: z.enum(["present", "absent", "excused"]).nullable(),
+  notes: z.string().max(500).optional().nullable(),
 });
 
 export const createFollowupSchema = z.object({

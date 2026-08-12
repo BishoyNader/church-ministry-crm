@@ -97,11 +97,17 @@ export function AttendancePage() {
   const hasRecords = Object.keys(records).length > 0;
 
   const handleQuickToggle = useCallback(
-    (childId: string, status: AttendanceRecord["status"] | null) => {
+    (childId: string, status: AttendanceRecord["status"] | null, notes?: string) => {
       if (!stageId) return;
       const stage = stages.find((s) => s.id === stageId);
       const sid = stage?.service_id ?? serviceId;
-      if (!sid) return;
+      if (!sid) {
+        // Never fail silently: an unresolved service means the write cannot
+        // be attributed to a valid session — surface it instead of doing
+        // nothing (which previously forced a page refresh to recover).
+        setSaveError(tAttendance("selectServiceFirst"));
+        return;
+      }
       setSaveError(null);
       toggleMutation.mutate(
         {
@@ -110,6 +116,7 @@ export function AttendancePage() {
           service_id: sid,
           attendance_date: date,
           status,
+          notes: notes || null,
         },
         {
           onSuccess: (result) => {
@@ -117,6 +124,9 @@ export function AttendancePage() {
               setSaveError(result.message ?? tAttendance("saveError"));
               return;
             }
+            // Local edits are cleared so the table reflects server truth;
+            // the query invalidation below refetches the current (stage,
+            // date) session data.
             setUserRecords({});
           },
         },
@@ -149,7 +159,11 @@ export function AttendancePage() {
 
     if (!result.success) {
       setSaveError(result.message ?? tAttendance("saveError"));
+      return;
     }
+    // Drop local edits so the next date/stage switch starts from a clean
+    // slate; the invalidation in the mutation refetches the saved session.
+    setUserRecords({});
   };
 
   if (loadError) {
@@ -244,25 +258,31 @@ export function AttendancePage() {
           {isAdmin ? (
             <p className="text-xs text-muted-foreground">{tAttendance("oneTapHint")}</p>
           ) : null}
+          {/* key forces a fresh table for every (stage, date) selection so no
+              stale row/input state survives a date switch — the screen always
+              represents the selected combination without a page refresh. */}
           <AttendanceTable
+            key={`${stageId}-${date}`}
             children_={children}
             records={records}
             onRecordChange={handleRecordChange}
             onQuickToggle={isAdmin ? handleQuickToggle : undefined}
           />
 
-          <div className="flex items-center justify-end">
-            <PermissionGuard permission="attendance.create">
-              <Button
-                onClick={handleSave}
-                disabled={!hasRecords || batchMutation.isPending}
-              >
-                {batchMutation.isPending
-                  ? tAttendance("saving")
-                  : tAttendance("saveAttendance")}
-              </Button>
-            </PermissionGuard>
-          </div>
+          {!isAdmin ? (
+            <div className="flex items-center justify-end">
+              <PermissionGuard permission="attendance.create">
+                <Button
+                  onClick={handleSave}
+                  disabled={!hasRecords || batchMutation.isPending}
+                >
+                  {batchMutation.isPending
+                    ? tAttendance("saving")
+                    : tAttendance("saveAttendance")}
+                </Button>
+              </PermissionGuard>
+            </div>
+          ) : null}
         </>
       )}
     </section>

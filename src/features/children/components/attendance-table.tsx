@@ -20,9 +20,11 @@ type AttendanceTableProps = {
   /**
    * When provided (admin one-tap mode), clicking a status button persists that
    * status immediately; clicking the already-active status toggles it off
-   * (status = null → record removed). Overrides onRecordChange for statuses.
+   * (status = null → record removed). The optional `notes` are persisted with
+   * the status, so typed notes are not lost when a status is saved. Overrides
+   * onRecordChange for statuses.
    */
-  onQuickToggle?: (childId: string, status: AttendanceStatus | null) => void;
+  onQuickToggle?: (childId: string, status: AttendanceStatus | null, notes?: string) => void;
   isLoading?: boolean;
 };
 
@@ -107,7 +109,11 @@ export function AttendanceTable({
                           size="sm"
                           onClick={() =>
                             onQuickToggle
-                              ? onQuickToggle(child.id, current?.status === option ? null : option)
+                              ? onQuickToggle(
+                                  child.id,
+                                  current?.status === option ? null : option,
+                                  current?.notes ?? "",
+                                )
                               : onRecordChange(child.id, option, current?.notes ?? "")
                           }
                         >
@@ -127,6 +133,13 @@ export function AttendanceTable({
                           e.target.value,
                         )
                       }
+                      onBlur={(e) => {
+                        // One-tap mode: persist a note edit once the input
+                        // loses focus (when a status already exists).
+                        if (onQuickToggle && current?.status) {
+                          onQuickToggle(child.id, current.status, e.target.value);
+                        }
+                      }}
                       className="h-8"
                     />
                   </td>
