@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/notifications",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/annual-promotion",
+      "schedule": "0 2 11 9 *"
     }
   ]
 }

@@ -37,6 +37,7 @@
     "stages": "Stages",
     "users": "Users",
     "servants": "Servants",
+    "servantRecords": "Servant Records",
     "spiritualJournal": "Spiritual Journal",
     "notifications": "Notifications",
     "importExport": "Import / Export",
@@ -52,7 +53,8 @@
     "toggleMenu": "Toggle navigation menu",
     "toggleTheme": "Toggle theme",
     "signOut": "Sign out",
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "promotions": "Annual Promotion"
   },
   "spiritualJournal": {
     "title": "Spiritual Journal",
@@ -383,6 +385,13 @@
       "loadingChurches": "Loading churches…",
       "selectChurchFirst": "Select a church first to choose roles and stages.",
       "noRoles": "No roles are available for this church.",
+      "services": "Service assignments",
+      "selectService": "Select a service",
+      "noServices": "No services are available for this church.",
+      "singleServiceHint": "This role is assigned to exactly one service.",
+      "multiServiceHint": "This role may serve multiple services.",
+      "selectStage": "Select a stage",
+      "noStagesInService": "No stages available for this service.",
       "managerWarningTitle": "Church Manager replacement",
       "managerWarning": "This will replace the current Church Manager with the new Church Manager.",
       "confirmReplaceManager": "I understand — replace the current Church Manager",
@@ -403,6 +412,28 @@
       "cancel": "Cancel",
       "processing": "Saving…"
     },
+    "assignments": {
+      "title": "Manage Assignments",
+      "description": "Manage service and stage assignments for {name}.",
+      "services": "Service assignments",
+      "noServices": "No active services available.",
+      "selectService": "Select a service…",
+      "singleServiceHint": "This role is assigned to exactly one service.",
+      "multiServiceHint": "This role may serve multiple services.",
+      "stages": "Stage assignment",
+      "selectStage": "Select a stage…",
+      "noStagesInService": "No stages available for this service.",
+      "stageHint": "A servant is assigned to exactly one stage within their service.",
+      "noAssignmentsNeeded": "This role manages the whole church and does not need service or stage assignments.",
+      "serviceRequired": "A service assignment is required for this role.",
+      "servantSingleService": "A servant must be assigned to exactly one service.",
+      "stageManagerSingleService": "A stage manager must be assigned to exactly one service.",
+      "stageRequired": "A servant must be assigned to exactly one stage.",
+      "saveError": "Failed to save assignments.",
+      "save": "Save assignments",
+      "cancel": "Cancel",
+      "processing": "Saving…"
+    },
     "deactivate": {
       "title": "Deactivate User",
       "description": "Are you sure you want to deactivate {name}? They will lose access to the system.",
@@ -413,7 +444,7 @@
     "actions": {
       "edit": "Edit user",
       "changeRole": "Change role",
-      "assignStages": "Assign stages",
+      "assignments": "Assign services & stages",
       "deactivate": "Deactivate"
     },
     "approvalQueue": {
@@ -477,6 +508,8 @@
       "missingRequired": "{count} rows are missing required fields.",
       "unknownRoles": "{count} rows reference an unknown role.",
       "unknownStages": "{count} rows reference an unknown stage.",
+      "unknownServices": "{count} rows reference an unknown service.",
+      "serviceRequired": "{count} rows are missing a service assignment for their role.",
       "managerConflicts": "{count, plural, =1 {# Church Manager row was rejected — this church already has a Church Manager} other {# Church Manager rows were rejected — this church already has a Church Manager}}",
       "showingFirst": "Showing the first {count} additional rows…",
       "downloadErrorsCsv": "Download errors (CSV)",
@@ -491,6 +524,8 @@
         "duplicate": "An account already exists for this email.",
         "invalidRole": "Role not found in this church.",
         "invalidStage": "Stage not found in this church.",
+        "invalidService": "Service not found in this church.",
+        "serviceRequired": "This role requires a service assignment.",
         "managerConflict": "The church already has a Church Manager; the manager is assigned from Church Management, not a spreadsheet.",
         "authFailed": "Failed to create the account.",
         "rpcFailure": "The account could not be provisioned.",
@@ -837,7 +872,8 @@
       "noStageSelected": "Select a stage and date to begin.",
       "noChildrenInStage": "No active beneficiaries found in this stage.",
       "caption": "Attendance records",
-      "selectServiceFirst": "Please select a service first"
+      "selectServiceFirst": "Please select a service first",
+      "oneTapHint": "One-tap mode: click a status to save it instantly; click the active status again to remove it."
     },
     "followups": {
       "title": "Follow-ups",
@@ -1309,7 +1345,8 @@
       "logout": "Logout",
       "import": "Import",
       "export": "Export",
-      "cron": "Scheduled"
+      "cron": "Scheduled",
+      "confirm": "Confirm"
     },
     "entityTypes": {
       "session": "Session",
@@ -1333,7 +1370,11 @@
       "church_request": "Church Request",
       "notification_automation": "Notification Automation",
       "user_roles": "Role Assignment",
-      "beneficiary_assignments": "Stage Assignment"
+      "beneficiary_assignments": "Stage Assignment",
+      "promotion_cycle": "Promotion Cycle",
+      "promotion_servant_transition": "Servant Assignment Transition",
+      "annual_promotions": "Annual Promotion Run",
+      "promotion_entries": "Promotion Entry"
     },
     "detail": {
       "title": "Audit Entry",
@@ -1402,7 +1443,15 @@
       "stageNameAr": "Stage name (Arabic)",
       "stageNameEn": "Stage name (English)",
       "ageMin": "Minimum age",
-      "ageMax": "Maximum age"
+      "ageMax": "Maximum age",
+      "serviceType": "Service type / Academic preset",
+      "serviceTypePlaceholder": "Select a preset (optional)",
+      "noPreset": "No preset (custom)",
+      "presetHint": "Presets pre-fill the service's stages — you can still edit, add, remove, or reorder them.",
+      "nextService": "Next service (promotion destination)",
+      "nextServicePlaceholder": "Select the next service…",
+      "noNextService": "No next service (last service / terminal)",
+      "nextServiceHint": "After the last stage of this service, beneficiaries move to the first stage of the selected next service."
     },
     "archive": {
       "title": "Archive Service",
@@ -1868,6 +1917,82 @@
       "create": "Create Church",
       "saving": "Saving...",
       "creating": "Creating..."
+    }
+  },
+  "promotions": {
+    "title": "Annual Promotion",
+    "description": "Run the annual stage promotion for a ministry, review its history, and undo any run.",
+    "runPromotion": "Run promotion",
+    "singlePromote": "Promote beneficiary",
+    "emptyTitle": "No promotion runs yet",
+    "emptyDescription": "Start the annual promotion for a stage, or promote a single beneficiary manually.",
+    "loadError": "Failed to load promotion runs.",
+    "applied": "Applied",
+    "reverted": "Reverted",
+    "entries": "{total} beneficiary(ies) · {undone} undone",
+    "undoAll": "Undo all",
+    "undo": "Undo",
+    "undone": "Undone",
+    "collapse": "Collapse",
+    "viewEntries": "View entries",
+    "noEntries": "No entries in this run.",
+    "graduated": "Graduated",
+    "promoted": "Promoted",
+    "undoAllConfirm": "Revert this entire promotion run for stage {stage}? This moves every promoted beneficiary back and reactivates graduates.",
+    "undoEntryConfirm": "Revert this promotion entry?",
+    "run": {
+      "title": "Run Annual Promotion",
+      "description": "Choose the source stage and academic year. Beneficiaries with a next stage are promoted; the last stage graduates them (status inactive + noted).",
+      "stage": "Stage",
+      "stagePlaceholder": "Select a stage",
+      "noStages": "No stages available.",
+      "year": "Academic year",
+      "notes": "Notes",
+      "cancel": "Cancel",
+      "processing": "Processing…",
+      "run": "Run promotion"
+    },
+    "single": {
+      "title": "Promote Beneficiary",
+      "description": "Manually move a single beneficiary to a target stage in the same ministry.",
+      "beneficiary": "Beneficiary",
+      "searchPlaceholder": "Search by name…",
+      "beneficiaryPlaceholder": "Select a beneficiary",
+      "noBeneficiaries": "No beneficiaries found.",
+      "targetStage": "Target stage",
+      "targetStagePlaceholder": "Select a target stage",
+      "noTargetStages": "No other stages in this ministry.",
+      "year": "Academic year",
+      "note": "Note",
+      "cancel": "Cancel",
+      "processing": "Processing…",
+      "promote": "Promote"
+    },
+    "cycles": {
+      "title": "Annual Promotion {year}",
+      "needsConfirmation": "Needs confirmation",
+      "description": "Beneficiary placements are already updated. The affected servant assignments stay on the previously published version until this cycle is confirmed.",
+      "review": "Review changes",
+      "hideReview": "Hide review",
+      "confirmAction": "Confirm & publish",
+      "beneficiaries": "Beneficiaries promoted",
+      "affectedServices": "Affected services",
+      "affectedServants": "Affected servants",
+      "pendingTransitions": "Pending transitions",
+      "beneficiaryPlacements": "Beneficiary placements (old → new)",
+      "servantTransitions": "Affected servant assignments",
+      "transitionPending": "pending",
+      "reviewNote": "Before confirmation: beneficiaries keep their new placement, while servants remain on their previously published assignment.",
+      "noEntries": "No entries in this cycle.",
+      "noTransitions": "No affected servant assignments in this cycle.",
+      "graduated": "Graduated",
+      "confirmed": "Confirmed",
+      "confirmTitle": "Confirm promotion & publish assignments",
+      "confirmDescription": "Confirm the annual promotion cycle {year} and publish the new servant assignments.",
+      "confirmWarning": "This publishes {transitions} pending assignment transition(s) for {servants} servant(s). Old assignments become historical and the affected servants immediately see the new beneficiary set. The publish is not automatically reversible.",
+      "confirm": "Confirm & publish",
+      "cancel": "Cancel",
+      "processing": "Publishing…"
     }
   },
   "pagination": {

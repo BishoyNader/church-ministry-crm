@@ -1348,6 +1348,71 @@ export type Database = {
           },
         ]
       }
+      servant_service_assignments: {
+        Row: {
+          assigned_by: string
+          church_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          servant_id: string
+          service_id: string
+          start_date: string
+        }
+        Insert: {
+          assigned_by: string
+          church_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          servant_id: string
+          service_id: string
+          start_date?: string
+        }
+        Update: {
+          assigned_by?: string
+          church_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          servant_id?: string
+          service_id?: string
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servant_service_assignments_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_service_assignments_servant_id_fkey"
+            columns: ["servant_id"]
+            isOneToOne: false
+            referencedRelation: "servants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_service_assignments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servant_service_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           church_id: string
@@ -1359,6 +1424,8 @@ export type Database = {
           is_active: boolean
           name_ar: string
           name_en: string | null
+          next_service_id: string | null
+          service_type: string | null
           sort_order: number
           updated_at: string
         }
@@ -1372,6 +1439,8 @@ export type Database = {
           is_active?: boolean
           name_ar: string
           name_en?: string | null
+          next_service_id?: string | null
+          service_type?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -1385,6 +1454,8 @@ export type Database = {
           is_active?: boolean
           name_ar?: string
           name_en?: string | null
+          next_service_id?: string | null
+          service_type?: string | null
           sort_order?: number
           updated_at?: string
         }
@@ -1394,6 +1465,13 @@ export type Database = {
             columns: ["church_id"]
             isOneToOne: false
             referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_next_service_id_fkey"
+            columns: ["next_service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
         ]
@@ -1489,8 +1567,10 @@ export type Database = {
           is_active: boolean
           name_ar: string
           name_en: string | null
+          next_stage_id: string | null
           service_id: string
           sort_order: number
+          stage_code: string | null
           updated_at: string
         }
         Insert: {
@@ -1505,8 +1585,10 @@ export type Database = {
           is_active?: boolean
           name_ar: string
           name_en?: string | null
+          next_stage_id?: string | null
           service_id: string
           sort_order?: number
+          stage_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -1521,8 +1603,10 @@ export type Database = {
           is_active?: boolean
           name_ar?: string
           name_en?: string | null
+          next_stage_id?: string | null
           service_id?: string
           sort_order?: number
+          stage_code?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1538,6 +1622,13 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stages_next_stage_id_fkey"
+            columns: ["next_stage_id"]
+            isOneToOne: false
+            referencedRelation: "stages"
             referencedColumns: ["id"]
           },
         ]
@@ -1690,6 +1781,7 @@ export type Database = {
         | "platform_owner"
         | "super_admin"
         | "admin"
+        | "stage_manager"
         | "servant"
     }
     CompositeTypes: {
@@ -1834,6 +1926,7 @@ export const Constants = {
         "platform_owner",
         "super_admin",
         "admin",
+        "stage_manager",
         "servant",
       ],
     },

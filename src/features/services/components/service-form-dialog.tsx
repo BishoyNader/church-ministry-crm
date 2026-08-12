@@ -1,7 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { Plus, Trash2 } from "lucide-react";
@@ -29,10 +36,15 @@ import type {
 import {
   useCreateServiceWithStages,
   useUpdateService,
+  useServiceList,
 } from "../hooks/use-services";
 import type { ServiceListItem } from "../types/services.types";
 import { FormField } from "@/components/ui/form-field";
 import { ServiceStagesSection } from "./service-stages-section";
+import {
+  ACADEMIC_PRESET_LIST,
+  type ServiceTypeKey,
+} from "../constants/presets";
 
 type ServiceFormDialogProps = {
   open: boolean;
@@ -51,6 +63,47 @@ export function ServiceFormDialog({
   const createMutation = useCreateServiceWithStages();
   const updateMutation = useUpdateService();
 
+  // Services of the church, used to pick the explicit promotion destination
+  // (next service) when editing an existing service.
+  const servicesQuery = useServiceList(
+    { page: 1, pageSize: 100, status: "all" },
+  );
+  const churchServices = servicesQuery.data?.data?.rows ?? [];
+
+  // Academic preset applied to the create form. It pre-fills the service name
+  // and its stages (with internal promotion codes); the admin can edit, add,
+  // remove, or reorder everything afterwards.
+  const [selectedPreset, setSelectedPreset] = useState<ServiceTypeKey | "">("");
+
+  const applyPreset = (key: ServiceTypeKey | "") => {
+    setSelectedPreset(key);
+    if (!key) {
+      createForm.setValue("service_type", undefined);
+      createForm.setValue("stages", []);
+      return;
+    }
+    const preset = ACADEMIC_PRESET_LIST.find((item) => item.key === key);
+    if (!preset) return;
+    createForm.setValue("service_type", key);
+    // Only overwrite the name fields when they are blank (or were auto-filled
+    // by a previous preset selection) so the admin's edits are never clobbered.
+    const currentName = createForm.getValues("name_ar");
+    if (!currentName || currentName === createForm.formState.defaultValues?.name_ar) {
+      createForm.setValue("name_ar", preset.name_ar);
+      createForm.setValue("name_en", preset.name_en);
+    }
+    createForm.setValue(
+      "stages",
+      preset.stages.map((stage) => ({
+        name_ar: stage.name_ar,
+        name_en: stage.name_en,
+        stage_code: stage.code,
+        age_min: undefined,
+        age_max: undefined,
+      })),
+    );
+  };
+
   const createForm = useForm<CreateServiceWithStagesFormValues>({
     resolver: zodResolver(createServiceWithStagesSchema),
     defaultValues: {
@@ -59,6 +112,8 @@ export function ServiceFormDialog({
       description_ar: "",
       description_en: "",
       sort_order: 0,
+      service_type: undefined,
+      next_service_id: null,
       stages: [],
     },
   });
@@ -89,6 +144,7 @@ export function ServiceFormDialog({
         description_en: service.description_en ?? "",
         sort_order: service.sort_order,
         is_active: service.is_active,
+        next_service_id: service.next_service_id ?? null,
       });
     }
   }, [service, updateForm]);
@@ -113,7 +169,10 @@ export function ServiceFormDialog({
     if (!service) return;
     const result = await updateMutation.mutateAsync({
       serviceId: service.id,
-      values,
+      values: {
+        ...values,
+        next_service_id: values.next_service_id ?? null,
+      },
     });
     if (result.success) onOpenChange(false);
   };
@@ -155,18 +214,43 @@ export function ServiceFormDialog({
 
               <FormField label={t("descriptionEn")}>
                 <Textarea {...updateForm.register("description_en")} />
-              </FormField>
+              </FormField>            <FormField
+              label={t("sortOrder")}
+              error={updateForm.formState.errors.sort_order?.message}
+            >
+              <Input
+                type="number"
+                min={0}
+                {...updateForm.register("sort_order", { valueAsNumber: true })}
+              />
+            </FormField>
 
-              <FormField
-                label={t("sortOrder")}
-                error={updateForm.formState.errors.sort_order?.message}
+            <FormField label={t("nextService")}>
+              <Select
+                value={updateForm.watch("next_service_id") ?? ""}
+                onValueChange={(value) =>
+                  updateForm.setValue(
+                    "next_service_id",
+                    value === "" ? null : (value as string),
+                  )
+                }
               >
-                <Input
-                  type="number"
-                  min={0}
-                  {...updateForm.register("sort_order", { valueAsNumber: true })}
-                />
-              </FormField>
+                <SelectTrigger>
+                  <SelectValue placeholder={t("nextServicePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{t("noNextService")}</SelectItem>
+                  {churchServices
+                    .filter((item) => item.id !== service.id)
+                    .map((item) => (
+                      <SelectItem key={item.id} value={item.id}>
+                        {item.name_ar}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{t("nextServiceHint")}</p>
+            </FormField>
 
               <label className="flex items-center gap-2 text-sm">
                 <Checkbox
@@ -232,6 +316,28 @@ export function ServiceFormDialog({
               />
             </FormField>
 
+            <FormField label={t("serviceType")}>
+              <Select
+                value={selectedPreset}
+                onValueChange={(value) =>
+                  applyPreset(value as ServiceTypeKey | "")
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("serviceTypePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{t("noPreset")}</SelectItem>
+                  {ACADEMIC_PRESET_LIST.map((preset) => (
+                    <SelectItem key={preset.key} value={preset.key}>
+                      {preset.name_ar}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">{t("presetHint")}</p>
+            </FormField>
+
             <div className="space-y-3 rounded-lg border p-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">{t("stages")}</h3>
@@ -240,7 +346,13 @@ export function ServiceFormDialog({
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    stageArray.append({ name_ar: "", name_en: "", age_min: undefined, age_max: undefined })
+                    stageArray.append({
+                      name_ar: "",
+                      name_en: "",
+                      stage_code: "",
+                      age_min: undefined,
+                      age_max: undefined,
+                    })
                   }
                 >
                   <Plus className="h-4 w-4" />

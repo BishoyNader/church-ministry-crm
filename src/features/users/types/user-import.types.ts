@@ -9,6 +9,7 @@ export type UserImportRow = {
   phone: string | null;
   roleName: string | null;
   stageName: string | null;
+  serviceName: string | null;
 };
 
 export type UserImportValidationError = {
@@ -32,6 +33,10 @@ export type UserImportErrorSummary = {
   missingRequired: number;
   unknownRoles: number;
   unknownStages: number;
+  /** Rows referencing a service name that does not exist in the church. */
+  unknownServices: number;
+  /** admin/stage_manager/servant rows with no resolvable service or stage. */
+  serviceRequired: number;
   /** super_admin rows rejected because the church already has (or claimed) a Church Manager. */
   managerConflicts: number;
 };
@@ -53,6 +58,8 @@ export type UserImportRowFailureReason =
   | "duplicate"
   | "invalid_role"
   | "invalid_stage"
+  | "invalid_service"
+  | "service_required"
   | "manager_conflict"
   | "auth_failed"
   | "rpc_failure";

@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/select";
 import { PageHeader } from "@/components/layout/page-header";
 import { ErrorState } from "@/components/feedback/error-state";
-import { PermissionGuard } from "@/features/rbac";
+import { PermissionGuard, useAccessState } from "@/features/rbac";
 import { useChildList, useChildServices, useChildStages } from "../hooks/use-children";
-import { useAttendanceList, useBatchAttendance } from "../hooks/use-attendance";
+import { useAttendanceList, useBatchAttendance, useToggleAttendance } from "../hooks/use-attendance";
 import { AttendanceTable, type AttendanceRecord } from "./attendance-table";
 import { ChildEmptyState } from "./child-empty-state";
 
@@ -47,6 +47,12 @@ export function AttendancePage() {
     !!stageId,
   );
   const batchMutation = useBatchAttendance();
+  const toggleMutation = useToggleAttendance();
+
+  const { data: accessState } = useAccessState();
+  const isAdmin = (accessState?.roles ?? []).some(
+    (role) => role.role_type === "super_admin" || role.role_type === "admin",
+  );
 
   const loadError = attendanceQuery.error ?? childrenQuery.error;
 
@@ -89,6 +95,35 @@ export function AttendancePage() {
   );
 
   const hasRecords = Object.keys(records).length > 0;
+
+  const handleQuickToggle = useCallback(
+    (childId: string, status: AttendanceRecord["status"] | null) => {
+      if (!stageId) return;
+      const stage = stages.find((s) => s.id === stageId);
+      const sid = stage?.service_id ?? serviceId;
+      if (!sid) return;
+      setSaveError(null);
+      toggleMutation.mutate(
+        {
+          beneficiary_id: childId,
+          stage_id: stageId,
+          service_id: sid,
+          attendance_date: date,
+          status,
+        },
+        {
+          onSuccess: (result) => {
+            if (!result.success) {
+              setSaveError(result.message ?? tAttendance("saveError"));
+              return;
+            }
+            setUserRecords({});
+          },
+        },
+      );
+    },
+    [stageId, stages, serviceId, date, toggleMutation, tAttendance],
+  );
 
   const handleSave = async () => {
     if (!stageId || !hasRecords) return;
@@ -206,10 +241,14 @@ export function AttendancePage() {
         />
       ) : (
         <>
+          {isAdmin ? (
+            <p className="text-xs text-muted-foreground">{tAttendance("oneTapHint")}</p>
+          ) : null}
           <AttendanceTable
             children_={children}
             records={records}
             onRecordChange={handleRecordChange}
+            onQuickToggle={isAdmin ? handleQuickToggle : undefined}
           />
 
           <div className="flex items-center justify-end">

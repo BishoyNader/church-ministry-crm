@@ -12,8 +12,14 @@ export type ServantStageAssignmentRow =
 export type ServantStageAssignmentInsert =
   Database["public"]["Tables"]["servant_stage_assignments"]["Insert"];
 
+export type ServantServiceAssignmentRow =
+  Database["public"]["Tables"]["servant_service_assignments"]["Row"];
+export type ServantServiceAssignmentInsert =
+  Database["public"]["Tables"]["servant_service_assignments"]["Insert"];
+
 export type RoleRow = Database["public"]["Tables"]["roles"]["Row"];
 export type StageRow = Database["public"]["Tables"]["stages"]["Row"];
+export type ServiceRow = Database["public"]["Tables"]["services"]["Row"];
 
 export type UserRoleType = Database["public"]["Enums"]["user_role_type"];
 
@@ -26,6 +32,9 @@ export type UserDetail = ProfileRow & {
   stageAssignments: (ServantStageAssignmentRow & {
     stages: Pick<StageRow, "id" | "name_ar" | "name_en">;
   })[];
+  serviceAssignments: (ServantServiceAssignmentRow & {
+    services: Pick<ServiceRow, "id" | "name_ar" | "name_en">;
+  })[];
 };
 
 export type CreateUserInput = {
@@ -37,6 +46,7 @@ export type CreateUserInput = {
   preferred_locale?: string;
   roleIds: string[];
   stageIds: string[];
+  serviceIds: string[];
 };
 
 export type UpdateUserInput = {
@@ -55,6 +65,11 @@ export type AssignRolesInput = {
 export type AssignStagesInput = {
   userId: string;
   stageIds: string[];
+};
+
+export type AssignServicesInput = {
+  userId: string;
+  serviceIds: string[];
 };
 
 export type UserListParams = {

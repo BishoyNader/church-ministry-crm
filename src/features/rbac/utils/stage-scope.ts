@@ -43,11 +43,36 @@ export async function getActorStageScope(
     return { scope: null, error: error.message };
   }
 
+  const churchWide = await isChurchWideActor(supabase, userId, churchId);
+  const stageIds = new Set<string>((data as string[] | null) ?? []);
+
+  // Annual promotion continuity (049): while a promotion cycle is pending
+  // confirmation, a caretaker servant keeps seeing the beneficiaries they
+  // carried over to the new stage (the beneficiary placement has already
+  // moved; the servant's PUBLISHED assignment only changes on confirmation).
+  // The target stages of the servant's pending transitions are merged into
+  // the stage scope so the promoted cohort stays visible in the meantime.
+  if (!churchWide && userId) {
+    try {
+      const { data: transitions } = await supabase
+        .from("promotion_servant_transitions")
+        .select("to_stage_id")
+        .eq("servant_id", userId)
+        .eq("status", "pending");
+      for (const transition of transitions ?? []) {
+        const stageId = (transition as { to_stage_id?: string | null }).to_stage_id;
+        if (stageId) stageIds.add(stageId);
+      }
+    } catch {
+      // Scope expansion is best-effort; the base scope still applies.
+    }
+  }
+
   return {
     scope: {
       churchId,
-      stageIds: (data as string[] | null) ?? [],
-      churchWide: await isChurchWideActor(supabase, userId, churchId),
+      stageIds: [...stageIds],
+      churchWide,
     },
     error: null,
   };

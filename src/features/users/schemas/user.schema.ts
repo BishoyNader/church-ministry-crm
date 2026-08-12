@@ -12,6 +12,8 @@ export const createUserSchema = z.object({
   preferred_locale: z.enum(["ar", "en"]).optional(),
   roleIds: z.array(z.string()).min(1, { message: "At least one role is required" }),
   stageIds: z.array(z.string()).optional(),
+  /** Service assignments (servant-type roles). */
+  serviceIds: z.array(z.string()).optional(),
   // Platform Owner confirmation when the Church Manager role would replace an
   // existing active manager. Server-enforced in createUserAction.
   confirmReplaceManager: z.boolean().optional(),
@@ -35,12 +37,17 @@ export const assignStagesSchema = z.object({
   stageIds: z.array(z.string()),
 });
 
+export const assignServicesSchema = z.object({
+  userId: z.string().uuid(),
+  serviceIds: z.array(z.string()),
+});
+
 export const userListSchema = z.object({
   page: z.number().int().min(1).default(1),
   pageSize: z.number().int().min(1).max(100).default(20),
   search: z.string().optional(),
   roleFilter: z
-    .enum(["platform_owner", "super_admin", "admin", "servant"])
+    .enum(["platform_owner", "super_admin", "admin", "stage_manager", "servant"])
     .optional(),
 });
 

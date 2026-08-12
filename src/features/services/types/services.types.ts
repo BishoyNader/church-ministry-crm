@@ -32,6 +32,8 @@ export type CreateServiceInput = {
   description_ar?: string;
   description_en?: string;
   sort_order?: number;
+  service_type?: string | null;
+  next_service_id?: string | null;
 };
 
 export type UpdateServiceInput = {
@@ -41,6 +43,7 @@ export type UpdateServiceInput = {
   description_en?: string;
   sort_order: number;
   is_active: boolean;
+  next_service_id?: string | null;
 };
 
 export type ServiceActionResult<T = unknown> = {

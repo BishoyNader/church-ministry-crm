@@ -10,6 +10,7 @@ export type NotificationScanSummary = {
   absence: NotificationScanResult;
   followup: NotificationScanResult;
   approval: NotificationScanResult;
+  promotion: NotificationScanResult;
 };
 
 export function emptyScanResult(): NotificationScanResult {

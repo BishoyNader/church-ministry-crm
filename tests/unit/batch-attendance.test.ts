@@ -86,7 +86,8 @@ describe("batchAttendance", () => {
     expect(result.data).toEqual({ created: 1, updated: 1 });
 
     // Exactly ONE multi-row attendance_records upsert with both rows and
-    // the right conflict target (the attendance_sessions upsert is expected).
+    // the right conflict target — the unique constraint introduced in
+    // migration 048 is (session_id, beneficiary_id).
     const recordUpserts = upsertCalls.filter((u) => u.table === "attendance_records");
     expect(recordUpserts).toHaveLength(1);
     const { rows, opts } = recordUpserts[0];
@@ -97,6 +98,6 @@ describe("batchAttendance", () => {
         expect.objectContaining({ beneficiary_id: "beneficiary-2", status: "absent", notes: "sick" }),
       ]),
     );
-    expect(opts).toEqual({ onConflict: "church_id,session_id,beneficiary_id" });
+    expect(opts).toEqual({ onConflict: "session_id,beneficiary_id" });
   });
 });

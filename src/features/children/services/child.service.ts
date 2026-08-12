@@ -401,6 +401,97 @@ export async function createAttendance(
   }
 }
 
+/**
+ * One-tap attendance toggle (admin): with a status, upserts a single
+ * attendance record for the beneficiary on the given date (creating the
+ * session on demand); with status = null, removes the existing record
+ * (toggle-off). Backed by the uq_attendance_records_session_beneficiary
+ * unique constraint (migration 048).
+ */
+export async function toggleAttendance(
+  supabase: SupabaseClient,
+  input: {
+    beneficiary_id: string;
+    stage_id: string;
+    service_id: string;
+    attendance_date: string;
+    status: "present" | "absent" | "excused" | null;
+  },
+): Promise<ServiceResult<boolean>> {
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { data: null, error: "You must be logged in." };
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("church_id")
+      .eq("id", user.id)
+      .single();
+
+    if (!profile) {
+      return { data: null, error: "Profile not found." };
+    }
+
+    const { data: session, error: sessionError } = await supabase
+      .from("attendance_sessions")
+      .upsert({
+        church_id: profile.church_id,
+        service_id: input.service_id,
+        stage_id: input.stage_id,
+        session_date: input.attendance_date,
+        created_by: user.id,
+      }, {
+        onConflict: "stage_id,session_date",
+      })
+      .select("id")
+      .single();
+
+    if (sessionError) {
+      return { data: null, error: sessionError.message };
+    }
+
+    if (input.status === null) {
+      const { error: deleteError } = await supabase
+        .from("attendance_records")
+        .delete()
+        .eq("session_id", session.id)
+        .eq("beneficiary_id", input.beneficiary_id);
+
+      if (deleteError) {
+        return { data: null, error: deleteError.message };
+      }
+
+      return { data: true, error: null };
+    }
+
+    const { error: upsertError } = await supabase
+      .from("attendance_records")
+      .upsert(
+        {
+          church_id: profile.church_id,
+          session_id: session.id,
+          beneficiary_id: input.beneficiary_id,
+          status: input.status,
+          notes: null,
+          recorded_by: user.id,
+        },
+        { onConflict: "session_id,beneficiary_id" },
+      );
+
+    if (upsertError) {
+      return { data: null, error: upsertError.message };
+    }
+
+    return { data: true, error: null };
+  } catch {
+    return { data: null, error: "Failed to toggle attendance." };
+  }
+}
+
 export async function batchAttendance(
   supabase: SupabaseClient,
   input: BatchAttendanceInput,
@@ -465,7 +556,7 @@ export async function batchAttendance(
 
     const { error: upsertError } = await supabase
       .from("attendance_records")
-      .upsert(rows, { onConflict: "church_id,session_id,beneficiary_id" });
+      .upsert(rows, { onConflict: "session_id,beneficiary_id" });
 
     if (upsertError) {
       return { data: null, error: upsertError.message };

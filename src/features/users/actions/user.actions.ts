@@ -7,6 +7,7 @@ import {
   updateUserSchema,
   assignRolesSchema,
   assignStagesSchema,
+  assignServicesSchema,
   userListSchema,
 } from "../schemas/user.schema";
 import type {
@@ -45,9 +46,17 @@ const CREATE_USER_ERROR_MESSAGES: Record<string, string> = {
   roles_required: "At least one role is required.",
   role_not_in_church: "A selected role does not belong to this church.",
   stage_not_in_church: "A selected stage does not belong to this church.",
+  service_not_in_church: "A selected service does not belong to this church.",
   auth_user_not_found: "The user account could not be provisioned.",
   auth_user_email_mismatch: "The account email does not match the request.",
   email_already_registered: "An account already exists for this email.",
+  cannot_assign_manager_role:
+    "You cannot assign the Church Manager role. Contact the Platform Owner to change the Church Manager.",
+  service_required: "A service assignment is required for this role.",
+  stage_manager_single_service: "A stage manager must be assigned to exactly one service.",
+  servant_single_service: "A servant must be assigned to exactly one service.",
+  servant_stage_required: "A servant must be assigned to exactly one stage.",
+  stage_service_mismatch: "The selected stage does not belong to the selected service.",
   manager_replacement_required:
     "This church already has a Church Manager. Confirm that you want to replace the current manager to assign this role.",
   manager_swap_failed:
@@ -310,6 +319,17 @@ export async function createUserAction(
     .maybeSingle();
   superAdminRoleId = superAdminRole?.id ?? null;
 
+  // Church Manager guard (050): a church-scoped actor (Church Manager) can
+  // NEVER grant the super_admin role — changing the Church Manager is a
+  // Platform Owner operation only (change_church_manager, 035).
+  if (
+    !isPlatformOwner &&
+    superAdminRoleId &&
+    values.roleIds.includes(superAdminRoleId)
+  ) {
+    return { success: false, message: mapCreateUserError("cannot_assign_manager_role") };
+  }
+
   if (superAdminRoleId && values.roleIds.includes(superAdminRoleId)) {
     const { data: activeManager } = await ctx.admin
       .from("user_roles")
@@ -379,6 +399,7 @@ export async function createUserAction(
       preferred_locale: values.preferred_locale,
       roleIds: initialRoleIds,
       stageIds: values.stageIds ?? [],
+      serviceIds: values.serviceIds ?? [],
     },
     targetChurchId,
   );
@@ -647,6 +668,26 @@ export async function assignRolesAction(
   const existing = await userService.getUserById(db, target.churchId, userId);
   const oldRoleIds = existing.data?.roles.map((r) => r.id) ?? [];
 
+  // Role assignment rules (050): the target user's service/stage assignments
+  // must satisfy the new role set (admin -> services; stage_manager -> one
+  // service; servant -> one service + one stage).
+  const { data: newRoles } = await db
+    .from("roles")
+    .select("role_type")
+    .in("id", roleIds);
+  const roleTypes = ((newRoles ?? []) as { role_type: string }[]).map(
+    (role) => role.role_type,
+  );
+  const ruleError = await userService.validateRoleAssignmentRules(
+    db,
+    target.churchId,
+    userId,
+    roleTypes,
+  );
+  if (ruleError) {
+    return { success: false, message: ruleError };
+  }
+
   const result = await userService.assignRoles(
     db,
     { userId, roleIds },
@@ -710,6 +751,47 @@ export async function assignStagesAction(
   const oldStageIds =
     existing.data?.stageAssignments.map((s) => s.stage_id) ?? [];
 
+  // Servant role rules (050): a servant is scoped to exactly ONE stage that
+  // must belong to their single assigned service.
+  const isServant =
+    existing.data?.roles.some((role) => role.role_type === "servant") ?? false;
+  if (isServant) {
+    if (stageIds.length !== 1) {
+      return {
+        success: false,
+        message: "A servant must be assigned to exactly one stage.",
+      };
+    }
+    const { data: serviceAssignments } = await db
+      .from("servant_service_assignments")
+      .select("service_id")
+      .eq("servant_id", userId)
+      .eq("church_id", target.churchId)
+      .eq("is_active", true)
+      .is("end_date", null);
+    const serviceId =
+      (serviceAssignments?.[0] as { service_id?: string } | undefined)?.service_id ?? null;
+    if (!serviceId) {
+      return {
+        success: false,
+        message: "A servant must be assigned to a service before choosing a stage.",
+      };
+    }
+    const { data: stage } = await db
+      .from("stages")
+      .select("id")
+      .eq("id", stageIds[0])
+      .eq("church_id", target.churchId)
+      .eq("service_id", serviceId)
+      .maybeSingle();
+    if (!stage) {
+      return {
+        success: false,
+        message: "The selected stage must belong to the servant's assigned service.",
+      };
+    }
+  }
+
   const result = await userService.assignStages(
     db,
     { userId, stageIds },
@@ -731,6 +813,86 @@ export async function assignStagesAction(
   );
 
   return { success: true, message: "Stage assignments updated." };
+}
+
+export async function assignServicesAction(
+  userId: string,
+  serviceIds: string[],
+  churchId?: string,
+): Promise<UserActionResult> {
+  try {
+    assignServicesSchema.parse({ userId, serviceIds });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return {
+        success: false,
+        message: "Please fix the highlighted fields.",
+        fieldErrors: Object.fromEntries(
+          error.issues.map((issue) => [issue.path.join("."), issue.message]),
+        ),
+      };
+    }
+    throw error;
+  }
+
+  const ctx = await resolveActorContext();
+  if (!ctx) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  const gate = await assertUserAdminPermission(ctx, "assign");
+  if (!gate.ok) {
+    return { success: false, message: gate.message };
+  }
+
+  const target = await resolveUserManagementChurch(ctx, churchId);
+  if (!target.churchId) {
+    return { success: false, message: target.message ?? "Invalid church scope." };
+  }
+
+  const db = dataClientFor(ctx);
+  const existing = await userService.getUserById(db, target.churchId, userId);
+  const oldServiceIds =
+    existing.data?.serviceAssignments.map((s) => s.service_id) ?? [];
+
+  // Servant role rules (050): exactly one service; when the user is a servant
+  // their stage (if any) must belong to the chosen service.
+  const isServant =
+    existing.data?.roles.some((role) => role.role_type === "servant") ?? false;
+  const isStageManager =
+    existing.data?.roles.some((role) => role.role_type === "stage_manager") ?? false;
+  if (isServant || isStageManager) {
+    if (serviceIds.length !== 1) {
+      return {
+        success: false,
+        message: isServant
+          ? "A servant must be assigned to exactly one service."
+          : "A stage manager must be assigned to exactly one service.",
+      };
+    }
+  }
+
+  const result = await userService.assignServices(
+    db,
+    { userId, serviceIds },
+    ctx.userId,
+  );
+
+  if (result.error) {
+    return { success: false, message: result.error };
+  }
+
+  await writeUserAudit(
+    ctx,
+    target.churchId,
+    "update",
+    "user",
+    userId,
+    { serviceIds },
+    { serviceIds: oldServiceIds },
+  );
+
+  return { success: true, message: "Service assignments updated." };
 }
 
 export async function getRolesAction(
@@ -755,6 +917,34 @@ export async function getRolesAction(
   }
 
   const result = await userService.listRoles(dataClientFor(ctx), targetChurchId);
+  if (result.error) {
+    return { success: false, message: result.error };
+  }
+  return { success: true, data: result.data ?? undefined };
+}
+
+export async function getServicesAction(
+  churchId: string,
+): Promise<UserActionResult<import("../types/user.types").ServiceRow[]>> {
+  const ctx = await resolveActorContext();
+  if (!ctx) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.USERS_READ))) {
+    return { success: false, message: "You do not have permission to view services." };
+  }
+
+  const targetChurchId = ctx.churchId ?? churchId;
+  if (!targetChurchId) {
+    return { success: false, message: "A church must be selected." };
+  }
+
+  if (ctx.churchId && targetChurchId !== ctx.churchId) {
+    return { success: false, message: "You cannot view services from another church." };
+  }
+
+  const result = await userService.listServices(dataClientFor(ctx), targetChurchId);
   if (result.error) {
     return { success: false, message: result.error };
   }

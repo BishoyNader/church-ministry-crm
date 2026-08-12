@@ -4,9 +4,11 @@ import { toRegistrationError } from "@/types/registration";
 import type { RegistrationFunctions } from "@/types/registration";
 import type {
   AssignRolesInput,
+  AssignServicesInput,
   AssignStagesInput,
   CreateUserInput,
   RoleRow,
+  ServiceRow,
   StageRow,
   UpdateUserInput,
   UserDetail,
@@ -162,11 +164,19 @@ export async function getUserById(
       .eq("is_active", true)
       .is("end_date", null);
 
+    const { data: serviceAssignments } = await supabase
+      .from("servant_service_assignments")
+      .select("*, services(id, name_ar, name_en)")
+      .eq("servant_id", userId)
+      .eq("is_active", true)
+      .is("end_date", null);
+
     return {
       data: {
         ...profile,
         roles,
         stageAssignments: (stageAssignments ?? []) as unknown as UserDetail["stageAssignments"],
+        serviceAssignments: (serviceAssignments ?? []) as unknown as UserDetail["serviceAssignments"],
       },
       error: null,
     };
@@ -228,6 +238,8 @@ export async function createUser(
       p_preferred_locale: input.preferred_locale ?? "ar",
       p_role_ids: input.roleIds,
       p_stage_ids: input.stageIds && input.stageIds.length > 0 ? input.stageIds : null,
+      p_service_ids:
+        input.serviceIds && input.serviceIds.length > 0 ? input.serviceIds : null,
     });
 
     if (rpcError) {
@@ -498,6 +510,134 @@ export async function assignRoles(
   }
 }
 
+export async function assignServices(
+  supabase: SupabaseClient,
+  input: AssignServicesInput,
+  assignedBy: string,
+): Promise<{ data: boolean; error: string | null }> {
+  try {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("church_id")
+      .eq("id", input.userId)
+      .single();
+
+    if (!profile) {
+      return { data: false, error: "User not found." };
+    }
+
+    const now = new Date().toISOString();
+
+    await supabase
+      .from("servant_service_assignments")
+      .update({ is_active: false, end_date: now })
+      .eq("servant_id", input.userId)
+      .eq("church_id", profile.church_id)
+      .eq("is_active", true)
+      .is("end_date", null);
+
+    if (input.serviceIds.length > 0) {
+      const { data: services, error: servicesError } = await supabase
+        .from("services")
+        .select("id")
+        .eq("church_id", profile.church_id)
+        .is("deleted_at", null)
+        .in("id", input.serviceIds);
+
+      if (servicesError) {
+        return { data: false, error: servicesError.message };
+      }
+
+      if ((services?.length ?? 0) !== input.serviceIds.length) {
+        return { data: false, error: "Some services are not valid for this church." };
+      }
+
+      const inserts = input.serviceIds.map((serviceId) => ({
+        church_id: profile.church_id,
+        servant_id: input.userId,
+        service_id: serviceId,
+        is_active: true,
+        start_date: now,
+        end_date: null,
+        assigned_by: assignedBy,
+      }));
+      await supabase.from("servant_service_assignments").insert(inserts);
+    }
+
+    return { data: true, error: null };
+  } catch {
+    return { data: false, error: "Failed to assign services." };
+  }
+}
+
+/**
+ * Role-assignment rules (mirrors the create_church_user RPC boundary, 050):
+ *   admin          -> needs at least one service assignment (multi-service ok)
+ *   stage_manager  -> needs exactly ONE service assignment
+ *   servant        -> needs exactly ONE service assignment AND exactly ONE
+ *                     active stage assignment
+ * Returns a user-facing error string when a rule is violated, or null when the
+ * role set is valid for the user's current assignments.
+ */
+export async function validateRoleAssignmentRules(
+  supabase: SupabaseClient,
+  churchId: string,
+  userId: string,
+  roleTypes: string[],
+): Promise<string | null> {
+  const hasAdmin = roleTypes.includes("admin");
+  const hasStageManager = roleTypes.includes("stage_manager");
+  const hasServant = roleTypes.includes("servant");
+
+  if (!hasAdmin && !hasStageManager && !hasServant) {
+    return null; // super_admin / platform_owner have no assignment requirements
+  }
+
+  const { data: services, error: servicesError } = await supabase
+    .from("servant_service_assignments")
+    .select("id")
+    .eq("servant_id", userId)
+    .eq("church_id", churchId)
+    .eq("is_active", true)
+    .is("end_date", null);
+
+  if (servicesError) {
+    return "Failed to load service assignments.";
+  }
+
+  const serviceCount = services?.length ?? 0;
+  if (serviceCount === 0) {
+    return hasServant
+      ? "A servant must be assigned to a service."
+      : "This role requires a service assignment.";
+  }
+
+  if (hasServant) {
+    if (serviceCount !== 1) {
+      return "A servant must be assigned to exactly one service.";
+    }
+    const { data: stages, error: stagesError } = await supabase
+      .from("servant_stage_assignments")
+      .select("id")
+      .eq("servant_id", userId)
+      .eq("church_id", churchId)
+      .eq("is_active", true)
+      .is("end_date", null);
+    if (stagesError) {
+      return "Failed to load stage assignments.";
+    }
+    if ((stages?.length ?? 0) !== 1) {
+      return "A servant must be assigned to exactly one stage.";
+    }
+  }
+
+  if (hasStageManager && serviceCount !== 1) {
+    return "A stage manager must be assigned to exactly one service.";
+  }
+
+  return null;
+}
+
 export async function assignStages(
   supabase: SupabaseClient,
   input: AssignStagesInput,
@@ -594,4 +734,24 @@ export async function listStages(
   }
 
   return { data: (data ?? []) as unknown as StageRow[], error: null };
+}
+
+export async function listServices(
+  supabase: SupabaseClient,
+  churchId: string,
+): Promise<{ data: ServiceRow[] | null; error: string | null }> {
+  const { data, error } = await supabase
+    .from("services")
+    .select("*")
+    .eq("church_id", churchId)
+    .is("deleted_at", null)
+    .eq("is_active", true)
+    .order("sort_order")
+    .order("name_ar");
+
+  if (error) {
+    return { data: null, error: error.message };
+  }
+
+  return { data: (data ?? []) as unknown as ServiceRow[], error: null };
 }

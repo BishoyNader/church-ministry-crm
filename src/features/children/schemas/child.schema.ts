@@ -79,6 +79,14 @@ export const batchAttendanceSchema = z.object({
     .min(1, { message: "At least one attendance record is required" }),
 });
 
+export const toggleAttendanceSchema = z.object({
+  beneficiary_id: z.string().uuid({ message: "Beneficiary is required" }),
+  stage_id: z.string().uuid({ message: "Stage is required" }),
+  service_id: z.string().uuid({ message: "Service is required" }),
+  attendance_date: z.string().regex(isoDateRegex, { message: "Date must be in YYYY-MM-DD format" }),
+  status: z.enum(["present", "absent", "excused"]).nullable(),
+});
+
 export const createFollowupSchema = z.object({
   beneficiary_id: z.string().uuid({ message: "Beneficiary is required" }),
   type: z.enum(["phone_call", "home_visit", "whatsapp", "church_meeting", "other"]),
@@ -107,5 +115,6 @@ export type UpdateChildFormValues = z.infer<typeof updateChildSchema>;
 export type TransferChildFormValues = z.infer<typeof transferChildSchema>;
 export type CreateAttendanceFormValues = z.infer<typeof createAttendanceSchema>;
 export type BatchAttendanceFormValues = z.infer<typeof batchAttendanceSchema>;
+export type ToggleAttendanceFormValues = z.infer<typeof toggleAttendanceSchema>;
 export type CreateFollowupFormValues = z.infer<typeof createFollowupSchema>;
 export type UpdateFollowupFormValues = z.infer<typeof updateFollowupSchema>;

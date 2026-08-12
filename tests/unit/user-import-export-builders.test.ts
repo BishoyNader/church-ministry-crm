@@ -36,6 +36,7 @@ const makeRow = (overrides: Partial<UserImportRow> = {}): UserImportRow => ({
   phone: "01000000000",
   roleName: "Church Manager",
   stageName: null,
+  serviceName: null,
   ...overrides,
 });
 
@@ -58,6 +59,7 @@ describe("buildUserImportTemplate (CSV)", () => {
       "full_name_en",
       "phone",
       "role",
+      "service",
       "stage",
     ]);
   });
@@ -94,8 +96,15 @@ describe("validateUserImportRows", () => {
       [
         makeRow(),
         // Second row uses a non-manager role: only one super_admin row per batch
-        // may claim the manager slot (single-Church-Manager invariant).
-        makeRow({ rowNumber: 3, email: "second@example.com", roleName: "Admin" }),
+        // may claim the manager slot (single-Church-Manager invariant). The
+        // admin role needs a service (or a stage, which implies one) per the
+        // 050 role rules.
+        makeRow({
+          rowNumber: 3,
+          email: "second@example.com",
+          roleName: "Admin",
+          stageName: "Teens",
+        }),
       ],
       roleOptions,
       stageOptions,
@@ -241,8 +250,10 @@ describe("validateUserImportRows — single Church Manager guard", () => {
   });
 
   it("does not reject non-manager rows for a church that has a manager", () => {
+    // The admin role requires a service per the 050 rules; the row satisfies it
+    // via a stage (the service is derived from the stage at import time).
     const result = validateUserImportRows(
-      [makeRow({ roleName: "Admin" })],
+      [makeRow({ roleName: "Admin", stageName: "Teens" })],
       roleOptions,
       stageOptions,
       [],
@@ -250,6 +261,33 @@ describe("validateUserImportRows — single Church Manager guard", () => {
     );
     expect(result.validRows).toHaveLength(1);
     expect(result.errorSummary.managerConflicts).toBe(0);
+  });
+
+  it("rejects an admin/stage_manager/servant row with no service or stage", () => {
+    const result = validateUserImportRows(
+      [makeRow({ roleName: "Admin" })],
+      roleOptions,
+      stageOptions,
+      [],
+    );
+    expect(result.invalidRows).toHaveLength(1);
+    expect(
+      result.invalidRows[0].errors.some((e) => e.field === "service"),
+    ).toBe(true);
+    expect(result.errorSummary.serviceRequired).toBe(1);
+  });
+
+  it("rejects a row referencing an unknown service", () => {
+    const result = validateUserImportRows(
+      [makeRow({ roleName: "Admin", serviceName: "No Such Service" })],
+      roleOptions,
+      stageOptions,
+      [],
+      {},
+      [{ id: "sv-1", name_ar: "الابتدائي", name_en: "Primary" }],
+    );
+    expect(result.invalidRows).toHaveLength(1);
+    expect(result.errorSummary.unknownServices).toBe(1);
   });
 
   it("accepts a super_admin row when no manager state is provided (backward compatible)", () => {
@@ -265,14 +303,16 @@ describe("validateUserImportRows — single Church Manager guard", () => {
 });
 
 describe("resolveUserImportRow", () => {
-  it("maps role and stage names to catalog IDs", () => {
-    const { roleIds, stageIds } = resolveUserImportRow(
-      makeRow({ roleName: "مدير الكنيسة", stageName: "Teens" }),
+  it("maps role, stage, and service names to catalog IDs", () => {
+    const { roleIds, stageIds, serviceIds } = resolveUserImportRow(
+      makeRow({ roleName: "مدير الكنيسة", stageName: "Teens", serviceName: "Primary" }),
       roleOptions,
       stageOptions,
+      [{ id: "sv-1", name_ar: "الابتدائي", name_en: "Primary" }],
     );
     expect(roleIds).toEqual(["r-super"]);
     expect(stageIds).toEqual(["s-2"]);
+    expect(serviceIds).toEqual(["sv-1"]);
   });
 
   it("accepts canonical role_type codes (super_admin/admin/stage_manager/servant)", () => {

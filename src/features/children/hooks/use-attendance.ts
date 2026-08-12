@@ -5,10 +5,12 @@ import {
   listAttendanceAction,
   createAttendanceAction,
   batchAttendanceAction,
+  toggleAttendanceAction,
 } from "../actions/child.actions";
 import type {
   CreateAttendanceFormValues,
   BatchAttendanceFormValues,
+  ToggleAttendanceFormValues,
 } from "../schemas/child.schema";
 import { CHILD_QUERY_KEYS } from "./use-children";
 
@@ -64,6 +66,19 @@ export function useBatchAttendance() {
   return useMutation({
     mutationFn: (values: BatchAttendanceFormValues) =>
       batchAttendanceAction(values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ATTENDANCE_QUERY_KEYS.all });
+      queryClient.invalidateQueries({ queryKey: CHILD_QUERY_KEYS.all });
+    },
+  });
+}
+
+export function useToggleAttendance() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (values: ToggleAttendanceFormValues) =>
+      toggleAttendanceAction(values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ATTENDANCE_QUERY_KEYS.all });
       queryClient.invalidateQueries({ queryKey: CHILD_QUERY_KEYS.all });

@@ -110,6 +110,8 @@ export async function createServiceAction(
     description_ar: values.description_ar,
     description_en: values.description_en,
     sort_order: values.sort_order,
+    service_type: values.service_type ?? null,
+    next_service_id: values.next_service_id ?? null,
   });
 
   if (result.error) {
@@ -120,6 +122,7 @@ export async function createServiceAction(
   if (result.data) {
     await writeAuditLog(supabase, "create", "service", result.data.id, undefined, {
       name_ar: values.name_ar,
+      service_type: values.service_type ?? null,
     });
   }
 
@@ -178,6 +181,8 @@ export async function createServiceWithStagesAction(
     description_ar: parsed.description_ar,
     description_en: parsed.description_en,
     sort_order: parsed.sort_order,
+    service_type: parsed.service_type ?? null,
+    next_service_id: parsed.next_service_id ?? null,
   });
 
   if (serviceResult.error || !serviceResult.data) {
@@ -199,6 +204,7 @@ export async function createServiceWithStagesAction(
       description_en: stage.description_en,
       age_min: stage.age_min,
       age_max: stage.age_max,
+      stage_code: stage.stage_code ?? null,
       sort_order: 0,
     });
 
@@ -281,6 +287,7 @@ export async function updateServiceAction(
     description_en: values.description_en,
     sort_order: values.sort_order,
     is_active: values.is_active,
+    next_service_id: values.next_service_id ?? null,
   });
 
   if (result.error) {

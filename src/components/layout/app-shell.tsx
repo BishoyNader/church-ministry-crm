@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Menu, Moon, Sun, Church, Users, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard } from "lucide-react";
+import { Menu, Moon, Sun, Church, Users, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,7 +21,7 @@ const navItems = [
   { labelKey: "children", href: "/children", icon: UserRound, permission: PERMISSION_CODES.BENEFICIARIES_READ, disabled: false },
   { labelKey: "attendance", href: "/attendance", icon: ClipboardCheck, permission: PERMISSION_CODES.ATTENDANCE_READ, disabled: false },
   { labelKey: "followups", href: "/followups", icon: Phone, permission: PERMISSION_CODES.FOLLOWUPS_READ, disabled: false },
-  { labelKey: "servants", href: "/servants", icon: HandHeart, permission: PERMISSION_CODES.SERVANTS_READ, disabled: false },
+  { labelKey: "servantRecords", href: "/servants", icon: HandHeart, permission: PERMISSION_CODES.SERVANTS_READ, disabled: false },
   { labelKey: "approvals", href: "/approvals", icon: BadgeCheck, permission: PERMISSION_CODES.SERVANTS_APPROVE, disabled: false },
   { labelKey: "spiritualJournal", href: "/spiritual-journal", icon: BookOpen, permission: PERMISSION_CODES.SPIRITUAL_READ, disabled: false },
   { labelKey: "notifications", href: "/notifications", icon: Bell, permission: PERMISSION_CODES.NOTIFICATIONS_READ, disabled: false },
@@ -31,9 +31,10 @@ const navItems = [
   { labelKey: "churches", href: "/admin/churches", icon: Building2, permission: PERMISSION_CODES.TENANTS_READ, disabled: false },
   { labelKey: "churchRequests", href: "/admin/church-requests", icon: ClipboardList, permission: PERMISSION_CODES.TENANTS_READ, disabled: false },
   { labelKey: "adminDashboard", href: "/admin/dashboard", icon: LayoutDashboard, permission: PERMISSION_CODES.TENANTS_READ, disabled: false },
-  { labelKey: "users", href: "/users", icon: Users, permission: PERMISSION_CODES.USERS_READ, disabled: false },
+  { labelKey: "servants", href: "/users", icon: Users, permission: PERMISSION_CODES.USERS_READ, disabled: false },
   { labelKey: "audit", href: "/audit", icon: ScrollText, permission: PERMISSION_CODES.AUDIT_READ, disabled: false },
   { labelKey: "events", href: "/events", icon: CalendarDays, permission: PERMISSION_CODES.EVENTS_READ, disabled: false },
+  { labelKey: "promotions", href: "/promotions", icon: ArrowUpRight, permission: PERMISSION_CODES.SETTINGS_UPDATE, disabled: false },
   { labelKey: "settings", href: "/settings", icon: Settings, permission: PERMISSION_CODES.SETTINGS_READ, disabled: false },
 ] as const;
 

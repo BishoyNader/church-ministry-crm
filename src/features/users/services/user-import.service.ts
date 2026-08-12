@@ -22,6 +22,12 @@ export type UserImportStageOption = {
   name_en: string | null;
 };
 
+export type UserImportServiceOption = {
+  id: string;
+  name_ar: string | null;
+  name_en: string | null;
+};
+
 type ServiceResult<T> = {
   data: T | null;
   error: string | null;
@@ -35,6 +41,7 @@ const USER_IMPORT_HEADERS = [
   "full_name_en",
   "phone",
   "role",
+  "service",
   "stage",
 ];
 
@@ -108,6 +115,7 @@ function mapRowToUser(row: Record<string, unknown>, rowNumber: number): UserImpo
   const phone = String(row.phone ?? "").trim() || null;
   const roleName = String(row.role ?? "").trim() || null;
   const stageName = String(row.stage ?? "").trim() || null;
+  const serviceName = String(row.service ?? "").trim() || null;
 
   return {
     rowNumber,
@@ -118,6 +126,7 @@ function mapRowToUser(row: Record<string, unknown>, rowNumber: number): UserImpo
     phone,
     roleName,
     stageName,
+    serviceName,
   };
 }
 
@@ -196,6 +205,7 @@ export function validateUserImportRows(
   stageOptions: UserImportStageOption[],
   existingEmails: string[],
   options: UserImportValidationOptions = {},
+  serviceOptions: UserImportServiceOption[] = [],
 ): UserImportValidationResult {
   const validRows: UserImportRow[] = [];
   const invalidRows: InvalidUserImportRow[] = [];
@@ -209,6 +219,8 @@ export function validateUserImportRows(
     missingRequired: 0,
     unknownRoles: 0,
     unknownStages: 0,
+    unknownServices: 0,
+    serviceRequired: 0,
     managerConflicts: 0,
   };
 
@@ -239,6 +251,22 @@ export function validateUserImportRows(
   const stageMatches = (stageName: string, option: UserImportStageOption): boolean =>
     option.name_ar?.trim().toLowerCase() === stageName.trim().toLowerCase() ||
     (option.name_en?.trim().toLowerCase() ?? "") === stageName.trim().toLowerCase();
+
+  const serviceMatches = (serviceName: string, option: UserImportServiceOption): boolean =>
+    option.name_ar?.trim().toLowerCase() === serviceName.trim().toLowerCase() ||
+    (option.name_en?.trim().toLowerCase() ?? "") === serviceName.trim().toLowerCase();
+
+  // 050 role rules: admin / stage_manager / servant all need a service (the
+  // servant may satisfy it via a stage, whose service is derived server-side).
+  const roleRequiresService = (row: UserImportRow): boolean => {
+    if (!row.roleName) return false;
+    const serviceRoleTypes = new Set(["admin", "stage_manager", "servant"]);
+    return roleOptions.some(
+      (option) =>
+        serviceRoleTypes.has(option.role_type ?? "") &&
+        roleMatches(row.roleName!, option),
+    );
+  };
 
   for (const row of rows) {
     const errors: UserImportValidationError[] = [];
@@ -320,6 +348,34 @@ export function validateUserImportRows(
       }
     }
 
+    // Only roles that need a service (admin/stage_manager/servant) validate
+    // the service column — a stray service value on a super_admin row is
+    // ignored rather than failing the import.
+    if (row.serviceName && roleRequiresService(row)) {
+      const serviceExists = serviceOptions.some((option) =>
+        serviceMatches(row.serviceName!, option),
+      );
+      if (!serviceExists) {
+        errorSummary.unknownServices++;
+        errors.push({
+          rowNumber: row.rowNumber,
+          field: "service",
+          message: `Service "${row.serviceName}" was not found in this church.`,
+        });
+      }
+    }
+
+    // 050 role rules: admin/stage_manager/servant roles need a service — either
+    // explicit (service column) or derivable from the row's stage.
+    if (roleRequiresService(row) && !row.serviceName && !row.stageName) {
+      errorSummary.serviceRequired++;
+      errors.push({
+        rowNumber: row.rowNumber,
+        field: "service",
+        message: `A service (or a stage) is required for the "${row.roleName}" role.`,
+      });
+    }
+
     // Single-Church-Manager invariant: reject a super_admin row when the
     // manager slot is already taken (existing manager or a previous row of the
     // same batch). Never silently replace a manager from a spreadsheet.
@@ -357,9 +413,11 @@ export function resolveUserImportRow(
   row: UserImportRow,
   roleOptions: UserImportRoleOption[],
   stageOptions: UserImportStageOption[],
+  serviceOptions: UserImportServiceOption[] = [],
 ): {
   roleIds: string[];
   stageIds: string[];
+  serviceIds: string[];
 } {
   const roleMatches = (roleName: string, option: UserImportRoleOption): boolean =>
     option.name_ar?.trim().toLowerCase() === roleName.trim().toLowerCase() ||
@@ -378,7 +436,15 @@ export function resolveUserImportRow(
     ? stageOptions.filter((option) => stageMatches(row.stageName!, option)).map((o) => o.id)
     : [];
 
-  return { roleIds, stageIds };
+  const serviceMatches = (serviceName: string, option: UserImportServiceOption): boolean =>
+    option.name_ar?.trim().toLowerCase() === serviceName.trim().toLowerCase() ||
+    (option.name_en?.trim().toLowerCase() ?? "") === serviceName.trim().toLowerCase();
+
+  const serviceIds = row.serviceName
+    ? serviceOptions.filter((option) => serviceMatches(row.serviceName!, option)).map((o) => o.id)
+    : [];
+
+  return { roleIds, stageIds, serviceIds };
 }
 
 // The example role must be a value the validator accepts: the seeded
@@ -392,6 +458,7 @@ const EXAMPLE_ROW: Record<string, string> = {
   full_name_en: "User Name",
   phone: "01000000000",
   role: "Church Manager",
+  service: "",
   stage: "",
 };
 

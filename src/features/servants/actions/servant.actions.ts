@@ -465,18 +465,52 @@ export async function createServantAction(
     return { success: false, message: "Role not found in this church." };
   }
 
+  // 050 role rules: الكاهن المسؤول (admin) needs service(s), أمين مرحلة
+  // (stage_manager) needs exactly ONE service and NO stage, خادم (servant)
+  // needs exactly ONE service + exactly ONE stage inside that service. The RPC
+  // enforces the same rules server-side; these checks give the user clear
+  // feedback before the RPC round-trip.
+  const roleType = role.role_type;
+  const requiresService =
+    roleType === "admin" || roleType === "stage_manager" || roleType === "servant";
+
+  let serviceIds: string[] = [];
   let stageIds: string[] = [];
 
-  if (role.role_type === "stage_manager") {
-    if (!parsed.serviceId || !parsed.stageId) {
+  if (requiresService) {
+    if (!parsed.serviceId) {
       return {
         success: false,
-        message: "A service and stage are required for a stage manager.",
+        message: "A service is required for this role.",
       };
     }
 
-    // Server-side validation (never client-trusted): the stage must belong to
-    // the actor's church and to the selected service.
+    // Server-side validation (never client-trusted): the service must belong
+    // to the actor's church.
+    const { data: service } = await ctx.supabase
+      .from("services")
+      .select("id")
+      .eq("id", parsed.serviceId)
+      .eq("church_id", ctx.churchId)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (!service) {
+      return { success: false, message: "Service not found." };
+    }
+
+    serviceIds = [parsed.serviceId];
+  }
+
+  if (roleType === "servant") {
+    if (!parsed.serviceId || !parsed.stageId) {
+      return {
+        success: false,
+        message: "A service and stage are required for a servant.",
+      };
+    }
+
+    // The stage must belong to the actor's church and to the selected service.
     const { data: stage } = await ctx.supabase
       .from("stages")
       .select("id")
@@ -504,6 +538,7 @@ export async function createServantAction(
       preferred_locale: parsed.preferred_locale ?? "ar",
       roleIds: [parsed.roleId],
       stageIds,
+      serviceIds,
     },
     ctx.churchId,
   );

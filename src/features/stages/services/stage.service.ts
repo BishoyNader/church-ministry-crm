@@ -505,6 +505,7 @@ export async function createStage(
         description_en: input.description_en ?? null,
         age_min: input.age_min ?? null,
         age_max: input.age_max ?? null,
+        stage_code: input.stage_code ?? null,
         sort_order: input.sort_order ?? 0,
       })
       .select("id")
