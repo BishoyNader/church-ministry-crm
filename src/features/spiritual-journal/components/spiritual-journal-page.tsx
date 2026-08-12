@@ -8,7 +8,7 @@ import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { PermissionGuard, useAccessState } from "@/features/rbac";
+import { PermissionGuard, useAccessState, PERMISSION_CODES } from "@/features/rbac";
 import { useSpiritualJournalList, useDeleteSpiritualJournalEntry } from "../hooks/use-spiritual-journal";
 import { SpiritualJournalFormDialog } from "@/features/spiritual-journal/components/spiritual-journal-form-dialog";
 import { SpiritualJournalOverview } from "./spiritual-journal-overview";
@@ -28,9 +28,17 @@ export function SpiritualJournalPage() {
   const [view, setView] = useState<"mine" | "overview">("mine");
 
   const { data: accessState } = useAccessState();
-  const isChurchViewer = (accessState?.roles ?? []).some(
-    (role) => role.role_type === "super_admin" || role.role_type === "admin",
+  const roles = accessState?.roles ?? [];
+  const permissionSet = new Set(
+    (accessState?.permissions ?? []).map((permission) => permission.code),
   );
+  // Church-wide journal monitoring: Church Manager / Admin always; a Stage
+  // Manager may use the (scoped) overview only when their role actually holds
+  // spiritual.read. Everyone else gets the own-journal view.
+  const isChurchViewer =
+    roles.some((role) => role.role_type === "super_admin" || role.role_type === "admin") ||
+    (roles.some((role) => role.role_type === "stage_manager") &&
+      permissionSet.has(PERMISSION_CODES.SPIRITUAL_READ));
 
   const { data, isLoading, error } = useSpiritualJournalList({ page, pageSize });
   const deleteMutation = useDeleteSpiritualJournalEntry();

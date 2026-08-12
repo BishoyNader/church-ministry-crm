@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Menu, Moon, Sun, Church, Users, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard, ArrowUpRight } from "lucide-react";
+import { Menu, Moon, Sun, Church, Users, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard, ArrowUpRight, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,16 +10,30 @@ import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { logoutAction } from "@/features/auth/actions/auth.actions";
-import { useAccessState, PERMISSION_CODES } from "@/features/rbac";
+import { useAccessState, PERMISSION_CODES, type PermissionCode } from "@/features/rbac";
 import { useNotificationSummary } from "@/features/notifications/hooks/use-notifications";
 import { cn } from "@/lib/utils";
 import { useDirection } from "@/lib/direction";
 
-const navItems = [
+type NavItem = {
+  labelKey: string;
+  href: string | null;
+  icon: LucideIcon;
+  permission?: PermissionCode;
+  /** Optional role whitelist (role_type values). When present, the item is
+   * hidden from every other role even if the permission is held — e.g.
+   * servant attendance is restricted to Church Manager / sector admin / stage
+   * manager, so plain servants never see a dead link. */
+  roles?: string[];
+  disabled?: boolean;
+};
+
+const navItems: NavItem[] = [
   { labelKey: "dashboard", href: "/dashboard", icon: BarChart3, permission: PERMISSION_CODES.REPORTS_READ, disabled: false },
   { labelKey: "reports", href: "/reports", icon: BarChart3, permission: PERMISSION_CODES.REPORTS_READ, disabled: false },
   { labelKey: "children", href: "/children", icon: UserRound, permission: PERMISSION_CODES.BENEFICIARIES_READ, disabled: false },
   { labelKey: "attendance", href: "/attendance", icon: ClipboardCheck, permission: PERMISSION_CODES.ATTENDANCE_READ, disabled: false },
+  { labelKey: "servantAttendance", href: "/servant-attendance", icon: ClipboardList, permission: PERMISSION_CODES.ATTENDANCE_READ, roles: ["super_admin", "admin", "stage_manager"], disabled: false },
   { labelKey: "followups", href: "/followups", icon: Phone, permission: PERMISSION_CODES.FOLLOWUPS_READ, disabled: false },
   { labelKey: "servantRecords", href: "/servants", icon: HandHeart, permission: PERMISSION_CODES.SERVANTS_READ, disabled: false },
   { labelKey: "approvals", href: "/approvals", icon: BadgeCheck, permission: PERMISSION_CODES.SERVANTS_APPROVE, disabled: false },
@@ -36,7 +50,7 @@ const navItems = [
   { labelKey: "events", href: "/events", icon: CalendarDays, permission: PERMISSION_CODES.EVENTS_READ, disabled: false },
   { labelKey: "promotions", href: "/promotions", icon: ArrowUpRight, permission: PERMISSION_CODES.SETTINGS_UPDATE, disabled: false },
   { labelKey: "settings", href: "/settings", icon: Settings, permission: PERMISSION_CODES.SETTINGS_READ, disabled: false },
-] as const;
+];
 
 function getActivePath(pathname: string): string {
   const parts = pathname.split("/").filter(Boolean);
@@ -68,13 +82,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { data: notificationSummary } = useNotificationSummary(canViewNotifications);
 
   const visibleNavItems = useMemo(() => {
+    const roleTypes = new Set((accessState?.roles ?? []).map((role) => role.role_type));
     return navItems.filter((item) => {
       if (item.disabled) {
         return true;
       }
-      return item.permission ? permissionSet.has(item.permission) : true;
+      if (item.permission && !permissionSet.has(item.permission)) {
+        return false;
+      }
+      if (item.roles && !item.roles.some((role) => roleTypes.has(role))) {
+        return false;
+      }
+      return true;
     });
-  }, [permissionSet]);
+  }, [permissionSet, accessState?.roles]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -86,7 +107,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const renderNavLink = (item: typeof navItems[number], handleClick?: () => void) => {
+  const renderNavLink = (item: NavItem, handleClick?: () => void) => {
     const Icon = item.icon;
     const isActive = item.href !== null && activePath === item.href;
 

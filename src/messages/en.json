@@ -30,7 +30,7 @@
     "churchRequests": "Church Requests",
     "reports": "Reports",
     "children": "Beneficiaries",
-    "attendance": "Attendance",
+    "attendance": "Beneficiary Attendance",
     "followups": "Follow-ups",
     "services": "Services",
     "classes": "Classes",
@@ -54,7 +54,8 @@
     "toggleTheme": "Toggle theme",
     "signOut": "Sign out",
     "skipToContent": "Skip to main content",
-    "promotions": "Annual Promotion"
+    "promotions": "Annual Promotion",
+    "servantAttendance": "Servant Attendance"
   },
   "spiritualJournal": {
     "title": "Spiritual Journal",
@@ -2004,5 +2005,35 @@
   },
   "common": {
     "close": "Close"
+  },
+  "servantAttendance": {
+    "title": "Servant Attendance",
+    "description": "Record attendance for servants (خدام) in each service and stage.",
+    "selectStage": "Select Stage",
+    "selectDate": "Select Date",
+    "servantName": "Servant Name",
+    "status": "Status",
+    "notes": "Notes",
+    "present": "Present",
+    "absent": "Absent",
+    "excused": "Excused",
+    "saveAttendance": "Save Attendance",
+    "saving": "Saving…",
+    "saveSuccess": "Servant attendance saved successfully.",
+    "saveError": "Failed to save servant attendance.",
+    "noStageSelected": "Select a service, stage and date to begin.",
+    "noServantsInStage": "No servants are assigned to this stage.",
+    "caption": "Servant attendance records",
+    "attendeesCount": "{count} servant(s) assigned to this stage",
+    "markAllPresent": "Mark all present",
+    "markAllAbsent": "Mark all absent",
+    "historyTitle": "Attendance history",
+    "historyLoading": "Loading history…",
+    "historyError": "Failed to load attendance history.",
+    "historyEmpty": "No previous attendance sessions for this stage.",
+    "historySummary": "{total} records · {present} present · {absent} absent",
+    "loadError": "Failed to load servant attendance.",
+    "accessDeniedTitle": "Access restricted",
+    "accessDeniedDescription": "Only the Church Manager and Stage Managers can record servant attendance."
   }
 }
