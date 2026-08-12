@@ -47,3 +47,10 @@ export type UpdateSpiritualJournalInput = {
   confession: boolean;
   spiritualNotes?: string | null;
 };
+
+export type ChurchJournalServant = {
+  id: string;
+  full_name_ar: string | null;
+  full_name_en: string | null;
+  email: string | null;
+};

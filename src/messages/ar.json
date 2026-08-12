@@ -75,7 +75,31 @@
     "deleteConfirm": "هل أنت متأكد من حذف هذه اليومية؟",
     "emptyTitle": "لا توجد يوميات بعد",
     "emptyDescription": "ابدأ بتسجيل ممارساتك الروحية اليومية.",
-    "loadError": "فشل تحميل اليوميات الروحية."
+    "loadError": "فشل تحميل اليوميات الروحية.",
+    "viewMine": "يومياتي",
+    "viewOverview": "نظرة شاملة",
+    "overview": {
+      "title": "نظرة شاملة على اليوميات الروحية",
+      "description": "راجع يوميات الخدام الروحية حسب الشهر.",
+      "backToMine": "العودة إلى يومياتي",
+      "servant": "الخادم",
+      "servantPlaceholder": "اختر الخادم",
+      "noServants": "لا يوجد خدام",
+      "month": "الشهر",
+      "entries": "عدد اليوميات: {count}",
+      "prayer": "الصلاة: {count}",
+      "bible": "الكتاب المقدس: {count}",
+      "liturgy": "القداس: {count}",
+      "confession": "الاعتراف",
+      "prayerCompleted": "الصلاة",
+      "bibleReading": "قراءة الكتاب المقدس",
+      "liturgyAttendance": "حضور القداس",
+      "loadError": "فشل تحميل بيانات اليوميات.",
+      "noServantsTitle": "لا يوجد خدام بعد",
+      "noServantsDescription": "ستظهر يوميات الخدام هنا بعد إضافة خدام إلى الكنيسة.",
+      "emptyTitle": "لا توجد يوميات لهذا الشهر",
+      "emptyDescription": "لم يسجّل الخادم أي يوميات في الشهر المحدد."
+    }
   },
   "settings": {
     "title": "الإعدادات",
@@ -278,6 +302,31 @@
       "confirm": "أرشفة",
       "cancel": "إلغاء",
       "processing": "جارٍ الأرشفة…"
+    },
+    "create": "إضافة خادم",
+    "createDialog": {
+      "title": "إضافة خادم جديد",
+      "description": "أنشئ حساب خادم جديد وحدد دوره، وإذا كان أمين مرحلة فحدد خدمته ومرحلته."
+    },
+    "form": {
+      "fullNameAr": "الاسم بالعربية",
+      "fullNameEn": "الاسم بالإنجليزية",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "phone": "رقم الهاتف",
+      "locale": "اللغة المفضلة",
+      "role": "الدور",
+      "rolePlaceholder": "اختر الدور",
+      "noRoles": "لا توجد أدوار متاحة",
+      "service": "الخدمة",
+      "servicePlaceholder": "اختر الخدمة",
+      "noServices": "لا توجد خدمات متاحة",
+      "stage": "المرحلة",
+      "stagePlaceholder": "اختر المرحلة",
+      "noStages": "لا توجد مراحل متاحة لهذه الخدمة",
+      "cancel": "إلغاء",
+      "processing": "جارٍ المعالجة…",
+      "create": "إنشاء"
     }
   },
   "users": {
@@ -1344,7 +1393,16 @@
       "isActive": "خدمة نشطة",
       "save": "حفظ",
       "cancel": "إلغاء",
-      "processing": "جاري المعالجة…"
+      "processing": "جاري المعالجة…",
+      "stages": "المراحل",
+      "addStage": "إضافة مرحلة",
+      "noStages": "لا توجد مراحل مضافة. يمكنك إضافة مراحل للخدمة الآن.",
+      "stage": "مرحلة {index}",
+      "removeStage": "حذف المرحلة",
+      "stageNameAr": "اسم المرحلة (عربي)",
+      "stageNameEn": "اسم المرحلة (إنجليزي)",
+      "ageMin": "السن الأدنى",
+      "ageMax": "السن الأقصى"
     },
     "archive": {
       "title": "أرشفة الخدمة",
@@ -1367,7 +1425,8 @@
       "updateDenied": "ليست لديك صلاحية تعديل الخدمات.",
       "archiveDenied": "ليست لديك صلاحية أرشفة الخدمات.",
       "restoreDenied": "ليست لديك صلاحية استعادة الخدمات.",
-      "notFound": "الخدمة غير موجودة."
+      "notFound": "الخدمة غير موجودة.",
+      "stageCreateFailed": "فشل إنشاء الخدمة أو إحدى مراحلها، وأُلغيت العملية."
     }
   },
   "events": {

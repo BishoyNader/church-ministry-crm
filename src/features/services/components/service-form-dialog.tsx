@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useEffect } from "react";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
+import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,14 +19,17 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import {
-  createServiceSchema,
+  createServiceWithStagesSchema,
   updateServiceSchema,
 } from "../schemas/services.schema";
 import type {
-  CreateServiceFormValues,
+  CreateServiceWithStagesFormValues,
   UpdateServiceFormValues,
 } from "../schemas/services.schema";
-import { useCreateService, useUpdateService } from "../hooks/use-services";
+import {
+  useCreateServiceWithStages,
+  useUpdateService,
+} from "../hooks/use-services";
 import type { ServiceListItem } from "../types/services.types";
 import { FormField } from "@/components/ui/form-field";
 import { ServiceStagesSection } from "./service-stages-section";
@@ -36,39 +40,32 @@ type ServiceFormDialogProps = {
   service?: ServiceListItem | null;
 };
 
-type CreatedServiceSnapshot = {
-  id: string;
-  name_ar: string;
-  name_en: string;
-  description_ar: string;
-  description_en: string;
-  sort_order: number;
-  is_active: boolean;
-};
-
 export function ServiceFormDialog({
   open,
   onOpenChange,
   service,
 }: ServiceFormDialogProps) {
   const t = useTranslations("services.form");
-  const [createdService, setCreatedService] = useState<CreatedServiceSnapshot | null>(null);
+  const isEdit = !!service;
 
-  const effectiveService = service ?? createdService;
-  const isEdit = !!effectiveService;
-
-  const createMutation = useCreateService();
+  const createMutation = useCreateServiceWithStages();
   const updateMutation = useUpdateService();
 
-  const createForm = useForm<CreateServiceFormValues>({
-    resolver: zodResolver(createServiceSchema),
+  const createForm = useForm<CreateServiceWithStagesFormValues>({
+    resolver: zodResolver(createServiceWithStagesSchema),
     defaultValues: {
       name_ar: "",
       name_en: "",
       description_ar: "",
       description_en: "",
       sort_order: 0,
+      stages: [],
     },
+  });
+
+  const stageArray = useFieldArray({
+    control: createForm.control,
+    name: "stages",
   });
 
   const updateForm = useForm<UpdateServiceFormValues>({
@@ -93,44 +90,29 @@ export function ServiceFormDialog({
         sort_order: service.sort_order,
         is_active: service.is_active,
       });
-    } else if (createdService) {
-      updateForm.reset({
-        name_ar: createdService.name_ar,
-        name_en: createdService.name_en ?? "",
-        description_ar: createdService.description_ar ?? "",
-        description_en: createdService.description_en ?? "",
-        sort_order: createdService.sort_order,
-        is_active: createdService.is_active,
-      });
     }
-  }, [service, createdService, updateForm]);
+  }, [service, updateForm]);
 
   const updateIsActive = useWatch({
     control: updateForm.control,
     name: "is_active",
   });
 
-  const handleCreate = async (values: CreateServiceFormValues) => {
-    const result = await createMutation.mutateAsync(values);
-    if (result.success && result.data?.id) {
-      // Keep the dialog open and switch to edit mode so the newly created
-      // service can immediately get its stages (المراحل) managed.
-      setCreatedService({
-        id: result.data.id,
-        name_ar: values.name_ar,
-        name_en: values.name_en ?? "",
-        description_ar: values.description_ar ?? "",
-        description_en: values.description_en ?? "",
-        sort_order: values.sort_order ?? 0,
-        is_active: true,
-      });
+  const handleCreate = async (values: CreateServiceWithStagesFormValues) => {
+    // The resolver already validated the raw form values; parse once more to
+    // get the coerced output (empty age inputs → undefined) for the action.
+    const parsed = createServiceWithStagesSchema.parse(values);
+    const result = await createMutation.mutateAsync(parsed);
+    if (result.success) {
+      // The service plus its stages were created together in one action.
+      onOpenChange(false);
     }
   };
 
   const handleUpdate = async (values: UpdateServiceFormValues) => {
-    if (!effectiveService) return;
+    if (!service) return;
     const result = await updateMutation.mutateAsync({
-      serviceId: effectiveService.id,
+      serviceId: service.id,
       values,
     });
     if (result.success) onOpenChange(false);
@@ -141,9 +123,7 @@ export function ServiceFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogPopup
-        className={isEdit ? "sm:max-w-2xl overflow-y-auto" : "sm:max-w-lg"}
-      >
+      <DialogPopup className="sm:max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? t("editTitle") : t("createTitle")}
@@ -212,8 +192,8 @@ export function ServiceFormDialog({
               </DialogFooter>
             </form>
 
-            {effectiveService && (
-              <ServiceStagesSection serviceId={effectiveService.id} />
+            {service && (
+              <ServiceStagesSection serviceId={service.id} />
             )}
           </>
         ) : (
@@ -251,6 +231,86 @@ export function ServiceFormDialog({
                 {...createForm.register("sort_order", { valueAsNumber: true })}
               />
             </FormField>
+
+            <div className="space-y-3 rounded-lg border p-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold">{t("stages")}</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    stageArray.append({ name_ar: "", name_en: "", age_min: undefined, age_max: undefined })
+                  }
+                >
+                  <Plus className="h-4 w-4" />
+                  {t("addStage")}
+                </Button>
+              </div>
+
+              {stageArray.fields.length === 0 ? (
+                <p className="text-xs text-muted-foreground">{t("noStages")}</p>
+              ) : (
+                <div className="space-y-4">
+                  {stageArray.fields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="space-y-3 rounded-md border p-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-muted-foreground">
+                          {t("stage", { index: index + 1 })}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label={t("removeStage")}
+                          onClick={() => stageArray.remove(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <FormField
+                          label={t("stageNameAr")}
+                          error={
+                            createForm.formState.errors.stages?.[index]?.name_ar
+                              ?.message
+                          }
+                          required
+                        >
+                          <Input {...createForm.register(`stages.${index}.name_ar`)} />
+                        </FormField>
+
+                        <FormField label={t("stageNameEn")}>
+                          <Input {...createForm.register(`stages.${index}.name_en`)} />
+                        </FormField>
+
+                        <FormField label={t("ageMin")}>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            {...createForm.register(`stages.${index}.age_min`)}
+                          />
+                        </FormField>
+
+                        <FormField label={t("ageMax")}>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            {...createForm.register(`stages.${index}.age_max`)}
+                          />
+                        </FormField>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {formError && (
               <p className="text-xs text-destructive">{formError}</p>

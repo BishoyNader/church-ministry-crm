@@ -75,7 +75,31 @@
     "deleteConfirm": "Are you sure you want to delete this entry?",
     "emptyTitle": "No entries yet",
     "emptyDescription": "Start recording your daily spiritual practices.",
-    "loadError": "Failed to load spiritual journal entries."
+    "loadError": "Failed to load spiritual journal entries.",
+    "viewMine": "My Journal",
+    "viewOverview": "Overview",
+    "overview": {
+      "title": "Spiritual Journal Overview",
+      "description": "Review servants' journal entries by month.",
+      "backToMine": "Back to my journal",
+      "servant": "Servant",
+      "servantPlaceholder": "Select a servant",
+      "noServants": "No servants available",
+      "month": "Month",
+      "entries": "{count, plural, one {# entry} other {# entries}}",
+      "prayer": "Prayer: {count}",
+      "bible": "Bible: {count}",
+      "liturgy": "Liturgy: {count}",
+      "confession": "Confession",
+      "prayerCompleted": "Prayer",
+      "bibleReading": "Bible Reading",
+      "liturgyAttendance": "Liturgy",
+      "loadError": "Failed to load journal data.",
+      "noServantsTitle": "No servants yet",
+      "noServantsDescription": "Servant journals will appear here once servants are added.",
+      "emptyTitle": "No entries for this month",
+      "emptyDescription": "The servant has not recorded any entries in the selected month."
+    }
   },
   "settings": {
     "title": "Settings",
@@ -278,6 +302,31 @@
       "confirm": "Archive",
       "cancel": "Cancel",
       "processing": "Archiving…"
+    },
+    "create": "Add Servant",
+    "createDialog": {
+      "title": "Add New Servant",
+      "description": "Create a new servant account and assign their role; if they are a stage manager, choose their service and stage."
+    },
+    "form": {
+      "fullNameAr": "Arabic name",
+      "fullNameEn": "English name",
+      "email": "Email",
+      "password": "Password",
+      "phone": "Phone",
+      "locale": "Preferred language",
+      "role": "Role",
+      "rolePlaceholder": "Select a role",
+      "noRoles": "No roles available",
+      "service": "Service",
+      "servicePlaceholder": "Select a service",
+      "noServices": "No services available",
+      "stage": "Stage",
+      "stagePlaceholder": "Select a stage",
+      "noStages": "No stages available for this service",
+      "cancel": "Cancel",
+      "processing": "Processing…",
+      "create": "Create"
     }
   },
   "users": {
@@ -1344,7 +1393,16 @@
       "isActive": "Active service",
       "save": "Save",
       "cancel": "Cancel",
-      "processing": "Processing…"
+      "processing": "Processing…",
+      "stages": "Stages",
+      "addStage": "Add stage",
+      "noStages": "No stages added yet. You can add stages for this service now.",
+      "stage": "Stage {index}",
+      "removeStage": "Remove stage",
+      "stageNameAr": "Stage name (Arabic)",
+      "stageNameEn": "Stage name (English)",
+      "ageMin": "Minimum age",
+      "ageMax": "Maximum age"
     },
     "archive": {
       "title": "Archive Service",
@@ -1367,7 +1425,8 @@
       "updateDenied": "You do not have permission to update services.",
       "archiveDenied": "You do not have permission to archive services.",
       "restoreDenied": "You do not have permission to restore services.",
-      "notFound": "Service not found."
+      "notFound": "Service not found.",
+      "stageCreateFailed": "Failed to create the service or one of its stages; the operation was rolled back."
     }
   },
   "events": {

@@ -5,12 +5,14 @@ import { useLocale } from "next-intl";
 import {
   archiveServiceAction,
   createServiceAction,
+  createServiceWithStagesAction,
   listServicesAction,
   restoreServiceAction,
   updateServiceAction,
 } from "../actions/services.actions";
 import type {
   CreateServiceFormValues,
+  CreateServiceWithStagesFormValues,
   UpdateServiceFormValues,
 } from "../schemas/services.schema";
 import type { ServiceFilters } from "../types/services.types";
@@ -41,6 +43,19 @@ export function useCreateService() {
 
   return useMutation({
     mutationFn: (values: CreateServiceFormValues) => createServiceAction(values, locale),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: SERVICES_QUERY_KEYS.all });
+    },
+  });
+}
+
+export function useCreateServiceWithStages() {
+  const queryClient = useQueryClient();
+  const locale = useLocale();
+
+  return useMutation({
+    mutationFn: (values: CreateServiceWithStagesFormValues) =>
+      createServiceWithStagesAction(values, locale),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SERVICES_QUERY_KEYS.all });
     },

@@ -9,6 +9,10 @@ export type {
   ServantListResult,
   UpdateServantInput,
   ServantStage,
+  ServantCreateOptionRole,
+  ServantCreateOptionService,
+  ServantCreateOptionStage,
+  ServantCreateOptions,
 } from "./types/servant.types";
 
 export {
@@ -16,8 +20,12 @@ export {
   updateServantSchema,
   assignServantStagesSchema,
   servantIdSchema,
+  createServantSchema,
 } from "./schemas/servant.schema";
-export type { UpdateServantFormValues } from "./schemas/servant.schema";
+export type {
+  UpdateServantFormValues,
+  CreateServantFormValues,
+} from "./schemas/servant.schema";
 
 export {
   listServants,
@@ -31,6 +39,8 @@ export {
 export {
   listServantsAction,
   getServantAction,
+  createServantAction,
+  getServantCreateOptionsAction,
   updateServantAction,
   assignServantStagesAction,
   archiveServantAction,
@@ -41,6 +51,8 @@ export {
   useServantList,
   useServantDetail,
   useServantStages,
+  useServantCreateOptions,
+  useCreateServant,
   useUpdateServant,
   useAssignServantStages,
   useArchiveServant,
@@ -50,5 +62,6 @@ export {
 } from "./hooks/use-servants";
 
 export { ServantListPage } from "./components/servant-list-page";
+export { ServantCreateDialog } from "./components/servant-create-dialog";
 export { ServantEditDialog } from "./components/servant-edit-dialog";
 export { ServantAssignmentDialog } from "./components/servant-assignment-dialog";

@@ -7,11 +7,18 @@ import { getActorStageScope } from "@/features/rbac/utils/stage-scope";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import { getTranslations } from "next-intl/server";
 import { ZodError } from "zod";
-import { createServiceSchema, updateServiceSchema } from "../schemas/services.schema";
+import {
+  createServiceSchema,
+  createServiceWithStagesSchema,
+  updateServiceSchema,
+} from "../schemas/services.schema";
 import type {
   CreateServiceFormValues,
+  CreateServiceWithStagesFormValues,
+  CreateServiceWithStagesParsedValues,
   UpdateServiceFormValues,
 } from "../schemas/services.schema";
+import { createStage } from "@/features/stages/services/stage.service";
 import * as servicesService from "../services/services.service";
 import type {
   ServiceActionResult,
@@ -120,6 +127,115 @@ export async function createServiceAction(
     success: true,
     message: "Service created successfully.",
     data: result.data ?? undefined,
+  };
+}
+
+/**
+ * Creates a service together with its stages (المراحل) in one logical user
+ * action. The service must exist first because stages require service_id, so
+ * the service is created, then every submitted stage is created with the
+ * returned service id. If any stage fails the whole operation is rolled back
+ * (created stages and the service are soft-deleted) so no inconsistent data
+ * is left behind.
+ */
+export async function createServiceWithStagesAction(
+  values: CreateServiceWithStagesFormValues,
+  locale: string,
+): Promise<ServiceActionResult<{ id: string }>> {
+  let parsed: CreateServiceWithStagesParsedValues;
+  try {
+    parsed = createServiceWithStagesSchema.parse(values);
+  } catch (error) {
+    return handleZodError(error);
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: "You must be logged in." };
+  }
+
+  if (!(await hasPermission(PERMISSION_CODES.STAGES_CREATE))) {
+    const t = await getTranslations({ locale, namespace: "services" });
+    return { success: false, message: t("errors.createDenied") };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+  if (!profile) {
+    return { success: false, message: "Profile not found." };
+  }
+
+  const serviceResult = await servicesService.createService(supabase, {
+    name_ar: parsed.name_ar,
+    name_en: parsed.name_en,
+    description_ar: parsed.description_ar,
+    description_en: parsed.description_en,
+    sort_order: parsed.sort_order,
+  });
+
+  if (serviceResult.error || !serviceResult.data) {
+    const t = await getTranslations({ locale, namespace: "services" });
+    return { success: false, message: t("errors.createFailed") };
+  }
+
+  const serviceId = serviceResult.data.id;
+  const createdStageIds: string[] = [];
+
+  for (const stage of parsed.stages ?? []) {
+    // createStage validates (never trusts the client) that the target service
+    // belongs to the actor's church before inserting the stage.
+    const stageResult = await createStage(supabase, {
+      service_id: serviceId,
+      name_ar: stage.name_ar,
+      name_en: stage.name_en,
+      description_ar: stage.description_ar,
+      description_en: stage.description_en,
+      age_min: stage.age_min,
+      age_max: stage.age_max,
+      sort_order: 0,
+    });
+
+    if (stageResult.error || !stageResult.data) {
+      // Roll back the whole logical action so the failed creation leaves no
+      // orphaned service or partially attached stages.
+      await servicesService.compensateServiceWithStages(
+        supabase,
+        serviceId,
+        createdStageIds,
+        profile.church_id,
+      );
+      const t = await getTranslations({ locale, namespace: "services" });
+      return { success: false, message: t("errors.stageCreateFailed") };
+    }
+
+    createdStageIds.push(stageResult.data.id);
+  }
+
+  // Assign the sort_order after creation (the create path ignores the numeric
+  // field and the submitted list order is authoritative).
+  for (let index = 0; index < createdStageIds.length; index += 1) {
+    await supabase
+      .from("stages")
+      .update({ sort_order: index })
+      .eq("id", createdStageIds[index]);
+  }
+
+  await writeAuditLog(supabase, "create", "service", serviceId, undefined, {
+    name_ar: parsed.name_ar,
+    stage_count: createdStageIds.length,
+  });
+
+  return {
+    success: true,
+    message: "Service created successfully.",
+    data: { id: serviceId },
   };
 }
 

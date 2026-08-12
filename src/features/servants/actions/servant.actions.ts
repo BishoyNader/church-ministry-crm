@@ -7,17 +7,23 @@ import { getActorStageScope, allStagesInScope } from "@/features/rbac/utils/stag
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import {
   assignServantStagesSchema,
+  createServantSchema,
   servantIdSchema,
   servantListSchema,
   updateServantSchema,
 } from "../schemas/servant.schema";
-import type { UpdateServantFormValues } from "../schemas/servant.schema";
 import type {
+  CreateServantFormValues,
+  UpdateServantFormValues,
+} from "../schemas/servant.schema";
+import type {
+  ServantCreateOptions,
   ServantDetail,
   ServantListResult,
   ServantStage,
 } from "../types/servant.types";
 import * as servantService from "../services/servant.service";
+import { createUser } from "@/features/users/services/user.service";
 import { ZodError } from "zod";
 
 export type ServantActionResult<T = unknown> = {
@@ -361,4 +367,164 @@ export async function getServantStagesAction(): Promise<ServantActionResult<Serv
   }
 
   return { success: true, data: result.data ?? undefined };
+}
+
+/**
+ * Options for the create-servant dialog in one server round trip: the church's
+ * assignable roles, its services, and its stages (each carrying its service_id
+ * so the dialog can build dependent service → stage selects). Only a church
+ * super admin may open the create flow, matching the create gate below.
+ */
+export async function getServantCreateOptionsAction(): Promise<
+  ServantActionResult<ServantCreateOptions>
+> {
+  const ctx = await getActorContext();
+  if (!isActorContext(ctx)) {
+    return { success: false, message: ctx.message };
+  }
+
+  if (!(await isActorSuperAdmin(ctx.supabase, ctx.userId, ctx.churchId))) {
+    return { success: false, message: "Only a super admin can create servants." };
+  }
+
+  const [rolesResult, servicesResult, stagesResult] = await Promise.all([
+    ctx.supabase
+      .from("roles")
+      .select("id, role_type, name_ar, name_en")
+      .eq("church_id", ctx.churchId)
+      .neq("role_type", "super_admin")
+      .order("name_ar"),
+    ctx.supabase
+      .from("services")
+      .select("id, name_ar")
+      .eq("church_id", ctx.churchId)
+      .is("deleted_at", null)
+      .eq("is_active", true)
+      .order("sort_order")
+      .order("name_ar"),
+    ctx.supabase
+      .from("stages")
+      .select("id, service_id, name_ar")
+      .eq("church_id", ctx.churchId)
+      .is("deleted_at", null)
+      .eq("is_active", true)
+      .order("sort_order")
+      .order("name_ar"),
+  ]);
+
+  if (rolesResult.error || servicesResult.error || stagesResult.error) {
+    return { success: false, message: "Failed to load create options." };
+  }
+
+  return {
+    success: true,
+    data: {
+      roles: rolesResult.data ?? [],
+      services: servicesResult.data ?? [],
+      stages: stagesResult.data ?? [],
+    },
+  };
+}
+
+/**
+ * Creates a new servant (user + role + optional stage grants) through the same
+ * secure create_church_user path used by Church user management. Only the
+ * church's super admin can run this — the RPC itself enforces the same
+ * boundary. When the selected role is a stage manager, a service + stage
+ * binding is required so the new manager immediately has a stage scope; the
+ * stage must belong to the actor's church and to the selected service.
+ */
+export async function createServantAction(
+  values: CreateServantFormValues,
+): Promise<ServantActionResult<{ id: string }>> {
+  let parsed;
+  try {
+    parsed = createServantSchema.parse(values);
+  } catch (error) {
+    if (error instanceof ZodError) return parseError(error);
+    throw error;
+  }
+
+  const ctx = await getActorContext();
+  if (!isActorContext(ctx)) {
+    return { success: false, message: ctx.message };
+  }
+
+  if (!(await isActorSuperAdmin(ctx.supabase, ctx.userId, ctx.churchId))) {
+    return { success: false, message: "Only a super admin can create servants." };
+  }
+
+  const { data: role } = await ctx.supabase
+    .from("roles")
+    .select("id, role_type")
+    .eq("id", parsed.roleId)
+    .eq("church_id", ctx.churchId)
+    .maybeSingle();
+
+  if (!role) {
+    return { success: false, message: "Role not found in this church." };
+  }
+
+  let stageIds: string[] = [];
+
+  if (role.role_type === "stage_manager") {
+    if (!parsed.serviceId || !parsed.stageId) {
+      return {
+        success: false,
+        message: "A service and stage are required for a stage manager.",
+      };
+    }
+
+    // Server-side validation (never client-trusted): the stage must belong to
+    // the actor's church and to the selected service.
+    const { data: stage } = await ctx.supabase
+      .from("stages")
+      .select("id")
+      .eq("id", parsed.stageId)
+      .eq("church_id", ctx.churchId)
+      .eq("service_id", parsed.serviceId)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (!stage) {
+      return { success: false, message: "Stage not found." };
+    }
+
+    stageIds = [parsed.stageId];
+  }
+
+  const result = await createUser(
+    ctx.supabase,
+    {
+      email: parsed.email,
+      password: parsed.password,
+      full_name_ar: parsed.full_name_ar,
+      full_name_en: parsed.full_name_en,
+      phone: parsed.phone,
+      preferred_locale: parsed.preferred_locale ?? "ar",
+      roleIds: [parsed.roleId],
+      stageIds,
+    },
+    ctx.churchId,
+  );
+
+  if (result.error || !result.data) {
+    return { success: false, message: result.error ?? "Failed to create servant." };
+  }
+
+  await writeAuditLog(
+    ctx.supabase,
+    "create",
+    "servant",
+    result.data.id,
+    undefined,
+    {
+      email: parsed.email,
+      full_name_ar: parsed.full_name_ar,
+      role_type: role.role_type,
+      stage_ids: stageIds,
+    },
+  );
+
+  return { success: true, message: "Servant created successfully.", data: result.data };
 }
