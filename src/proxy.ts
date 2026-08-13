@@ -75,7 +75,31 @@ export async function proxy(request: NextRequest) {
   const rebasedRequest = withRequestId(request, requestId);
   const intlResponse = intlMiddleware(rebasedRequest);
   intlResponse.headers.set("x-request-id", requestId);
-  const { response, user, supabase } = await updateSession(rebasedRequest, intlResponse);
+
+  // A missing/misconfigured Supabase environment would otherwise throw from
+  // getSupabaseEnv() inside updateSession on EVERY request, taking the whole
+  // deployment down with an opaque 500 (observed on a staging deployment whose
+  // Preview env vars were not set). Fail closed with a clear maintenance
+  // response instead — this only runs when env vars are absent, so it can
+  // never bypass auth or weaken RLS on a correctly configured deployment.
+  let sessionContext: Awaited<ReturnType<typeof updateSession>>;
+  try {
+    sessionContext = await updateSession(rebasedRequest, intlResponse);
+  } catch (error) {
+    const isMissingEnv =
+      error instanceof Error && error.message.includes("Missing Supabase environment variables");
+    if (!isMissingEnv) {
+      throw error;
+    }
+    const maintenance = NextResponse.json(
+      { error: "Server configuration error. Please check the Supabase environment variables." },
+      { status: 503 },
+    );
+    maintenance.headers.set("x-request-id", requestId);
+    stampResponse(maintenance, startedAt);
+    return maintenance;
+  }
+  const { response, user, supabase } = sessionContext;
 
   const pathname = request.nextUrl.pathname;
   const pathParts = pathname.split("/").filter(Boolean);

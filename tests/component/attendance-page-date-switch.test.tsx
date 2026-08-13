@@ -106,4 +106,23 @@ describe("AttendancePage — date switching without a page refresh", () => {
       expect.anything(),
     );
   });
+
+  it("still renders an explicit Save button for admins and enables it on a status click", async () => {
+    mocks.attendanceList.mockReturnValue({ data: { data: [] }, error: null });
+
+    render(<AttendancePage />);
+
+    fireEvent.click(screen.getAllByText("selectStage").at(-1)!);
+    fireEvent.click(await screen.findByText("Grade 6"));
+
+    // Regression: the explicit Save button must be visible for admin roles
+    // (it was previously hidden, which read as "save does nothing").
+    const saveButton = screen.getByText("saveAttendance").closest("button")!;
+    expect(saveButton).not.toBeNull();
+    expect(saveButton.disabled).toBe(true); // no unsaved edits yet
+
+    // One-tap click writes the optimistic local record, enabling Save.
+    fireEvent.click(screen.getByText("present"));
+    expect(saveButton.disabled).toBe(false);
+  });
 });
