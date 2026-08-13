@@ -5,6 +5,7 @@ import { UserRound } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
 import { EmptyState } from "@/components/feedback/empty-state";
+import { useRelativeTime } from "@/hooks/use-relative-time";
 import Link from "next/link";
 import type { RecentChildItem } from "../types/dashboard.types";
 
@@ -16,6 +17,7 @@ type RecentChildrenProps = {
 export function RecentChildren({ data, isLoading }: RecentChildrenProps) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
+  const relativeTime = useRelativeTime();
 
   if (isLoading) {
     return (
@@ -52,7 +54,7 @@ export function RecentChildren({ data, isLoading }: RecentChildrenProps) {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{child.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {timeAgo(child.createdAt, locale)}
+                    {relativeTime({ date: child.createdAt })}
                   </p>
                 </div>
               </Link>
@@ -64,30 +66,3 @@ export function RecentChildren({ data, isLoading }: RecentChildrenProps) {
   );
 }
 
-function timeAgo(dateStr: string, locale: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.round(diffMs / 60000);
-
-  if (diffMins < 1) return locale === "ar" ? "الآن" : "just now";
-  if (diffMins < 60) {
-    const val = Math.round(diffMins);
-    if (locale === "ar") return `منذ ${val} دقيقة`;
-    return `${val}m ago`;
-  }
-  const hours = Math.round(diffMins / 60);
-  if (hours < 24) {
-    if (locale === "ar") return `منذ ${hours} ساعة`;
-    return `${hours}h ago`;
-  }
-  const days = Math.round(hours / 24);
-  if (days < 30) {
-    if (locale === "ar") return `منذ ${days} يوم`;
-    return `${days}d ago`;
-  }
-  return date.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-    month: "short",
-    day: "numeric",
-  });
-}

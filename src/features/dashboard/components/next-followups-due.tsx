@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
 import { EmptyState } from "@/components/feedback/empty-state";
+import { useRelativeTime } from "@/hooks/use-relative-time";
 import Link from "next/link";
 import type { ScheduledFollowupItem } from "../types/dashboard.types";
 
@@ -17,6 +18,7 @@ type NextFollowupsDueProps = {
 export function NextFollowupsDue({ data, isLoading }: NextFollowupsDueProps) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
+  const relativeTime = useRelativeTime();
 
   if (isLoading) {
     return (
@@ -53,7 +55,7 @@ export function NextFollowupsDue({ data, isLoading }: NextFollowupsDueProps) {
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{item.childName || "\u2014"}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatRelativeDate(item.scheduledAt, locale)}
+                    {relativeTime({ date: item.scheduledAt, future: true })}
                   </p>
                 </div>
                 <Badge
@@ -69,33 +71,4 @@ export function NextFollowupsDue({ data, isLoading }: NextFollowupsDueProps) {
       )}
     </SectionCard>
   );
-}
-
-function formatRelativeDate(dateStr: string, locale: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = date.getTime() - now.getTime();
-  const diffMins = Math.round(diffMs / 60000);
-  const absMins = Math.abs(diffMins);
-
-  if (absMins < 1) return locale === "ar" ? "الآن" : "now";
-  if (absMins < 60) {
-    const val = Math.round(absMins);
-    if (locale === "ar") return `خلال ${val} دقيقة`;
-    return `in ${val}m`;
-  }
-  const hours = Math.round(absMins / 60);
-  if (hours < 24) {
-    if (locale === "ar") return `خلال ${hours} ساعة`;
-    return `in ${hours}h`;
-  }
-  const days = Math.round(hours / 24);
-  if (days < 7) {
-    if (locale === "ar") return `خلال ${days} يوم`;
-    return `in ${days}d`;
-  }
-  return date.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-    month: "short",
-    day: "numeric",
-  });
 }

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatLocalizedDateTime } from "@/lib/dates";
 import type { AuditLogEntry } from "../types/audit.types";
 
 type AuditDetailDialogProps = {
@@ -48,7 +49,7 @@ export function AuditDetailDialog({ entry, open, onOpenChange }: AuditDetailDial
   const locale = useLocale();
 
   const actorLabel = entry.actorName ?? entry.actorEmail ?? entry.actorId;
-  const formattedTime = new Date(entry.createdAt).toLocaleString(locale);
+  const formattedTime = formatLocalizedDateTime(entry.createdAt, locale);
   const hasChanges = entry.oldValues !== null || entry.newValues !== null;
 
   return (

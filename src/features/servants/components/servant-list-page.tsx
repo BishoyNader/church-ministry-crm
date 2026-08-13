@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Plus, Search, Pencil, ListChecks, Archive, CheckCircle2, XCircle } from "lucide-react";
 import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import {
   Dialog,
   DialogPopup,
@@ -28,6 +30,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { useAccessState } from "@/features/rbac";
+import { formatLocalizedDate } from "@/lib/dates";
 import {
   useServantList,
   useApproveServant,
@@ -50,6 +53,7 @@ const PAGE_SIZE = 20;
 
 export function ServantListPage() {
   const t = useTranslations("servants");
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -178,7 +182,7 @@ export function ServantListPage() {
       <SectionCard className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={t("searchPlaceholder")}
               aria-label={t("search")}
@@ -305,7 +309,7 @@ export function ServantListPage() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">
-                          {new Date(servant.created_at).toLocaleDateString()}
+                          {formatLocalizedDate(servant.created_at, locale)}
                         </td>
                         <td className="px-4 py-3 text-end">
                           <div className="flex items-center justify-end gap-1">
@@ -436,9 +440,9 @@ export function ServantListPage() {
           </DialogHeader>
 
           {rejectError ? (
-            <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {rejectError}
-            </div>
+            <InlineNotice variant="error">
+              <p>{rejectError}</p>
+            </InlineNotice>
           ) : null}
 
           <label className="block text-sm font-medium">
@@ -466,42 +470,23 @@ export function ServantListPage() {
         </DialogPopup>
       </Dialog>
 
-      <Dialog
+      <ConfirmDialog
         open={!!archiveTarget}
         onOpenChange={(open) => {
           if (!open) setArchiveTarget(null);
         }}
-      >
-        <DialogPopup>
-          <DialogHeader>
-            <DialogTitle>{t("archiveDialog.title")}</DialogTitle>
-            <DialogDescription>
-              {t("archiveDialog.description", {
-                name: archiveTarget?.profile?.full_name_ar ?? "",
-              })}
-            </DialogDescription>
-          </DialogHeader>
-
-          {archiveError ? (
-            <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-              {archiveError}
-            </div>
-          ) : null}
-
-          <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
-              {t("archiveDialog.cancel")}
-            </DialogClose>
-            <Button
-              variant="destructive"
-              onClick={handleArchive}
-              disabled={archiveMutation.isPending}
-            >
-              {archiveMutation.isPending ? t("archiveDialog.processing") : t("archiveDialog.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogPopup>
-      </Dialog>
+        title={t("archiveDialog.title")}
+        description={t("archiveDialog.description", {
+          name: archiveTarget?.profile?.full_name_ar ?? "",
+        })}
+        confirmLabel={t("archiveDialog.confirm")}
+        cancelLabel={t("archiveDialog.cancel")}
+        processingLabel={t("archiveDialog.processing")}
+        destructive
+        isSubmitting={archiveMutation.isPending}
+        errorMessage={archiveError}
+        onConfirm={handleArchive}
+      />
     </section>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { CheckCircle2, Eye, UserRoundCheck, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ import {
   useRejectServant,
 } from "@/features/users";
 import type { PendingRegistration } from "@/features/users/services/approval.service";
+import { formatLocalizedDate } from "@/lib/dates";
 
 type ServantApprovalsTabProps = {
   onReview: (registration: PendingRegistration) => void;
@@ -32,6 +33,7 @@ type ServantApprovalsTabProps = {
 
 export function ServantApprovalsTab({ onReview }: ServantApprovalsTabProps) {
   const t = useTranslations("approvals.queue");
+  const locale = useLocale();
   const { data, isLoading, error } = usePendingRegistrations();
   const approveMutation = useApproveServant();
   const rejectMutation = useRejectServant();
@@ -152,7 +154,7 @@ export function ServantApprovalsTab({ onReview }: ServantApprovalsTabProps) {
                   {registration.profiles?.phone ?? "—"}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {new Date(registration.created_at).toLocaleDateString()}
+                  {formatLocalizedDate(registration.created_at, locale)}
                 </td>
                 <td className="px-6 py-3 text-end">
                   <div className="flex items-center justify-end gap-1">

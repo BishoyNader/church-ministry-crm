@@ -1,15 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogPopup,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   useDeactivateChurch,
   useDisableChurch,
@@ -60,33 +52,18 @@ export function ChurchStatusConfirmDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogPopup className="sm:max-w-[440px]">
-        <DialogHeader>
-          <DialogTitle>{t(`statusDialog.${status}.title`)}</DialogTitle>
-          <DialogDescription>{t(`statusDialog.${status}.description`)}</DialogDescription>
-        </DialogHeader>
-
-        {errorMessage && (
-          <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            {errorMessage}
-          </div>
-        )}
-
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
-            {t("cancel")}
-          </Button>
-          <Button
-            type="button"
-            variant={status === "disabled" ? "destructive" : "default"}
-            onClick={handleConfirm}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? t("statusDialog.saving") : t(`statusDialog.${status}.confirm`)}
-          </Button>
-        </DialogFooter>
-      </DialogPopup>
-    </Dialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t(`statusDialog.${status}.title`)}
+      description={t(`statusDialog.${status}.description`)}
+      confirmLabel={t(`statusDialog.${status}.confirm`)}
+      cancelLabel={t("cancel")}
+      processingLabel={t("statusDialog.saving")}
+      destructive={status === "disabled"}
+      isSubmitting={isSubmitting}
+      errorMessage={errorMessage}
+      onConfirm={handleConfirm}
+    />
   );
 }

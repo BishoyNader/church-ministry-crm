@@ -55,6 +55,8 @@
     "skipToContent": "Skip to main content",
     "promotions": "Annual Promotion",
     "servantAttendance": "Servant Attendance",
+    "approvals": "Approval Center",
+    "audit": "Audit Log",
     "sectionOverview": "Overview",
     "sectionMinistry": "Ministry",
     "sectionPeople": "People",
@@ -2033,7 +2035,16 @@
     "page": "Page {page} of {totalPages}"
   },
   "common": {
-    "close": "Close"
+    "close": "Close",
+    "time": {
+      "now": "now",
+      "inMinutes": "in {value}m",
+      "inHours": "in {value}h",
+      "inDays": "in {value}d",
+      "minutesAgo": "{value}m ago",
+      "hoursAgo": "{value}h ago",
+      "daysAgo": "{value}d ago"
+    }
   },
   "servantAttendance": {
     "title": "Servant Attendance",

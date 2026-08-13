@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Download,
   Layers,
@@ -20,15 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
 import { PaginationBar } from "@/components/layout/pagination-bar";
-import {
-  Dialog,
-  DialogPopup,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Select,
   SelectContent,
@@ -37,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { formatLocalizedDate } from "@/lib/dates";
 import {
   useUserList,
   useExportUsers,
@@ -72,6 +65,7 @@ function triggerDownload(fileName: string, content: string, mimeType: string) {
 export function ChurchUsersTable({ churchId }: ChurchUsersTableProps) {
   const t = useTranslations("churches");
   const ut = useTranslations("users");
+  const locale = useLocale();
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
@@ -266,7 +260,7 @@ export function ChurchUsersTable({ churchId }: ChurchUsersTableProps) {
                       </Badge>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {new Date(user.created_at).toLocaleDateString()}
+                      {formatLocalizedDate(user.created_at, locale)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
@@ -379,28 +373,19 @@ export function ChurchUsersTable({ churchId }: ChurchUsersTableProps) {
         currentManagerId={currentManagerId}
       />
 
-      <Dialog open={!!deactivateUser} onOpenChange={(open) => { if (!open) setDeactivateUser(null); }}>
-        <DialogPopup>
-          <DialogHeader>
-            <DialogTitle>{ut("deactivate.title")}</DialogTitle>
-            <DialogDescription>
-              {ut("deactivate.description", { name: deactivateUser?.full_name_ar ?? "" })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
-              {ut("deactivate.cancel")}
-            </DialogClose>
-            <Button
-              variant="destructive"
-              onClick={handleDeactivate}
-              disabled={deactivateMutation.isPending}
-            >
-              {deactivateMutation.isPending ? ut("deactivate.processing") : ut("deactivate.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogPopup>
-      </Dialog>
+      <ConfirmDialog
+        open={!!deactivateUser}
+        onOpenChange={(open) => { if (!open) setDeactivateUser(null); }}
+        title={ut("deactivate.title")}
+        description={ut("deactivate.description", { name: deactivateUser?.full_name_ar ?? "" })}
+        confirmLabel={ut("deactivate.confirm")}
+        cancelLabel={ut("deactivate.cancel")}
+        processingLabel={ut("deactivate.processing")}
+        destructive
+        isSubmitting={deactivateMutation.isPending}
+        errorMessage={deactivateMutation.data?.success === false ? deactivateMutation.data.message : null}
+        onConfirm={handleDeactivate}
+      />
     </div>
   );
 }

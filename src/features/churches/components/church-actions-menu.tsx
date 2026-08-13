@@ -87,7 +87,7 @@ export function ChurchActionsMenu({
       </Button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-1 min-w-[180px] overflow-hidden rounded-md border bg-popover py-1 shadow-md">
+        <div className="absolute end-0 z-50 mt-1 min-w-[180px] overflow-hidden rounded-md border bg-popover py-1 shadow-md">
           <MenuItem label={t("actions.view")} onSelect={close(() => onView(church))} />
 
           <PermissionGuard permission="tenants.update">

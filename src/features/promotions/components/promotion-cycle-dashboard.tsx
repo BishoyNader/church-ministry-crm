@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   AlertTriangle,
   ArrowRight,
@@ -32,6 +32,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { formatLocalizedDate } from "@/lib/dates";
 import {
   usePromotionCycleEntries,
   usePromotionTransitions,
@@ -194,6 +195,7 @@ function ConfirmDialog({
 
 export function PromotionCycleDashboard({ cycles }: { cycles: PromotionCycle[] }) {
   const t = useTranslations("promotions.cycles");
+  const locale = useLocale();
 
   const [reviewOpen, setReviewOpen] = useState(false);
   const [confirmCycle, setConfirmCycle] = useState<PromotionCycle | null>(null);
@@ -292,7 +294,7 @@ export function PromotionCycleDashboard({ cycles }: { cycles: PromotionCycle[] }
               </Badge>
               {cycle.confirmedAt ? (
                 <span className="text-xs text-muted-foreground">
-                  {new Date(cycle.confirmedAt).toLocaleDateString()}
+                  {formatLocalizedDate(cycle.confirmedAt, locale)}
                 </span>
               ) : null}
             </div>

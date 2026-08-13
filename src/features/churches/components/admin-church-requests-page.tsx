@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   CheckCircle2,
   XCircle,
@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { StaggerItem, StaggerList } from "@/components/motion/motion-primitives";
+import { formatLocalizedDate, formatLocalizedDateTime } from "@/lib/dates";
 import {
   useApproveChurchRequest,
   useChurchRequests,
@@ -38,6 +39,7 @@ type AdminChurchRequestsPageProps = {
 
 export function AdminChurchRequestsPage({ embedded = false }: AdminChurchRequestsPageProps) {
   const t = useTranslations("admin.churchRequests");
+  const locale = useLocale();
 
   const [tab, setTab] = useState<ChurchRequestStatus>("pending");
   const [searchInput, setSearchInput] = useState("");
@@ -151,7 +153,7 @@ export function AdminChurchRequestsPage({ embedded = false }: AdminChurchRequest
                       <p className="text-xs text-muted-foreground">
                         {t("table.catechist", { name: request.catechist_name })} ·{" "}
                         {t("table.submitted", {
-                          date: new Date(request.created_at).toLocaleDateString(),
+                          date: formatLocalizedDate(request.created_at, locale),
                         })}
                       </p>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -165,7 +167,7 @@ export function AdminChurchRequestsPage({ embedded = false }: AdminChurchRequest
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <CalendarDays className="size-3" />
-                          {new Date(request.created_at).toLocaleString()}
+                          {formatLocalizedDateTime(request.created_at, locale)}
                         </span>
                       </div>
                       {request.notes ? (

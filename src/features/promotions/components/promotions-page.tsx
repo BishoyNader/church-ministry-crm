@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ArrowUpRight, Plus, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { cn } from "@/lib/utils";
+import { formatLocalizedDate } from "@/lib/dates";
 import { PromotionRunDialog } from "./promotion-run-dialog";
 import { SinglePromoteDialog } from "./single-promote-dialog";
 import { PromotionCycleDashboard } from "./promotion-cycle-dashboard";
@@ -25,6 +26,7 @@ import type { AnnualPromotionRun } from "../types/promotions.types";
 
 function RunCard({ run }: { run: AnnualPromotionRun }) {
   const t = useTranslations("promotions");
+  const locale = useLocale();
   const [expanded, setExpanded] = useState(false);
 
   const entriesQuery = usePromotionEntries(expanded ? run.id : null);
@@ -70,7 +72,7 @@ function RunCard({ run }: { run: AnnualPromotionRun }) {
               <Badge variant="outline">{run.academicYear}</Badge>
             </div>
             <p className="text-sm text-muted-foreground">
-              {new Date(run.createdAt).toLocaleDateString()}
+              {formatLocalizedDate(run.createdAt, locale)}
               {run.notes ? ` — ${run.notes}` : ""}
             </p>
           </div>

@@ -1,16 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogPopup,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useDeactivateChild } from "../hooks/use-children";
 import type { ChildListItem } from "../types/child.types";
 
@@ -39,35 +30,21 @@ export function ChildDeleteDialog({
       ? deactivateMutation.data.message
       : null;
 
-  const childName = child
-    ? child.full_name_ar
-    : "";
+  const childName = child ? child.full_name_ar : "";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogPopup>
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-          <DialogDescription>
-            {t("description", { name: childName })}
-          </DialogDescription>
-        </DialogHeader>
-
-        {error && <p className="text-sm text-destructive">{error}</p>}
-
-        <DialogFooter>
-          <DialogClose render={<Button variant="outline" />}>
-            {t("cancel")}
-          </DialogClose>
-          <Button
-            variant="destructive"
-            onClick={handleDeactivate}
-            disabled={deactivateMutation.isPending}
-          >
-            {deactivateMutation.isPending ? t("processing") : t("confirm")}
-          </Button>
-        </DialogFooter>
-      </DialogPopup>
-    </Dialog>
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("title")}
+      description={t("description", { name: childName })}
+      confirmLabel={t("confirm")}
+      cancelLabel={t("cancel")}
+      processingLabel={t("processing")}
+      destructive
+      isSubmitting={deactivateMutation.isPending}
+      errorMessage={error}
+      onConfirm={handleDeactivate}
+    />
   );
 }

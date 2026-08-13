@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Plus, Pencil, Trash2, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatLocalizedDate } from "@/lib/dates";
 import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,6 +23,7 @@ const pageSize = 20;
 
 export function SpiritualJournalPage() {
   const t = useTranslations("spiritualJournal");
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<SpiritualJournalEntry | null>(null);
@@ -153,7 +155,7 @@ export function SpiritualJournalPage() {
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="text-base font-semibold">
-                        {new Date(entry.entryDate).toLocaleDateString()}
+                        {formatLocalizedDate(entry.entryDate, locale)}
                       </h3>
                       <Badge variant={entry.prayerCompleted ? "default" : "secondary"}>
                         {t("prayerCompleted")}

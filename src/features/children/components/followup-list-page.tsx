@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Plus, Pencil, Trash2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { formatLocalizedDate } from "@/lib/dates";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,6 +40,7 @@ const TYPE_OPTIONS = ["phone_call", "home_visit", "whatsapp", "church_meeting", 
 export function FollowupListPage() {
   const t = useTranslations("children");
   const tDetail = useTranslations("children.detail");
+  const locale = useLocale();
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -295,7 +297,7 @@ export function FollowupListPage() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {followup.scheduled_at
-                        ? new Date(followup.scheduled_at).toLocaleDateString()
+                        ? formatLocalizedDate(followup.scheduled_at, locale)
                         : "\u2014"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">

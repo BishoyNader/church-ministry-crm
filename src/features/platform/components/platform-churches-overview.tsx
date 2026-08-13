@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { SectionCard } from "@/components/layout/section-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/feedback/empty-state";
+import { useRelativeTime } from "@/hooks/use-relative-time";
 import { StaggerItem, StaggerList } from "@/components/motion/motion-primitives";
 import { useChurchList } from "@/features/churches/hooks/use-churches";
 import { ChurchStatusBadge } from "@/features/churches/components/church-status-badge";
@@ -14,6 +15,7 @@ const PREVIEW_LIMIT = 5;
 
 export function PlatformChurchesOverview() {
   const t = useTranslations("admin.dashboard.churches");
+  const relativeTime = useRelativeTime();
   const { data, isLoading } = useChurchList({ pageSize: PREVIEW_LIMIT });
 
   const rows = data?.data?.rows ?? [];
@@ -58,7 +60,7 @@ export function PlatformChurchesOverview() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium hover:underline">{church.name_ar}</p>
                   <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                    {church.slug} · {new Date(church.created_at).toLocaleDateString()}
+                    {church.slug} · {relativeTime({ date: church.created_at })}
                   </p>
                 </div>
                 <ChurchStatusBadge status={church.status} />

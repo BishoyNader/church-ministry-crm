@@ -2,7 +2,7 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { AlertCircle, CheckCircle2, ArrowRight, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 type OverdueFollowupsHeroProps = {
@@ -70,12 +70,17 @@ export function OverdueFollowupsHero({ overdue, isLoading }: OverdueFollowupsHer
             </div>
           </div>
           <div className="hidden shrink-0 sm:block">
-            <Button variant={hasOverdue ? "destructive" : "outline"} size="sm" className="pointer-events-none">
-              <span className="flex items-center gap-1">
-                {t("overdueFollowups.viewAll")}
-                {isRtl ? <ArrowLeft className="size-3.5" /> : <ArrowRight className="size-3.5" />}
-              </span>
-            </Button>
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                hasOverdue
+                  ? "border-destructive/30 bg-destructive/10 text-destructive group-hover:bg-destructive/15"
+                  : "border-border-whisper bg-surface-elevated text-muted-foreground group-hover:text-foreground",
+              )}
+            >
+              {t("overdueFollowups.viewAll")}
+              {isRtl ? <ArrowLeft className="size-3.5" /> : <ArrowRight className="size-3.5" />}
+            </span>
           </div>
         </div>
       </div>

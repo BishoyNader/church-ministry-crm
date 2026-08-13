@@ -1,22 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Search, Plus, Download, Loader2, Layers, Pencil, UserCog, UserX } from "lucide-react";
 import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Dialog,
-  DialogPopup,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   Select,
   SelectTrigger,
@@ -28,6 +20,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
+import { formatLocalizedDate } from "@/lib/dates";
 import { useUserList, useDeactivateUser, useActorChurch, useExportUsers } from "../hooks/use-users";
 import { PendingRegistrationsQueue } from "./pending-registrations-queue";
 import { UserForm } from "./user-form";
@@ -49,6 +42,7 @@ const PAGE_SIZE = 20;
 
 export function UserListPage() {
   const t = useTranslations("users");
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -161,7 +155,7 @@ export function UserListPage() {
       <SectionCard className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={t("searchPlaceholder")}
               aria-label={t("search")}
@@ -273,7 +267,7 @@ export function UserListPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {new Date(user.created_at).toLocaleDateString()}
+                        {formatLocalizedDate(user.created_at, locale)}
                       </td>
                       <td className="px-4 py-3 text-end">
                         <div className="flex items-center justify-end gap-1">
@@ -378,28 +372,19 @@ export function UserListPage() {
         />
       )}
 
-      <Dialog open={!!deactivateUser} onOpenChange={(open) => { if (!open) setDeactivateUser(null); }}>
-        <DialogPopup>
-          <DialogHeader>
-            <DialogTitle>{t("deactivate.title")}</DialogTitle>
-            <DialogDescription>
-              {t("deactivate.description", { name: deactivateUser?.full_name_ar ?? "" })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose render={<Button variant="outline" />}>
-              {t("deactivate.cancel")}
-            </DialogClose>
-            <Button
-              variant="destructive"
-              onClick={handleDeactivate}
-              disabled={deactivateMutation.isPending}
-            >
-              {deactivateMutation.isPending ? t("deactivate.processing") : t("deactivate.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogPopup>
-      </Dialog>
+      <ConfirmDialog
+        open={!!deactivateUser}
+        onOpenChange={(open) => { if (!open) setDeactivateUser(null); }}
+        title={t("deactivate.title")}
+        description={t("deactivate.description", { name: deactivateUser?.full_name_ar ?? "" })}
+        confirmLabel={t("deactivate.confirm")}
+        cancelLabel={t("deactivate.cancel")}
+        processingLabel={t("deactivate.processing")}
+        destructive
+        isSubmitting={deactivateMutation.isPending}
+        errorMessage={deactivateMutation.data?.success === false ? deactivateMutation.data.message : null}
+        onConfirm={handleDeactivate}
+      />
     </section>
   );
 }

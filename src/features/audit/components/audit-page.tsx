@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
+import { formatLocalizedDateTime } from "@/lib/dates";
 import { useAuditFilterOptions, useAuditPage, useExportAuditCsv } from "../hooks/use-audit";
 import { AUDIT_ACTION_CODES } from "../services/audit.service";
 import { AuditDetailDialog } from "./audit-detail-dialog";
@@ -244,7 +245,7 @@ export function AuditPage() {
                 {rows.map((entry) => (
                   <tr key={entry.id} className="align-middle">
                     <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
-                      {new Date(entry.createdAt).toLocaleString(locale)}
+                      {formatLocalizedDateTime(entry.createdAt, locale)}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={ACTION_VARIANT[entry.action] ?? "outline"}>

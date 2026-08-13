@@ -63,7 +63,7 @@ export function StatCard({
           {isLoading ? (
             <Skeleton className="mt-1 h-7 w-16" />
           ) : (
-            <p className={cn("text-2xl font-bold tabular-nums", toneValue[tone])}>
+            <p className={cn("text-2xl font-bold leading-none tracking-tight tabular-nums", toneValue[tone])}>
               {value ?? "\u2014"}
             </p>
           )}

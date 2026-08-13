@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { KeyRound, Pencil, ShieldCheck, UserPlus, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ import {
 } from "../hooks/use-churches";
 import { ChangeChurchManagerDialog } from "./change-church-manager-dialog";
 import { UserForm } from "@/features/users/components/user-form";
+import { formatLocalizedDate, formatLocalizedDateTime } from "@/lib/dates";
 import type { ChurchDetail } from "../types/church.types";
 
 type ChurchManagerCardProps = {
@@ -30,6 +31,7 @@ type ChurchManagerCardProps = {
 
 export function ChurchManagerCard({ church }: ChurchManagerCardProps) {
   const t = useTranslations("churches");
+  const locale = useLocale();
   const manager = church.manager;
 
   const [changeOpen, setChangeOpen] = useState(false);
@@ -78,7 +80,7 @@ export function ChurchManagerCard({ church }: ChurchManagerCardProps) {
                 <p className="text-sm text-muted-foreground">{manager.email}</p>
                 <p className="text-sm text-muted-foreground">{manager.phone ?? "—"}</p>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span>{t("manager.lastLogin")}: {manager.lastLoginAt ? new Date(manager.lastLoginAt).toLocaleString() : "—"}</span>
+                  <span>{t("manager.lastLogin")}: {manager.lastLoginAt ? formatLocalizedDateTime(manager.lastLoginAt, locale) : "—"}</span>
                   <Badge variant={manager.isActive ? "default" : "secondary"}>
                     {manager.isActive ? t("manager.statusActive") : t("manager.statusInactive")}
                   </Badge>

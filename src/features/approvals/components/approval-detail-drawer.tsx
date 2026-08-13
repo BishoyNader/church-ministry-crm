@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,6 +18,7 @@ import {
 import { useRoles, useStages, useRejectServant } from "@/features/users";
 import { useApproveServantWithProvision } from "../hooks/use-approval-center";
 import type { PendingRegistration } from "@/features/users/services/approval.service";
+import { formatLocalizedDate } from "@/lib/dates";
 
 type ApprovalDetailDrawerProps = {
   registration: PendingRegistration | null;
@@ -26,6 +27,7 @@ type ApprovalDetailDrawerProps = {
 
 export function ApprovalDetailDrawer({ registration, onClose }: ApprovalDetailDrawerProps) {
   const t = useTranslations("approvals.drawer");
+  const locale = useLocale();
 
   const rolesQuery = useRoles(registration?.church_id ?? null);
   const stagesQuery = useStages(registration?.church_id ?? null);
@@ -133,9 +135,7 @@ export function ApprovalDetailDrawer({ registration, onClose }: ApprovalDetailDr
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">{t("requestedOn")}</dt>
               <dd className="text-end">
-                {registration
-                  ? new Date(registration.created_at).toLocaleDateString()
-                  : "—"}
+                {registration ? formatLocalizedDate(registration.created_at, locale) : "—"}
               </dd>
             </div>
           </dl>

@@ -1,7 +1,9 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
+import { Layers } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/feedback/empty-state";
 import type { StageAnalyticsItem } from "../types/dashboard.types";
 
 type StageAnalyticsTableProps = {
@@ -28,9 +30,9 @@ export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProp
           <thead>
             <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
               <th scope="col" className="px-4 py-3">{t("stageAnalytics.stage")}</th>
-              <th scope="col" className="px-4 py-3">{t("stageAnalytics.children")}</th>
-              <th scope="col" className="px-4 py-3">{t("stageAnalytics.followups")}</th>
-              <th scope="col" className="px-4 py-3">{t("stageAnalytics.attendance")}</th>
+              <th scope="col" className="px-4 py-3 text-end">{t("stageAnalytics.children")}</th>
+              <th scope="col" className="px-4 py-3 text-end">{t("stageAnalytics.followups")}</th>
+              <th scope="col" className="px-4 py-3 text-end">{t("stageAnalytics.attendance")}</th>
               <th scope="col" className="px-4 py-3">{t("stageAnalytics.attendanceRate")}</th>
             </tr>
           </thead>
@@ -50,9 +52,9 @@ export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProp
                     <td className="px-4 py-3 font-medium">
                       {isArabic ? stage.stageNameAr : (stage.stageNameEn ?? stage.stageNameAr)}
                     </td>
-                    <td className="px-4 py-3 tabular-nums">{stage.totalChildren}</td>
-                    <td className="px-4 py-3 tabular-nums">{stage.followupCount}</td>
-                    <td className="px-4 py-3 tabular-nums">{stage.attendanceCount}</td>
+                    <td className="px-4 py-3 text-end tabular-nums">{stage.totalChildren}</td>
+                    <td className="px-4 py-3 text-end tabular-nums">{stage.followupCount}</td>
+                    <td className="px-4 py-3 text-end tabular-nums">{stage.attendanceCount}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-muted">
@@ -70,8 +72,11 @@ export function StageAnalyticsTable({ data, isLoading }: StageAnalyticsTableProp
                 ))}
             {!isLoading && (!data || data.length === 0) && (
               <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">
-                  {t("noData")}
+                <td colSpan={5} className="px-4 py-10">
+                  <EmptyState
+                    icon={<Layers className="size-6 text-muted-foreground" />}
+                    title={t("noData")}
+                  />
                 </td>
               </tr>
             )}
