@@ -11,7 +11,7 @@ export function SectionCard({ children, className, variant = "default" }: Sectio
   return (
     <div
       className={cn(
-        "rounded-card border border-whisper bg-surface-elevated shadow-diffused-sm",
+        "rounded-card border border-border-whisper bg-surface-elevated shadow-diffused-sm",
         variant === "elevated" && "shadow-diffused-md",
         className,
       )}

@@ -9,13 +9,13 @@ import {
   FileDown,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   Loader2,
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "@/components/layout/section-card";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import {
   Select,
   SelectTrigger,
@@ -313,12 +313,11 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
             </div>
 
             {summary.invalidCount > 0 ? (
-              <div className="rounded-lg border border-amber-300/50 bg-amber-50 p-4 dark:bg-amber-950/20">
-                <div className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
-                  <AlertTriangle className="size-4" />
+              <InlineNotice variant="warning" className="mt-2">
+                <div className="flex items-center gap-2 font-medium">
                   {t("validationReport")}
                 </div>
-                <ul className="mt-2 space-y-1 text-sm text-amber-700 dark:text-amber-300">
+                <ul className="mt-1.5 space-y-1">
                   {summary.duplicateEmails > 0 ? (
                     <li>{t("duplicateEmails", { count: summary.duplicateEmails })}</li>
                   ) : null}
@@ -347,7 +346,7 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
                     <li>{t("managerConflicts", { count: summary.managerConflicts })}</li>
                   ) : null}
                 </ul>
-              </div>
+              </InlineNotice>
             ) : null}
 
             {validation.validRows.length > 0 ? (
@@ -480,13 +479,14 @@ export function UserImportPanel({ churchId }: { churchId: string | null }) {
 
         {importSummary ? (
           <div className="mt-4 space-y-3">
-            <div className="flex items-center gap-2 rounded-lg border border-emerald-300/50 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-200">
-              <CheckCircle2 className="size-4" />
-              {t("importSummary", {
-                imported: importSummary.importedCount,
-                failed: importSummary.failedCount,
-              })}
-            </div>
+            <InlineNotice variant="success">
+              <p>
+                {t("importSummary", {
+                  imported: importSummary.importedCount,
+                  failed: importSummary.failedCount,
+                })}
+              </p>
+            </InlineNotice>
             {importSummary.failures.length > 0 ? (
               <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3">
                 <div className="flex items-center gap-2 text-sm font-medium text-destructive">

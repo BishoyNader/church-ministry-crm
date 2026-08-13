@@ -11,13 +11,39 @@ type StatCardProps = {
   isLoading?: boolean;
   className?: string;
   accent?: boolean;
+  /** Semantic tone for the leading icon + value. */
+  tone?: "default" | "primary" | "warning" | "success" | "danger";
 };
 
-export function StatCard({ label, value, icon: Icon, isLoading, className, accent }: StatCardProps) {
+const toneIcon: Record<NonNullable<StatCardProps["tone"]>, string> = {
+  default: "bg-muted text-muted-foreground group-hover:bg-muted/80",
+  primary: "bg-primary/10 text-primary group-hover:bg-primary/15",
+  warning: "bg-warning/10 text-warning group-hover:bg-warning/15",
+  success: "bg-success/10 text-success group-hover:bg-success/15",
+  danger: "bg-danger/10 text-danger group-hover:bg-danger/15",
+};
+
+const toneValue: Record<NonNullable<StatCardProps["tone"]>, string> = {
+  default: "",
+  primary: "text-primary",
+  warning: "text-warning",
+  success: "text-success",
+  danger: "text-danger",
+};
+
+export function StatCard({
+  label,
+  value,
+  icon: Icon,
+  isLoading,
+  className,
+  accent,
+  tone = accent ? "primary" : "default",
+}: StatCardProps) {
   return (
     <div
       className={cn(
-        "group rounded-card border border-whisper bg-surface-elevated p-4 shadow-diffused-sm transition-all duration-200 hover:shadow-diffused-md hover:-translate-y-0.5",
+        "group rounded-card border border-border-whisper bg-surface-elevated p-4 shadow-diffused-sm transition-all duration-200 hover:shadow-diffused-md hover:-translate-y-0.5",
         className,
       )}
     >
@@ -25,9 +51,7 @@ export function StatCard({ label, value, icon: Icon, isLoading, className, accen
         <div
           className={cn(
             "rounded-xl p-3 transition-colors duration-200",
-            accent
-              ? "bg-ministry/10 text-ministry group-hover:bg-ministry/15"
-              : "bg-muted text-muted-foreground",
+            toneIcon[tone],
           )}
         >
           <Icon className="size-5" />
@@ -39,7 +63,9 @@ export function StatCard({ label, value, icon: Icon, isLoading, className, accen
           {isLoading ? (
             <Skeleton className="mt-1 h-7 w-16" />
           ) : (
-            <p className="text-2xl font-bold tabular-nums">{value ?? "\u2014"}</p>
+            <p className={cn("text-2xl font-bold tabular-nums", toneValue[tone])}>
+              {value ?? "\u2014"}
+            </p>
           )}
         </div>
       </div>

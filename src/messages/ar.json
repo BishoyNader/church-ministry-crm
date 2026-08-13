@@ -45,7 +45,6 @@
     "settings": "الإعدادات",
     "comingSoon": "قريباً",
     "tagline": "عمليات الخدمة",
-    "greeting": "صباح الخير",
     "welcomeBack": "مرحبًا بعودتك إلى لوحة معلومات كنيستك",
     "footerTitle": "جاهز للخدمة",
     "footerDescription": "تابع الأعضاء والأحداث والمتابعات من مكان واحد.",
@@ -55,7 +54,18 @@
     "signOut": "تسجيل الخروج",
     "skipToContent": "تخطي إلى المحتوى الرئيسي",
     "promotions": "الترقية السنوية",
-    "servantAttendance": "حضور الخدام"
+    "servantAttendance": "حضور الخدام",
+    "sectionOverview": "نظرة عامة",
+    "sectionMinistry": "الخدمة",
+    "sectionPeople": "الأشخاص",
+    "sectionOperations": "العمليات",
+    "sectionSpiritual": "روحي",
+    "sectionAdministration": "الإدارة",
+    "roleBadge": "الدور",
+    "toggleLanguage": "تغيير اللغة",
+    "greetingMorning": "صباح الخير",
+    "greetingAfternoon": "مساء الخير",
+    "greetingEvening": "مساء الخير"
   },
   "spiritualJournal": {
     "title": "اليوميات الروحية",
@@ -224,7 +234,14 @@
       "noToken": "رابط إعادة التعيين غير صالح. الرجاء طلب رابط جديد.",
       "generalError": "تعذر إكمال إعادة تعيين كلمة المرور.",
       "login": "العودة لتسجيل الدخول"
-    }
+    },
+    "brand": {
+      "tagline": "إدارة الخدمة",
+      "quote": "«اخدموا بعضكم بعضًا في المحبة.»",
+      "quoteRef": "غلاطية 5: 13"
+    },
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "servants": {
     "title": "إدارة الخدام",

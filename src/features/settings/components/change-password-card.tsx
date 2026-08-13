@@ -11,6 +11,7 @@ import { changePasswordSchema } from "../schemas/settings.schema";
 import type { ChangePasswordFormValues } from "../schemas/settings.schema";
 import { FormField } from "@/components/ui/form-field";
 import { SectionCard } from "@/components/layout/section-card";
+import { InlineNotice } from "@/components/ui/inline-notice";
 
 const emptyValues: ChangePasswordFormValues = {
   currentPassword: "",
@@ -75,8 +76,8 @@ export function ChangePasswordCard() {
           </FormField>
         </div>
 
-        {formError ? <p className="text-xs text-destructive">{formError}</p> : null}
-        {successMessage ? <p className="text-xs text-emerald-600">{successMessage}</p> : null}
+        {formError ? <InlineNotice variant="error" className="mt-1"><p>{formError}</p></InlineNotice> : null}
+        {successMessage ? <InlineNotice variant="success" className="mt-1"><p>{successMessage}</p></InlineNotice> : null}
 
         <div className="flex justify-end">
           <Button type="submit" disabled={changeMutation.isPending}>

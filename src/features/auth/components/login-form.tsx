@@ -6,10 +6,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { FormField } from "@/components/ui/form-field";
 import { Checkbox } from "@/components/ui/checkbox";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { loginSchema } from "../schemas/auth.schema";
 import type { LoginFormValues } from "../types/auth.types";
 import type { AuthActionResult } from "../actions/auth.actions";
@@ -56,11 +59,11 @@ export function LoginForm({
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
       {formError ? (
-        <div role="alert" className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {formError}
-        </div>
+        <InlineNotice variant="error">
+          <p>{formError}</p>
+        </InlineNotice>
       ) : null}
 
       <div className="space-y-4">
@@ -69,7 +72,7 @@ export function LoginForm({
         </FormField>
 
         <FormField label={t("login.passwordLabel")} error={errors.password?.message}>
-          <Input type="password" autoComplete="current-password" {...register("password")} />
+          <PasswordInput autoComplete="current-password" {...register("password")} />
         </FormField>
       </div>
 
@@ -93,7 +96,14 @@ export function LoginForm({
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? t("loading") : t("login.submit")}
+        {isLoading ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            {t("loading")}
+          </>
+        ) : (
+          t("login.submit")
+        )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">

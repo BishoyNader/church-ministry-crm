@@ -5,9 +5,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
+import { PasswordInput } from "@/components/ui/password-input";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { resetPasswordSchema } from "../schemas/auth.schema";
 import type { ResetPasswordFormValues } from "../types/auth.types";
 import { createClient } from "@/lib/supabase/client";
@@ -61,31 +63,42 @@ export function ResetPasswordForm({ locale }: { locale: string }) {
 
   if (initialized && !hasSession) {
     return (
-      <div className="rounded-3xl border border-warning/30 bg-warning/10 p-6 text-sm text-warning">
-        {t("resetPassword.noToken")}
-      </div>
+      <InlineNotice variant="warning">
+        <p>{t("resetPassword.noToken")}</p>
+      </InlineNotice>
     );
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
       {error ? (
-        <div role="alert" className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
+        <InlineNotice variant="error">
+          <p>{error}</p>
+        </InlineNotice>
       ) : null}
       {message ? (
-        <div role="status" className="rounded-2xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">{message}</div>
+        <InlineNotice variant="success">
+          <p>{message}</p>
+        </InlineNotice>
       ) : null}
 
       <FormField label={t("resetPassword.password")} error={errors.password?.message}>
-        <Input type="password" autoComplete="new-password" {...register("password")} />
+        <PasswordInput autoComplete="new-password" {...register("password")} />
       </FormField>
 
       <FormField label={t("resetPassword.confirmPassword")} error={errors.confirmPassword?.message}>
-        <Input type="password" autoComplete="new-password" {...register("confirmPassword")} />
+        <PasswordInput autoComplete="new-password" {...register("confirmPassword")} />
       </FormField>
 
       <Button type="submit" className="w-full" disabled={isLoading || !initialized}>
-        {isLoading ? t("loading") : t("resetPassword.submit")}
+        {isLoading ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            {t("loading")}
+          </>
+        ) : (
+          t("resetPassword.submit")
+        )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">

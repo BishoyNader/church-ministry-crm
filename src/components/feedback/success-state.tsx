@@ -13,7 +13,7 @@ export function SuccessState({ title, description, action }: SuccessStateProps) 
       role="status"
       className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-success/30 bg-success/5 px-6 py-16 text-center"
     >
-      <div className="rounded-2xl bg-success/10 p-4 text-success shadow-diffused-sm">
+      <div className="rounded-2xl bg-success/10 p-4 text-success shadow-diffused-sm ring-1 ring-inset ring-success/10">
         <CheckCircle2 className="size-8" />
       </div>
       <h3 className="mt-4 text-lg font-semibold tracking-tight">{title}</h3>
