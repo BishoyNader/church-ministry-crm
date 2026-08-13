@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { createUserSchema, updateUserSchema } from "../schemas/user.schema";
 import type { CreateUserFormValues, UpdateUserFormValues } from "../schemas/user.schema";
 import { resolveRoleAssignments } from "../utils/role-assignment";
@@ -584,15 +585,14 @@ export function UserForm({
             ) : null}
 
             {showManagerWarning ? (
-              <div className="space-y-2 rounded-lg border border-amber-300/50 bg-amber-50 p-4 dark:bg-amber-950/20">
-                <div className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
-                  <AlertTriangle className="size-4" />
+              <InlineNotice variant="warning">
+                <div className="flex items-center gap-2 font-medium">
                   {t("managerWarningTitle")}
                 </div>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
+                <p className="mt-1">
                   {t("managerWarning", { name: manager?.fullNameAr ?? manager?.email ?? "" })}
                 </p>
-                <label className="flex cursor-pointer items-start gap-2 text-sm text-amber-800 dark:text-amber-200">
+                <label className="mt-2 flex cursor-pointer items-start gap-2">
                   <Checkbox
                     checked={createForm.watch("confirmReplaceManager") ?? false}
                     onCheckedChange={(checked) =>
@@ -601,7 +601,7 @@ export function UserForm({
                   />
                   {t("confirmReplaceManager")}
                 </label>
-              </div>
+              </InlineNotice>
             ) : null}
 
             {errorBanner}

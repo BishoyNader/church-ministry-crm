@@ -11,7 +11,7 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border-whisper bg-card px-6 py-16 text-center">
       {icon ? (
-        <div className="rounded-2xl bg-ministry/10 p-4 text-ministry shadow-diffused-sm">
+        <div className="rounded-2xl bg-gradient-to-br from-primary/10 to-gold/10 p-4 text-primary shadow-diffused-sm ring-1 ring-inset ring-primary/10">
           {icon}
         </div>
       ) : null}

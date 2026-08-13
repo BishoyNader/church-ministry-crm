@@ -5,17 +5,23 @@ import { useTranslations } from "next-intl";
 import {
   AlertTriangle,
   ArrowRight,
+  Building2,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   ClipboardCheck,
+  ClipboardList,
   Eye,
+  HandHeart,
   ShieldCheck,
+  UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
+import { StatCard } from "@/components/layout/stat-card";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import {
   Dialog,
   DialogPopup,
@@ -33,32 +39,6 @@ import {
 } from "../hooks/use-promotions";
 import type { PromotionCycle } from "../types/promotions.types";
 
-function StatCard({
-  label,
-  value,
-  tone = "default",
-}: {
-  label: string;
-  value: number;
-  tone?: "default" | "warning" | "success";
-}) {
-  return (
-    <div className="rounded-xl border bg-card p-4">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-        {label}
-      </p>
-      <p
-        className={cn(
-          "mt-1 text-2xl font-bold tabular-nums",
-          tone === "warning" && "text-amber-600 dark:text-amber-400",
-          tone === "success" && "text-emerald-600 dark:text-emerald-400",
-        )}
-      >
-        {value}
-      </p>
-    </div>
-  );
-}
 
 function ReviewPanel({ cycleId }: { cycleId: string }) {
   const t = useTranslations("promotions.cycles");
@@ -174,15 +154,14 @@ function ConfirmDialog({
         </DialogHeader>
 
         <div className="space-y-3 py-2">
-          <div className="flex items-start gap-2 rounded-lg border border-amber-300/50 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
-            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          <InlineNotice variant="warning">
             <p>
               {t("confirmWarning", {
                 servants: cycle.affectedServants,
                 transitions: cycle.pendingTransitions,
               })}
             </p>
-          </div>
+          </InlineNotice>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-lg border p-3">
               <dt className="text-xs text-muted-foreground">{t("beneficiaries")}</dt>
@@ -238,7 +217,7 @@ export function PromotionCycleDashboard({ cycles }: { cycles: PromotionCycle[] }
                   <h3 className="text-lg font-bold tracking-tight">
                     {t("title", { year: pendingCycle.academicYear })}
                   </h3>
-                  <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                  <Badge variant="warning">
                     <AlertTriangle className="size-3" />
                     {t("needsConfirmation")}
                   </Badge>
@@ -271,18 +250,22 @@ export function PromotionCycleDashboard({ cycles }: { cycles: PromotionCycle[] }
               <StatCard
                 label={t("beneficiaries")}
                 value={pendingCycle.beneficiariesPromoted}
+                icon={UserRound}
               />
               <StatCard
                 label={t("affectedServices")}
                 value={pendingCycle.affectedServices}
+                icon={Building2}
               />
               <StatCard
                 label={t("affectedServants")}
                 value={pendingCycle.affectedServants}
+                icon={HandHeart}
               />
               <StatCard
                 label={t("pendingTransitions")}
                 value={pendingCycle.pendingTransitions}
+                icon={ClipboardList}
                 tone="warning"
               />
             </div>
@@ -299,7 +282,7 @@ export function PromotionCycleDashboard({ cycles }: { cycles: PromotionCycle[] }
               key={cycle.id}
               className="flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 text-sm"
             >
-              <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+              <ShieldCheck className="size-4 text-success" />
               <span className="font-medium">
                 {t("title", { year: cycle.academicYear })}
               </span>

@@ -45,7 +45,6 @@
     "settings": "Settings",
     "comingSoon": "Soon",
     "tagline": "Ministry operations",
-    "greeting": "Good morning",
     "welcomeBack": "Welcome back to your church dashboard",
     "footerTitle": "Ready for ministry",
     "footerDescription": "Track members, events, and follow-ups from one place.",
@@ -55,7 +54,18 @@
     "signOut": "Sign out",
     "skipToContent": "Skip to main content",
     "promotions": "Annual Promotion",
-    "servantAttendance": "Servant Attendance"
+    "servantAttendance": "Servant Attendance",
+    "sectionOverview": "Overview",
+    "sectionMinistry": "Ministry",
+    "sectionPeople": "People",
+    "sectionOperations": "Operations",
+    "sectionSpiritual": "Spiritual",
+    "sectionAdministration": "Administration",
+    "roleBadge": "Role",
+    "toggleLanguage": "Switch language",
+    "greetingMorning": "Good morning",
+    "greetingAfternoon": "Good afternoon",
+    "greetingEvening": "Good evening"
   },
   "spiritualJournal": {
     "title": "Spiritual Journal",
@@ -224,7 +234,14 @@
       "noToken": "The reset link appears to be invalid. Please request a new link.",
       "generalError": "Unable to complete password reset.",
       "login": "Back to login"
-    }
+    },
+    "brand": {
+      "tagline": "Ministry operations",
+      "quote": "“Serve one another in love.”",
+      "quoteRef": "Galatians 5:13"
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "servants": {
     "title": "Servant Management",

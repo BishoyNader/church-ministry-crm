@@ -9,6 +9,8 @@ import { useTranslations } from "next-intl";
 import { ChevronDown, Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { InlineNotice } from "@/components/ui/inline-notice";
 import { FormField } from "@/components/ui/form-field";
 import { Combobox } from "@base-ui/react/combobox";
 import { signupSchema } from "../schemas/auth.schema";
@@ -67,9 +69,9 @@ export function SignupForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       {formError ? (
-        <div role="alert" className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {formError}
-        </div>
+        <InlineNotice variant="error">
+          <p>{formError}</p>
+        </InlineNotice>
       ) : null}
 
       <div className="space-y-4">
@@ -176,16 +178,23 @@ export function SignupForm({
         </FormField>
 
         <FormField label={t("signup.password")} required error={errors.password?.message}>
-          <Input type="password" autoComplete="new-password" {...register("password")} className="h-11 rounded-xl px-4" />
+          <PasswordInput autoComplete="new-password" {...register("password")} />
         </FormField>
 
         <FormField label={t("signup.confirmPassword")} required error={errors.confirmPassword?.message}>
-          <Input type="password" autoComplete="new-password" {...register("confirmPassword")} className="h-11 rounded-xl px-4" />
+          <PasswordInput autoComplete="new-password" {...register("confirmPassword")} />
         </FormField>
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading || churchesQuery.isLoading}>
-        {isLoading ? t("loading") : t("signup.submit")}
+        {isLoading ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            {t("loading")}
+          </>
+        ) : (
+          t("signup.submit")
+        )}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
