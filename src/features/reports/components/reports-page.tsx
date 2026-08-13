@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/feedback/error-state";
 import { useAccessState, PERMISSION_CODES } from "@/features/rbac";
+import { formatLocalizedDate, formatLocalizedDateTime } from "@/lib/dates";
 import { useDailyAttendanceBreakdown, useReportsData, useReportsFilterOptions } from "../hooks/use-reports";
 import { exportReportsCsv } from "../hooks/use-reports";
 import type { ReportsFilters } from "../types/reports.types";
@@ -36,15 +37,10 @@ export function ReportsPage() {
   const [exportError, setExportError] = useState<string | null>(null);
 
   const formatDay = (sessionDate: string) =>
-    new Date(`${sessionDate}T00:00:00`).toLocaleDateString(locale, {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+    formatLocalizedDate(`${sessionDate}T00:00:00`, locale);
 
   const formatDateTime = (iso: string) =>
-    iso ? new Date(iso).toLocaleString(locale) : "—";
+    iso ? formatLocalizedDateTime(iso, locale) : "—";
 
   const exportCsv = async () => {
     setExportError(null);

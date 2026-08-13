@@ -55,6 +55,8 @@
     "skipToContent": "تخطي إلى المحتوى الرئيسي",
     "promotions": "الترقية السنوية",
     "servantAttendance": "حضور الخدام",
+    "approvals": "مركز الموافقات",
+    "audit": "سجل المراجعة",
     "sectionOverview": "نظرة عامة",
     "sectionMinistry": "الخدمة",
     "sectionPeople": "الأشخاص",
@@ -2033,7 +2035,16 @@
     "page": "صفحة {page} من {totalPages}"
   },
   "common": {
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "time": {
+      "now": "الآن",
+      "inMinutes": "خلال {value} دقيقة",
+      "inHours": "خلال {value} ساعة",
+      "inDays": "خلال {value} يوم",
+      "minutesAgo": "منذ {value} دقيقة",
+      "hoursAgo": "منذ {value} ساعة",
+      "daysAgo": "منذ {value} يوم"
+    }
   },
   "servantAttendance": {
     "title": "حضور الخدام",

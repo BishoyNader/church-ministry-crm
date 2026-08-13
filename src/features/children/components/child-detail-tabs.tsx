@@ -3,6 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { formatLocalizedDate } from "@/lib/dates";
 import { ChildEmptyState } from "./child-empty-state";
 import type {
   ChildDetail,
@@ -124,7 +125,7 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
                   {child.attendance.map((record) => (
                     <tr key={record.id} className="border-b transition hover:bg-muted/30">
                       <td className="px-4 py-3">
-                        {new Date((record as AttendanceRecordWithSession).attendance_sessions?.session_date ?? record.created_at).toLocaleDateString(locale)}
+                        {formatLocalizedDate((record as AttendanceRecordWithSession).attendance_sessions?.session_date ?? record.created_at, locale)}
                       </td>
                       <td className="px-4 py-3">
                         <Badge
@@ -181,7 +182,7 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {record.scheduled_at
-                          ? new Date(record.scheduled_at).toLocaleDateString(locale)
+                          ? formatLocalizedDate(record.scheduled_at, locale)
                           : "\u2014"}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">

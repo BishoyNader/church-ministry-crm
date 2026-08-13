@@ -40,6 +40,17 @@ const NAV_SECTIONS: NavSection[] = [
   "administration",
 ];
 
+// Static label keys per section so the i18n checker can resolve them and
+// the section headers stay type-safe.
+const SECTION_TITLE_KEYS: Record<NavSection, string> = {
+  overview: "sectionOverview",
+  ministry: "sectionMinistry",
+  people: "sectionPeople",
+  operations: "sectionOperations",
+  spiritual: "sectionSpiritual",
+  administration: "sectionAdministration",
+};
+
 const navItems: NavItem[] = [
   { labelKey: "dashboard", href: "/dashboard", icon: BarChart3, section: "overview", permission: PERMISSION_CODES.REPORTS_READ },
   { labelKey: "reports", href: "/reports", icon: BarChart3, section: "overview", permission: PERMISSION_CODES.REPORTS_READ },
@@ -138,7 +149,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const renderNavGroup = (section: NavSection, items: NavItem[], handleClick?: () => void) => (
     <div key={section} className="space-y-0.5">
       <p className="mb-1.5 px-3 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
-        {t(`section${section.charAt(0).toUpperCase()}${section.slice(1)}`)}
+        {t(SECTION_TITLE_KEYS[section])}
       </p>
       <div className="space-y-0.5">
         {items.map((item) => renderNavLink(item, handleClick))}
@@ -234,22 +245,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <div className="flex flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-border-whisper bg-surface-elevated/85 px-4 py-3 backdrop-blur sm:px-6">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                  <SheetTrigger>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="lg:hidden"
-                      aria-label={t("toggleMenu")}
-                      aria-expanded={mobileOpen}
-                      aria-controls="mobile-navigation"
-                    >
-                      <Menu className="size-4" />
-                    </Button>
+                  <SheetTrigger
+                    render={
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="lg:hidden"
+                        aria-label={t("toggleMenu")}
+                        aria-expanded={mobileOpen}
+                        aria-controls="mobile-navigation"
+                      />
+                    }
+                  >
+                    <Menu className="size-4" />
                   </SheetTrigger>
                   <SheetContent side={isRtl ? "right" : "left"} showCloseButton={false} id="mobile-navigation">
                     <SheetTitle className="sr-only">{t("mainNavigation")}</SheetTitle>

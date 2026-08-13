@@ -1,10 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { SearchX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
+import { formatLocalizedDate, formatLocalizedDateTime } from "@/lib/dates";
 import {
   useChurchServices,
   useChurchStages,
@@ -20,6 +21,7 @@ type ChurchEntityTableProps = {
 
 export function ChurchEntityTable({ churchId, kind }: ChurchEntityTableProps) {
   const t = useTranslations("churches");
+  const locale = useLocale();
   const hook = kind === "services" ? useChurchServices : kind === "stages" ? useChurchStages : useChurchClasses;
   const { data, isLoading, error } = hook(churchId);
 
@@ -52,7 +54,7 @@ export function ChurchEntityTable({ churchId, kind }: ChurchEntityTableProps) {
               <div className="space-y-1">
                 <p className="font-medium">{row.nameAr}</p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(row.createdAt).toLocaleDateString()}
+                  {formatLocalizedDate(row.createdAt, locale)}
                 </p>
               </div>
               <Badge variant={row.isActive ? "default" : "secondary"}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { BellRing, CheckCheck, CircleDot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PaginationBar } from "@/components/layout/pagination-bar";
@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
+import { formatLocalizedDateTime } from "@/lib/dates";
 import {
   buildNotificationFilterOptions,
   formatNotificationType,
@@ -25,6 +26,7 @@ const pageSize = 10;
 
 export function NotificationCenterPage() {
   const t = useTranslations("notifications");
+  const locale = useLocale();
   const [selectedType, setSelectedType] = useState<NotificationFilter>("all");
   const [page, setPage] = useState(1);
   const { data, isLoading, error } = useNotifications({ page, pageSize, type: selectedType });
@@ -136,7 +138,7 @@ export function NotificationCenterPage() {
                     </div>
                     <p className="text-sm text-muted-foreground">{notification.body_ar}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(notification.sent_at).toLocaleString()}
+                      {formatLocalizedDateTime(notification.sent_at, locale)}
                     </p>
                   </div>
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { ScrollText, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { SectionCard } from "@/components/layout/section-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/feedback/empty-state";
+import { useRelativeTime } from "@/hooks/use-relative-time";
 import { StaggerItem, StaggerList } from "@/components/motion/motion-primitives";
 import { usePlatformRecentAudit } from "../hooks/use-platform-dashboard";
 
@@ -26,7 +27,7 @@ const ACTION_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
 
 export function RecentAuditCard() {
   const t = useTranslations("admin.dashboard.recentAudit");
-  const locale = useLocale();
+  const relativeTime = useRelativeTime();
   const { data, isLoading } = usePlatformRecentAudit(PREVIEW_LIMIT);
 
   const rows = data?.data ?? [];
@@ -78,7 +79,7 @@ export function RecentAuditCard() {
                   </p>
                 </div>
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  {timeAgo(entry.createdAt, locale)}
+                  {relativeTime({ date: entry.createdAt })}
                 </span>
               </div>
             </StaggerItem>
@@ -87,28 +88,4 @@ export function RecentAuditCard() {
       )}
     </SectionCard>
   );
-}
-
-function timeAgo(dateStr: string, locale: string): string {
-  const date = new Date(dateStr);
-  const diffMs = Date.now() - date.getTime();
-  const diffMins = Math.round(diffMs / 60000);
-
-  if (diffMins < 1) return locale === "ar" ? "الآن" : "just now";
-  if (diffMins < 60) {
-    const val = Math.round(diffMins);
-    return locale === "ar" ? `منذ ${val} دقيقة` : `${val}m ago`;
-  }
-  const hours = Math.round(diffMins / 60);
-  if (hours < 24) {
-    return locale === "ar" ? `منذ ${hours} ساعة` : `${hours}h ago`;
-  }
-  const days = Math.round(hours / 24);
-  if (days < 30) {
-    return locale === "ar" ? `منذ ${days} يوم` : `${days}d ago`;
-  }
-  return date.toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-    month: "short",
-    day: "numeric",
-  });
 }

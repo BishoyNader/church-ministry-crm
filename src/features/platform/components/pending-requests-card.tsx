@@ -7,6 +7,7 @@ import { SectionCard } from "@/components/layout/section-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/feedback/empty-state";
+import { useRelativeTime } from "@/hooks/use-relative-time";
 import { StaggerItem, StaggerList } from "@/components/motion/motion-primitives";
 import { useChurchRequests } from "@/features/churches/hooks/use-church-requests";
 
@@ -14,6 +15,7 @@ const PREVIEW_LIMIT = 5;
 
 export function PendingRequestsCard() {
   const t = useTranslations("admin.dashboard.pendingRequests");
+  const relativeTime = useRelativeTime();
   const { data, isLoading } = useChurchRequests("pending");
 
   const rows = data?.data ?? [];
@@ -54,9 +56,7 @@ export function PendingRequestsCard() {
                   {request.applicant_name} · {request.email}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t("submitted", {
-                    date: new Date(request.created_at).toLocaleDateString(),
-                  })}
+                  {t("submitted", { date: relativeTime({ date: request.created_at }) })}
                 </p>
               </div>
             </StaggerItem>

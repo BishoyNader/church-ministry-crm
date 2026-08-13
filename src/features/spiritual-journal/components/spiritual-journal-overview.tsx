@@ -1,10 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatLocalizedDate } from "@/lib/dates";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import {
@@ -44,6 +45,7 @@ export function SpiritualJournalOverview({
   onBack,
 }: SpiritualJournalOverviewProps) {
   const t = useTranslations("spiritualJournal.overview");
+  const locale = useLocale();
   const [servantId, setServantId] = useState<string>("");
   const [month, setMonth] = useState<string>(currentMonth());
 
@@ -191,7 +193,7 @@ export function SpiritualJournalOverview({
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="text-base font-semibold">
-                      {new Date(entry.entryDate).toLocaleDateString()}
+                      {formatLocalizedDate(entry.entryDate, locale)}
                     </h3>
                     <Badge variant={entry.prayerCompleted ? "default" : "secondary"}>
                       {t("prayerCompleted")}

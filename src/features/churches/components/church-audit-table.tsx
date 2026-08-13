@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { SearchX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SectionCard } from "@/components/layout/section-card";
 import { PaginationBar } from "@/components/layout/pagination-bar";
+import { formatLocalizedDate, formatLocalizedDateTime } from "@/lib/dates";
 import { useChurchAudit } from "../hooks/use-churches";
 
 const PAGE_SIZE = 10;
@@ -18,6 +19,7 @@ type ChurchAuditTableProps = {
 
 export function ChurchAuditTable({ churchId, limit }: ChurchAuditTableProps) {
   const t = useTranslations("churches");
+  const locale = useLocale();
   const [page, setPage] = useState(1);
 
   const { data, isLoading, error } = useChurchAudit(churchId, page, limit ?? PAGE_SIZE);
@@ -58,7 +60,7 @@ export function ChurchAuditTable({ churchId, limit }: ChurchAuditTableProps) {
                     <span className="text-sm font-medium">{event.entityType}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {event.actorName ?? event.actorEmail ?? "—"} · {new Date(event.createdAt).toLocaleString()}
+                    {event.actorName ?? event.actorEmail ?? "—"} · {formatLocalizedDateTime(event.createdAt, locale)}
                   </p>
                 </div>
               </div>

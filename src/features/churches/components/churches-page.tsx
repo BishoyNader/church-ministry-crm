@@ -17,7 +17,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
+import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
+import { useRelativeTime } from "@/hooks/use-relative-time";
 import { PermissionGuard } from "@/features/rbac";
 import { StaggerItem, StaggerList } from "@/components/motion/motion-primitives";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -52,6 +54,7 @@ function CountCell({ label, value }: CountCellProps) {
 export function ChurchesPage() {
   const t = useTranslations("churches");
   const router = useRouter();
+  const relativeTime = useRelativeTime();
 
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState("");
@@ -190,9 +193,11 @@ export function ChurchesPage() {
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-            <Building2 className="size-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">{t("emptyState")}</p>
+          <div className="px-4 py-10">
+            <EmptyState
+              icon={<Building2 className="size-8 text-muted-foreground" />}
+              title={t("emptyState")}
+            />
           </div>
         ) : (
           <StaggerList className="divide-y">
@@ -218,11 +223,11 @@ export function ChurchesPage() {
                       {church.manager ? church.manager.fullNameAr : t("manager.notAssigned")}
                     </span>
                     <span>·</span>
-                    <span>{t("createdAt")}: {new Date(church.created_at).toLocaleDateString()}</span>
+                    <span>{t("createdAt")}: {relativeTime({ date: church.created_at })}</span>
                     <span>·</span>
                     <span>
                       {t("lastActivity")}:{" "}
-                      {church.lastActivityAt ? new Date(church.lastActivityAt).toLocaleDateString() : "—"}
+                      {church.lastActivityAt ? relativeTime({ date: church.lastActivityAt }) : "—"}
                     </span>
                   </div>
                 </div>

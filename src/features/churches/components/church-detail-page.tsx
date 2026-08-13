@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import {
   ArrowLeft,
   Pencil,
@@ -51,6 +51,13 @@ function StatCard({ label, value }: StatCardProps) {
 
 export function ChurchDetailPage({ churchId, initialTab = "overview", onBack }: ChurchDetailPageProps) {
   const t = useTranslations("churches");
+  const locale = useLocale();
+  const dateLocale = locale === "ar" ? "ar-EG" : "en-US";
+  const formatDateTime = (value: string | Date) =>
+    new Date(value).toLocaleString(dateLocale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
 
   const { data: detailResult, isLoading: detailLoading, error: detailError } = useChurchDetail(churchId);
   const { data: statsResult, isLoading: statsLoading } = useChurchStats(churchId);
@@ -229,7 +236,7 @@ export function ChurchDetailPage({ churchId, initialTab = "overview", onBack }: 
                     <span className="font-medium">{latestAudit.action}</span> · {latestAudit.entityType}
                   </p>
                   <p className="text-muted-foreground">
-                    {latestAudit.actorName ?? latestAudit.actorEmail ?? "—"} · {new Date(latestAudit.createdAt).toLocaleString()}
+                    {latestAudit.actorName ?? latestAudit.actorEmail ?? "—"} · {formatDateTime(latestAudit.createdAt)}
                   </p>
                 </div>
               ) : (
@@ -305,7 +312,7 @@ export function ChurchDetailPage({ churchId, initialTab = "overview", onBack }: 
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">{t("createdAt")}</p>
-                <p className="mt-1">{new Date(church.created_at).toLocaleString()}</p>
+                <p className="mt-1">{formatDateTime(church.created_at)}</p>
               </div>
             </div>
           </SectionCard>

@@ -20,21 +20,13 @@ import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { ErrorState } from "@/components/feedback/error-state";
 import { PermissionGuard } from "@/features/rbac";
+import { formatLocalizedDateTime } from "@/lib/dates";
 import { useEventList, useEventOptions } from "../hooks/use-events";
 import { EventFormDialog } from "./event-form-dialog";
 import { EventDeleteDialog } from "./event-delete-dialog";
 import type { EventListItem, EventTypeFilter } from "../types/events.types";
 
 const PAGE_SIZE = 20;
-
-function formatDateTime(iso: string, locale: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
 
 type EventsPageProps = {
   presetServiceId?: string;
@@ -196,7 +188,7 @@ export function EventsPage({ presetServiceId }: EventsPageProps) {
                       {event.serviceNameAr ?? "-"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {formatDateTime(event.start_at, locale)}
+                      {formatLocalizedDateTime(event.start_at, locale)}
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={event.is_active ? "default" : "secondary"}>
