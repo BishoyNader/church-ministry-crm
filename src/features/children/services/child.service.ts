@@ -216,7 +216,7 @@ export async function createChild(
     const { data, error } = await supabase.rpc("create_beneficiary_with_assignment", {
       p_full_name_ar: input.full_name_ar,
       p_full_name_en: input.full_name_en ?? null,
-      p_date_of_birth: input.date_of_birth ?? null,
+      p_date_of_birth: input.date_of_birth || null,
       p_gender: input.gender ?? null,
       p_service_id: input.service_id,
       p_stage_id: input.stage_id,
@@ -253,7 +253,7 @@ export async function updateChild(
       .update({
         full_name_ar: input.full_name_ar,
         full_name_en: input.full_name_en ?? null,
-        date_of_birth: input.date_of_birth ?? null,
+        date_of_birth: input.date_of_birth || "2000-01-01",
         gender: input.gender ?? null,
         status: input.status,
         father_mobile: input.father_mobile ?? null,
@@ -675,7 +675,8 @@ export async function createFollowup(
         servant_id: user.id,
         beneficiary_id: input.beneficiary_id,
         type: input.type,
-        scheduled_at: input.scheduled_at ?? null,
+        status: "open",
+        scheduled_at: input.scheduled_at || null,
         assigned_to: input.assigned_to || null,
         notes: input.notes ?? null,
       })
@@ -705,7 +706,7 @@ export async function updateFollowup(
     if (input.outcome !== undefined) updateData.outcome = input.outcome;
     if (input.notes !== undefined) updateData.notes = input.notes;
     if (input.assigned_to !== undefined) updateData.assigned_to = input.assigned_to || null;
-    if (input.scheduled_at !== undefined) updateData.scheduled_at = input.scheduled_at;
+    if (input.scheduled_at !== undefined) updateData.scheduled_at = input.scheduled_at || null;
 
     if (input.status === "completed") {
       updateData.completed_at = new Date().toISOString();

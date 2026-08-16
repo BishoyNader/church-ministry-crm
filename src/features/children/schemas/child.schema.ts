@@ -5,7 +5,8 @@ const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
 const optionalIsoDate = z
   .string()
   .regex(isoDateRegex, { message: "Date must be in YYYY-MM-DD format" })
-  .optional();
+  .optional()
+  .or(z.literal(""));
 
 const optionalUrl = z
   .string()

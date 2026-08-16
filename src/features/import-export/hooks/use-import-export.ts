@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import {
   previewImportAction,
@@ -9,6 +9,7 @@ import {
   exportBeneficiariesTemplateAction,
   exportBeneficiariesImportErrorsAction,
 } from "../actions/import-export.actions";
+import { CHILD_QUERY_KEYS } from "@/features/children/hooks/use-children";
 import type {
   BeneficiaryImportRow,
   ExportEntityType,
@@ -38,9 +39,14 @@ export function usePreviewImport() {
 }
 
 export function useImportBeneficiaries() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (values: { rows: BeneficiaryImportRow[]; churchId?: string }) =>
       importBeneficiariesAction(values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CHILD_QUERY_KEYS.all });
+    },
   });
 }
 
