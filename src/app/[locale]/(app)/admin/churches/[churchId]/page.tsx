@@ -9,9 +9,7 @@ type Props = {
   searchParams: Promise<{ tab?: string }>;
 };
 
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function ChurchDetailRoute({ params, searchParams }: Props) {
   const [{ locale, churchId }, { tab }] = await Promise.all([params, searchParams]);

@@ -4,9 +4,7 @@ import { routing } from "@/i18n/routing";
 import { PermissionGuard } from "@/features/rbac";
 import { ChildDetailPage } from "@/features/children";
 
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function ChildDetailRoute({
   params,
