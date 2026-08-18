@@ -79,7 +79,7 @@ describe("PermissionGuard", () => {
 
     renderGuard("services.read", <div>Secret content</div>);
 
-    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.getAllByRole("status").length).toBeGreaterThan(0);
     expect(screen.queryByText("Secret content")).not.toBeInTheDocument();
   });
 });

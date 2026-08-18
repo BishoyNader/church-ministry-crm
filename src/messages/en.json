@@ -781,7 +781,8 @@
       "school": "School",
       "selectService": "Select a service",
       "service": "Service",
-      "whatsapp": "WhatsApp"
+      "whatsapp": "WhatsApp",
+      "status": "Status"
     },
     "delete": {
       "title": "Deactivate Beneficiary",

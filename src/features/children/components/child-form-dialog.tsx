@@ -270,7 +270,7 @@ export function ChildFormDialog({
                     </SelectContent>
                   </Select>
                 </FormField>
-                <FormField label="Status">
+                <FormField label={t("status")}>
                   <Select
                     value={updateForm.watch("status")}
                     onValueChange={(value) =>

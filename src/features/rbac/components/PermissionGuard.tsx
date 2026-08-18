@@ -37,7 +37,7 @@ function AccessDenied() {
 
 function AccessDeniedSkeleton() {
   return (
-    <div role="status" aria-live="polite" className="space-y-3">
+    <div className="space-y-3">
       <Skeleton className="h-24 w-full rounded-2xl" />
       <Skeleton className="h-24 w-full rounded-2xl" />
     </div>

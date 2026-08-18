@@ -292,7 +292,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-1.5">
                 {canViewNotifications ? (
                   <Link href="/notifications" className="relative" aria-label={t("notifications")}>
-                    <Button variant="ghost" size="icon" aria-label={t("notifications")}>
+                    <Button variant="ghost" size="icon">
                       <Bell className="size-4" />
                     </Button>
                     {(notificationSummary?.unreadCount ?? 0) > 0 ? (
