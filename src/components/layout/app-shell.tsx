@@ -168,13 +168,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         aria-current={isActive ? "page" : undefined}
         onClick={handleClick}
         className={cn(
-          "group flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200",
+          "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150",
           isActive
             ? "border-s-2 border-ministry bg-ministry/10 text-ministry shadow-sm"
-            : "border-s-2 border-transparent text-muted-foreground hover:bg-accent/70 hover:text-foreground",
+            : "border-s-2 border-transparent text-muted-foreground hover:bg-accent/70 hover:text-foreground active:scale-[0.98]",
         )}
       >
-        <Icon className={cn("size-4 shrink-0 transition-transform duration-200", isActive ? "scale-110" : "group-hover:scale-105")} />
+        <Icon className={cn("size-4 shrink-0", isActive && "text-ministry")} />
         <span className={cn("truncate", isActive && "font-semibold")}>{t(item.labelKey)}</span>
         {isActive ? <span className="ms-auto size-1.5 shrink-0 rounded-full bg-gold" aria-hidden="true" /> : null}
       </Link>
@@ -200,7 +200,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 
   const mobileNavContent = (
-    <nav className="flex flex-col gap-4 overflow-y-auto p-4" aria-label={t("mainNavigation")}>
+    <nav className="flex flex-col gap-3 overflow-y-auto p-4 pt-2" aria-label={t("mainNavigation")}>
       {groupedNav.map((group) => renderNavGroup(group.section, group.items, () => setMobileOpen(false)))}
     </nav>
   );
@@ -247,8 +247,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 border-b border-border-whisper bg-surface-elevated/85 px-4 py-3 backdrop-blur sm:px-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-3">
+            <div className="flex items-center justify-between gap-2 sm:gap-3">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                 <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
                   <SheetTrigger
                     render={
@@ -327,7 +327,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 lg:p-8" id="main-content">
+          <main className="flex-1 p-3 sm:p-6 lg:p-8" id="main-content">
             {children}
           </main>
         </div>

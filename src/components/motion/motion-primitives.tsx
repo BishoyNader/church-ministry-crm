@@ -2,8 +2,6 @@
 
 import { motion, useReducedMotion, type HTMLMotionProps, type Variants } from "framer-motion";
 
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
 type MotionDivProps = HTMLMotionProps<"div"> & {
   delay?: number;
 };
@@ -16,7 +14,11 @@ export function FadeIn({ children, className, delay = 0, ...rest }: MotionDivPro
       className={className}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: reduceMotion ? 0 : 0.45, delay, ease: EASE }}
+      transition={{
+        duration: reduceMotion ? 0.01 : 0.3,
+        delay,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       {...rest}
     >
       {children}
@@ -32,7 +34,7 @@ export function SlideUp({
   children,
   className,
   delay = 0,
-  distance = 16,
+  distance = 12,
   ...rest
 }: SlideUpProps) {
   const reduceMotion = useReducedMotion();
@@ -42,7 +44,11 @@ export function SlideUp({
       className={className}
       initial={{ opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : distance }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reduceMotion ? 0 : 0.5, delay, ease: EASE }}
+      transition={{
+        duration: reduceMotion ? 0.01 : 0.4,
+        delay,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       {...rest}
     >
       {children}
@@ -58,7 +64,7 @@ type StaggerListProps = MotionDivProps & {
 export function StaggerList({
   children,
   className,
-  stagger = 0.07,
+  stagger = 0.05,
   delayChildren = 0,
   ...rest
 }: StaggerListProps) {
@@ -88,12 +94,16 @@ type StaggerItemProps = MotionDivProps & {
   distance?: number;
 };
 
-export function StaggerItem({ children, className, distance = 14, ...rest }: StaggerItemProps) {
+export function StaggerItem({ children, className, distance = 10, ...rest }: StaggerItemProps) {
   const reduceMotion = useReducedMotion();
 
   const itemVariants: Variants = {
     hidden: { opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : distance },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] },
+    },
   };
 
   return (
@@ -105,7 +115,7 @@ export function StaggerItem({ children, className, distance = 14, ...rest }: Sta
 
 export function PageTransition({ children, className, ...rest }: MotionDivProps) {
   return (
-    <SlideUp className={className} distance={8} {...rest}>
+    <SlideUp className={className} distance={6} {...rest}>
       {children}
     </SlideUp>
   );

@@ -139,7 +139,7 @@ export function AuditPage() {
         }
       />
 
-      <SectionCard className="p-4">
+      <SectionCard className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:flex-wrap">
           <Input
             type="date"
@@ -199,7 +199,7 @@ export function AuditPage() {
             aria-label={t("searchPlaceholder")}
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            className="w-full lg:flex-1 lg:min-w-[220px]"
+            className="w-full min-w-0 lg:flex-1 lg:min-w-[220px]"
           />
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
@@ -233,38 +233,38 @@ export function AuditPage() {
               <caption className="sr-only">{t("table.caption")}</caption>
               <thead>
                 <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th scope="col" className="px-4 py-3">{t("table.time")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.action")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.entityType")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.entityId")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.actor")}</th>
-                  <th scope="col" className="px-4 py-3 text-end">{t("table.details")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3">{t("table.time")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3">{t("table.action")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 hidden sm:table-cell">{t("table.entityType")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 hidden lg:table-cell">{t("table.entityId")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 hidden md:table-cell">{t("table.actor")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-end">{t("table.details")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {rows.map((entry) => (
                   <tr key={entry.id} className="align-middle">
-                    <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
+                    <td className="whitespace-nowrap px-3 sm:px-4 py-3 text-xs text-muted-foreground">
                       {formatLocalizedDateTime(entry.createdAt, locale)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3">
                       <Badge variant={ACTION_VARIANT[entry.action] ?? "outline"}>
                         {t(`actions.${entry.action}`, { defaultValue: entry.action })}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">
                       {t(`entityTypes.${entry.entityType}`, { defaultValue: entry.entityType })}
                     </td>
-                    <td className="max-w-[180px] px-4 py-3 font-mono text-xs truncate" title={entry.entityId}>
+                    <td className="max-w-[180px] px-3 sm:px-4 py-3 font-mono text-xs truncate hidden lg:table-cell" title={entry.entityId}>
                       {entry.entityId}
                     </td>
-                    <td className="max-w-[200px] truncate px-4 py-3">
+                    <td className="max-w-[200px] truncate px-3 sm:px-4 py-3 hidden md:table-cell">
                       {entry.actorName ?? entry.actorEmail ?? entry.actorId ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-end">
+                    <td className="px-3 sm:px-4 py-3 text-end">
                       <Button
                         variant="ghost"
-                        size="icon"
+                        size="icon-sm"
                         aria-label={t("table.viewDetails")}
                         onClick={() => setSelectedEntry(entry)}
                       >

@@ -37,7 +37,7 @@ export function FormField({
     : children;
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2 sm:space-y-1.5">
       <Label htmlFor={id}>
         {label}
         {required ? <span className="text-destructive"> *</span> : null}

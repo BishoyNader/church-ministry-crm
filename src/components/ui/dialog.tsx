@@ -64,7 +64,7 @@ function DialogPopup({
         role="dialog"
         aria-modal="true"
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 grid max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-hidden rounded-2xl border border-border-whisper bg-surface-elevated p-6 text-card-foreground shadow-diffused-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:w-full",
+          "fixed left-1/2 top-1/2 z-50 grid max-h-[90dvh] sm:max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-hidden rounded-2xl border border-border-whisper bg-surface-elevated p-5 sm:p-6 text-card-foreground shadow-diffused-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:w-full",
           className,
         )}
         {...props}
@@ -106,7 +106,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)}
+      className={cn("flex flex-col space-y-1.5 text-center sm:text-start", className)}
       {...props}
     />
   )
@@ -117,7 +117,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-0",
         className,
       )}
       {...props}

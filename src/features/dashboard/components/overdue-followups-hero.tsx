@@ -28,41 +28,41 @@ export function OverdueFollowupsHero({ overdue, isLoading }: OverdueFollowupsHer
     <Link href={`/${locale}/followups`} className="block">
       <div
         className={
-          "group relative overflow-hidden rounded-xl border p-6 shadow-md transition-all hover:shadow-lg sm:p-8 " +
+          "group relative overflow-hidden rounded-xl border p-4 shadow-md transition-all hover:shadow-lg sm:p-6 lg:p-8 " +
           (hasOverdue
             ? "border-destructive/30 bg-destructive/5"
             : "border-success/25 bg-success/5")
         }
       >
-        <div className="flex items-start justify-between">
-          <div className="flex items-start gap-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 sm:gap-5 min-w-0">
             <div
               className={
-                "mt-1 rounded-xl p-3 " +
+                "mt-0.5 sm:mt-1 rounded-xl p-2 sm:p-3 shrink-0 " +
                 (hasOverdue
                   ? "bg-destructive/10 text-destructive"
                   : "bg-success/10 text-success")
               }
             >
               {hasOverdue ? (
-                <AlertCircle className="size-7" />
+                <AlertCircle className="size-6 sm:size-7" />
               ) : (
-                <CheckCircle2 className="size-7" />
+                <CheckCircle2 className="size-6 sm:size-7" />
               )}
             </div>
-            <div>
-              <p className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-sm font-medium uppercase tracking-wider text-muted-foreground">
                 {hasOverdue ? t("overdueFollowups.label") : t("followupStatus.title")}
               </p>
               <p
                 className={
-                  "mt-1 text-4xl font-bold tabular-nums sm:text-5xl " +
+                  "mt-0.5 sm:mt-1 text-3xl sm:text-4xl lg:text-5xl font-bold tabular-nums " +
                   (hasOverdue ? "text-destructive" : "text-success")
                 }
               >
                 {overdue}
               </p>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-0.5 sm:mt-1 text-xs sm:text-sm text-muted-foreground">
                 {hasOverdue
                   ? t("overdueFollowups.description", { count: overdue })
                   : t("overdueFollowups.allClear")}
@@ -71,12 +71,12 @@ export function OverdueFollowupsHero({ overdue, isLoading }: OverdueFollowupsHer
           </div>
           <div className="hidden shrink-0 sm:block">
             <span
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors",
-                hasOverdue
+              className={
+                "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors " +
+                (hasOverdue
                   ? "border-destructive/30 bg-destructive/10 text-destructive group-hover:bg-destructive/15"
-                  : "border-border-whisper bg-surface-elevated text-muted-foreground group-hover:text-foreground",
-              )}
+                  : "border-border-whisper bg-surface-elevated text-muted-foreground group-hover:text-foreground")
+              }
             >
               {t("overdueFollowups.viewAll")}
               {isRtl ? <ArrowLeft className="size-3.5" /> : <ArrowRight className="size-3.5" />}

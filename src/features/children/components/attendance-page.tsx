@@ -195,8 +195,8 @@ export function AttendancePage() {
         description={tAttendance("description")}
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="flex-1 space-y-1.5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:items-end">
+        <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">
             {tAttendance("selectDate")}
           </label>
@@ -204,16 +204,16 @@ export function AttendancePage() {
             type="date"
             value={date}
             onChange={(e) => handleDateChange(e.target.value)}
-            className="w-full sm:w-44"
+            className="w-full"
           />
         </div>
 
-        <div className="flex-1 space-y-1.5">
+        <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">
             {t("filters.allServices")}
           </label>
           <Select value={serviceFilter} onValueChange={handleServiceChange}>
-            <SelectTrigger className="w-full sm:w-44">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder={t("filters.allServices")} />
             </SelectTrigger>
             <SelectContent>
@@ -227,12 +227,12 @@ export function AttendancePage() {
           </Select>
         </div>
 
-        <div className="flex-1 space-y-1.5">
+        <div className="space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">
             {tAttendance("selectStage")}
           </label>
           <Select value={stageId ?? ""} onValueChange={handleStageChange}>
-            <SelectTrigger className="w-full sm:w-44">
+            <SelectTrigger className="w-full">
               <SelectValue placeholder={tAttendance("selectStage")} />
             </SelectTrigger>
             <SelectContent>

@@ -42,14 +42,14 @@ export function QuickActions() {
   if (visibleActions.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:grid-cols-4">
       {visibleActions.map(({ key, icon: Icon, href }) => (
         <Link
           key={key}
           href={href(locale)}
-          className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-4 shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
+          className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-3 sm:p-4 shadow-sm transition-colors duration-150 hover:border-primary/30 hover:shadow-md active:scale-[0.98]"
         >
-          <div className="rounded-xl bg-muted p-3 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+          <div className="rounded-xl bg-muted p-2.5 sm:p-3 text-muted-foreground transition-colors duration-150 group-hover:bg-primary/10 group-hover:text-primary">
             <Icon className="size-5" />
           </div>
           <span className="text-center text-xs font-medium text-muted-foreground group-hover:text-foreground">

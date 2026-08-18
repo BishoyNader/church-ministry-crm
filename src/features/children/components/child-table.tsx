@@ -34,52 +34,53 @@ export function ChildTable({ children_, isLoading, onEdit, onDelete }: ChildTabl
           <caption className="sr-only">{t("table.caption")}</caption>
           <thead>
             <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              <th scope="col" className="px-4 py-3">{t("table.name")}</th>
-              <th scope="col" className="px-4 py-3">{t("table.stage")}</th>
-              <th scope="col" className="px-4 py-3">{t("table.status")}</th>
-              <th scope="col" className="px-4 py-3">{t("table.mobile")}</th>
-              <th scope="col" className="px-4 py-3 text-end">{t("table.actions")}</th>
+              <th scope="col" className="px-3 sm:px-4 py-3">{t("table.name")}</th>
+              <th scope="col" className="px-3 sm:px-4 py-3 hidden sm:table-cell">{t("table.stage")}</th>
+              <th scope="col" className="px-3 sm:px-4 py-3">{t("table.status")}</th>
+              <th scope="col" className="px-3 sm:px-4 py-3 hidden md:table-cell">{t("table.mobile")}</th>
+              <th scope="col" className="px-3 sm:px-4 py-3 text-end">{t("table.actions")}</th>
             </tr>
           </thead>
           <tbody>
             {isLoading
               ? Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b">
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-5 w-20" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-5 w-16" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-4 w-28" /></td>
-                    <td className="px-4 py-3"><Skeleton className="h-8 w-20 ms-auto" /></td>
+                    <td className="px-3 sm:px-4 py-3"><Skeleton className="h-4 w-32" /></td>
+                    <td className="px-3 sm:px-4 py-3 hidden sm:table-cell"><Skeleton className="h-5 w-20" /></td>
+                    <td className="px-3 sm:px-4 py-3"><Skeleton className="h-5 w-16" /></td>
+                    <td className="px-3 sm:px-4 py-3 hidden md:table-cell"><Skeleton className="h-4 w-28" /></td>
+                    <td className="px-3 sm:px-4 py-3"><Skeleton className="h-8 w-20 ms-auto" /></td>
                   </tr>
                 ))
               : children_.map((child) => (
-                  <tr key={child.id} className="border-b transition hover:bg-muted/30">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                  <tr key={child.id} className="border-b transition-colors hover:bg-muted/30">
+                    <td className="px-3 sm:px-4 py-3">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
                           {child.full_name_ar[0]}
                         </div>
-                        <div>
-                          <p className="font-medium">{child.full_name_ar}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{child.full_name_ar}</p>
                           {child.full_name_en ? (
-                            <p className="text-xs text-muted-foreground">{child.full_name_en}</p>
+                            <p className="text-xs text-muted-foreground truncate">{child.full_name_en}</p>
                           ) : null}
+                          <p className="text-xs text-muted-foreground sm:hidden">{child.stageNameAr}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">
                       <Badge variant="outline">{child.stageNameAr}</Badge>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3">
                       <Badge variant={STATUS_VARIANT[child.status] ?? "secondary"}>
                         {t(`status.${child.status}`)}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-3 sm:px-4 py-3 text-muted-foreground hidden md:table-cell">
                       {child.mobile ?? "\u2014"}
                     </td>
-                    <td className="px-4 py-3 text-end">
-                      <div className="flex items-center justify-end gap-1">
+                    <td className="px-3 sm:px-4 py-3 text-end">
+                      <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                         <Button
                           variant="ghost"
                           size="icon-sm"

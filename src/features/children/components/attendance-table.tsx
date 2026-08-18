@@ -76,30 +76,30 @@ export function AttendanceTable({
           <caption className="sr-only">{t("caption")}</caption>
           <thead>
             <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              <th scope="col" className="px-4 py-3">{t("childName")}</th>
-              <th scope="col" className="px-4 py-3">{t("status")}</th>
-              <th scope="col" className="px-4 py-3">{t("notes")}</th>
+              <th scope="col" className="px-3 sm:px-4 py-3">{t("childName")}</th>
+              <th scope="col" className="px-3 sm:px-4 py-3">{t("status")}</th>
+              <th scope="col" className="px-3 sm:px-4 py-3 hidden md:table-cell">{t("notes")}</th>
             </tr>
           </thead>
           <tbody>
             {children_.map((child) => {
               const current = records[child.id];
               return (
-                <tr key={child.id} className="border-b transition hover:bg-muted/30">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                <tr key={child.id} className="border-b transition-colors hover:bg-muted/30">
+                    <td className="px-3 sm:px-4 py-3">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
                           {child.full_name_ar[0]}
                         </div>
-                        <div>
-                          <p className="font-medium">{child.full_name_ar}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{child.full_name_ar}</p>
                           {child.full_name_en ? (
-                            <p className="text-xs text-muted-foreground">{child.full_name_en}</p>
+                            <p className="text-xs text-muted-foreground truncate">{child.full_name_en}</p>
                           ) : null}
                         </div>
                       </div>
                     </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-3">
                     <div className="flex gap-1">
                       {STATUS_OPTIONS.map((option) => (
                         <Button
@@ -107,6 +107,7 @@ export function AttendanceTable({
                           type="button"
                           variant={current?.status === option ? "default" : "outline"}
                           size="sm"
+                          className="min-h-9 sm:min-h-8 text-xs sm:text-sm"
                           onClick={() =>
                             onQuickToggle
                               ? onQuickToggle(
@@ -122,7 +123,7 @@ export function AttendanceTable({
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-3 sm:px-4 py-3 hidden md:table-cell">
                     <Input
                       placeholder={t("notes")}
                       value={current?.notes ?? ""}

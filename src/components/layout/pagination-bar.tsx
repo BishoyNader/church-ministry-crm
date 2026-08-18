@@ -39,7 +39,7 @@ export function PaginationBar({
   const to = Math.min(page * pageSize, total);
 
   return (
-    <SectionCard className="flex items-center justify-between px-4 py-3">
+    <SectionCard className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 py-3">
       <p className="text-xs text-muted-foreground" aria-live="polite">
         {labelMode === "range"
           ? t("showing", { from, to, total })
