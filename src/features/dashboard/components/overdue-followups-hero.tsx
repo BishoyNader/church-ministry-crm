@@ -28,7 +28,7 @@ export function OverdueFollowupsHero({ overdue, isLoading }: OverdueFollowupsHer
     <Link href={`/${locale}/followups`} className="block">
       <div
         className={
-          "group relative overflow-hidden rounded-xl border p-4 shadow-md transition-all hover:shadow-lg sm:p-6 lg:p-8 " +
+          "group relative overflow-hidden rounded-xl border p-4 shadow-md transition-all duration-200 hover:shadow-lg sm:p-6 lg:p-8 " +
           (hasOverdue
             ? "border-destructive/30 bg-destructive/5"
             : "border-success/25 bg-success/5")

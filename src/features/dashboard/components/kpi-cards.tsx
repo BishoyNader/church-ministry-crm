@@ -19,18 +19,21 @@ const KPI_ITEMS = [
   { key: "activeStages", icon: Layers, getValue: (d: DashboardData) => d.kpis.activeStages },
 ] as const;
 
+const KPI_TONES = ["default", "primary", "primary", "danger", "success", "primary"] as const;
+
 export function KpiCards({ data, isLoading }: KpiCardsProps) {
   const t = useTranslations("dashboard");
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-6">
-      {KPI_ITEMS.map(({ key, icon, getValue }) => (
+      {KPI_ITEMS.map(({ key, icon, getValue }, i) => (
         <StatCard
           key={key}
           label={t(`${key}.label`)}
           value={data ? getValue(data) : undefined}
           icon={icon}
           isLoading={isLoading}
+          tone={KPI_TONES[i]}
         />
       ))}
     </div>

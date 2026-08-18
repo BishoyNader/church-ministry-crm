@@ -148,7 +148,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const renderNavGroup = (section: NavSection, items: NavItem[], handleClick?: () => void) => (
     <div key={section} className="space-y-0.5">
-      <p className="mb-1.5 px-3 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+      <p className="mb-1.5 px-3 pt-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
         {t(SECTION_TITLE_KEYS[section])}
       </p>
       <div className="space-y-0.5">
@@ -168,7 +168,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         aria-current={isActive ? "page" : undefined}
         onClick={handleClick}
         className={cn(
-          "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150",
+          "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors duration-150 active:scale-[0.98]",
           isActive
             ? "border-s-2 border-ministry bg-ministry/10 text-ministry shadow-sm"
             : "border-s-2 border-transparent text-muted-foreground hover:bg-accent/70 hover:text-foreground active:scale-[0.98]",
@@ -214,8 +214,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {t("skipToContent")}
       </a>
       <div className={cn("flex min-h-screen", isRtl && "flex-row-reverse")}>
-        <aside className="hidden w-72 flex-col border-e border-border-whisper bg-surface-elevated px-4 py-5 lg:flex">
-          <Link href="/dashboard" className="flex items-center gap-3 rounded-xl px-2">
+        <aside className="hidden w-72 flex-col border-e border-border-whisper bg-surface-elevated px-4 py-5 shadow-diffused-md lg:flex">
+          <Link href="/dashboard" className="flex items-center gap-3 rounded-xl px-2 transition-opacity duration-150 hover:opacity-80">
             <div className="rounded-2xl bg-primary p-2 text-primary-foreground shadow-diffused-sm">
               <CopticCross className="size-5" />
             </div>
@@ -246,7 +246,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 border-b border-border-whisper bg-surface-elevated/85 px-4 py-3 backdrop-blur sm:px-6">
+          <header className="sticky top-0 z-30 border-b border-border-whisper bg-surface-elevated/80 px-4 py-3 backdrop-blur-xl backdrop-saturate-150 sm:px-6">
             <div className="flex items-center justify-between gap-2 sm:gap-3">
               <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                 <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>

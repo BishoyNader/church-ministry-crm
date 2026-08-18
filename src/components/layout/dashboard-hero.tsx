@@ -12,7 +12,7 @@ export function DashboardHero({ title, description, action, className }: Dashboa
   return (
     <div
       className={cn(
-        "rounded-hero border border-border-whisper bg-surface-elevated p-4 shadow-diffused-md sm:p-6 lg:p-8",
+        "rounded-hero border border-border-whisper bg-gradient-to-br from-surface-elevated via-surface-elevated to-gold/5 p-4 shadow-diffused-md sm:p-6 lg:p-8",
         className,
       )}
     >
