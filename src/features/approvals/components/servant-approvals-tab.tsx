@@ -119,7 +119,7 @@ export function ServantApprovalsTab({ onReview }: ServantApprovalsTabProps) {
         <table className="w-full text-sm">
           <caption className="sr-only">{t("table.caption")}</caption>
           <thead>
-            <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <th scope="col" className="px-6 py-3">{t("table.applicant")}</th>
               <th scope="col" className="px-4 py-3">{t("table.email")}</th>
               <th scope="col" className="px-4 py-3">{t("table.phone")}</th>

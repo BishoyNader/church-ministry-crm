@@ -51,7 +51,7 @@ export function OverdueFollowupsHero({ overdue, isLoading }: OverdueFollowupsHer
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] sm:text-sm font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="text-[10px] sm:text-sm font-medium uppercase tracking-wide text-muted-foreground">
                 {hasOverdue ? t("overdueFollowups.label") : t("followupStatus.title")}
               </p>
               <p

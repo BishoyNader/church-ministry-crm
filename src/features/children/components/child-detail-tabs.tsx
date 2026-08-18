@@ -115,7 +115,7 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
               <table className="w-full text-sm">
                 <caption className="sr-only">{t("attendanceTable.caption")}</caption>
                 <thead>
-                  <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     <th scope="col" className="px-4 py-3">{t("attendanceTable.date")}</th>
                     <th scope="col" className="px-4 py-3">{t("attendanceTable.status")}</th>
                     <th scope="col" className="px-4 py-3">{t("attendanceTable.notes")}</th>
@@ -158,7 +158,7 @@ export function ChildDetailTabs({ child }: ChildDetailTabsProps) {
               <table className="w-full text-sm">
                 <caption className="sr-only">{t("followupsTable.caption")}</caption>
                 <thead>
-                  <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     <th scope="col" className="px-4 py-3">{t("followupsTable.type")}</th>
                     <th scope="col" className="px-4 py-3">{t("followupsTable.status")}</th>
                     <th scope="col" className="px-4 py-3">{t("followupsTable.scheduledAt")}</th>
