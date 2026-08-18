@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Plus, Pencil, Trash2, BookOpen, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatLocalizedDate } from "@/lib/dates";
 import { PaginationBar } from "@/components/layout/pagination-bar";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +29,7 @@ export function SpiritualJournalPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<SpiritualJournalEntry | null>(null);
   const [view, setView] = useState<"mine" | "overview">("mine");
+  const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
 
   const { data: accessState } = useAccessState();
   const roles = accessState?.roles ?? [];
@@ -50,16 +52,18 @@ export function SpiritualJournalPage() {
 
   const handleDelete = useCallback(
     (entryId: string) => {
-      if (confirm(t("deleteConfirm"))) {
-        deleteMutation.mutate(entryId, {
-          onError: () => {
-            // Error is surfaced via deleteMutation.error state below
-          },
-        });
-      }
+      setDeleteEntryId(entryId);
     },
-    [deleteMutation, t],
+    [],
   );
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!deleteEntryId) return;
+    deleteMutation.mutate(deleteEntryId, {
+      onError: () => {},
+      onSettled: () => setDeleteEntryId(null),
+    });
+  }, [deleteEntryId, deleteMutation]);
 
   const handleOpenCreate = useCallback(() => {
     setEditingEntry(null);
@@ -204,6 +208,19 @@ export function SpiritualJournalPage() {
       )}
 
       <SpiritualJournalFormDialog open={dialogOpen} onOpenChange={handleDialogClose} entry={editingEntry} />
+
+      <ConfirmDialog
+        open={deleteEntryId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteEntryId(null); }}
+        title={t("deleteConfirm")}
+        description={t("deleteConfirm")}
+        confirmLabel={t("delete")}
+        cancelLabel={t("cancel")}
+        destructive
+        isSubmitting={deleteMutation.isPending}
+        errorMessage={deleteMutation.error?.message ?? null}
+        onConfirm={handleConfirmDelete}
+      />
     </section>
   );
 }

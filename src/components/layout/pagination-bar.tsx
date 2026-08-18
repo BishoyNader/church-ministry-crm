@@ -40,7 +40,7 @@ export function PaginationBar({
 
   return (
     <SectionCard className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 py-3">
-      <p className="text-xs text-muted-foreground" aria-live="polite">
+      <p className="text-xs text-muted-foreground" aria-live="polite" role="status">
         {labelMode === "range"
           ? t("showing", { from, to, total })
           : labelMode === "count"

@@ -781,7 +781,8 @@
       "school": "المدرسة",
       "selectService": "اختر خدمة",
       "service": "الخدمة",
-      "whatsapp": "واتساب"
+      "whatsapp": "واتساب",
+      "status": "الحالة"
     },
     "delete": {
       "title": "تعطيل المخدوم",
