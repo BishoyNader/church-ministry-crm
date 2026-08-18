@@ -211,9 +211,13 @@
     @apply bg-background text-foreground;
     font-feature-settings: "cv11", "ss01";
     line-height: 1.6;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   html {
     @apply font-sans;
+    overflow-x: hidden;
   }
   ::selection {
     background-color: var(--primary);
@@ -277,6 +281,18 @@
   :where([id]) {
     scroll-margin-top: 6rem;
   }
+
+  /* Prevent horizontal overflow on the root containers */
+  #main-content {
+    min-width: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Apple-quality touch interaction defaults */
+  button, a, [role="button"], label, select {
+    touch-action: manipulation;
+  }
 }
 
 /* RTL-safe table header alignment: headings use logical text alignment so
@@ -286,12 +302,22 @@
   text-align: start;
 }
 
-/* Respect reduced-motion preferences across the whole application. */
+/* Respect reduced-motion preferences across the whole application.
+   Replace slides/springs/parallax with short opacity cross-fades.
+   Keep opacity/color changes that aid comprehension. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0.15s !important;
+    transition-property: opacity, background-color, color, border-color !important;
     scroll-behavior: auto !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .backdrop-blur-sm,
+  [style*="backdrop-filter"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }

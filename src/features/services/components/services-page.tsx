@@ -107,14 +107,14 @@ export function ServicesPage() {
         }
       />
 
-      <SectionCard className="p-4">
+      <SectionCard className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
           <Input
             placeholder={t("searchPlaceholder")}
             aria-label={t("searchPlaceholder")}
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            className="flex-1 min-w-[200px]"
+            className="flex-1 min-w-0 sm:min-w-[200px]"
           />
 
           <Select value={statusFilter} onValueChange={handleStatusChange}>
@@ -160,23 +160,23 @@ export function ServicesPage() {
               <caption className="sr-only">{t("table.caption")}</caption>
               <thead>
                 <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th scope="col" className="px-4 py-3">{t("table.name")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.stages")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.events")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.status")}</th>
-                  <th scope="col" className="px-4 py-3">{t("table.sortOrder")}</th>
-                  <th scope="col" className="px-4 py-3 text-end">{t("table.actions")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3">{t("table.name")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 hidden sm:table-cell">{t("table.stages")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 hidden md:table-cell">{t("table.events")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3">{t("table.status")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 hidden lg:table-cell">{t("table.sortOrder")}</th>
+                  <th scope="col" className="px-3 sm:px-4 py-3 text-end">{t("table.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {rows.map((service) => (
                   <tr key={service.id} className="align-middle">
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium">{service.name_ar}</p>
+                    <td className="px-3 sm:px-4 py-3 min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <p className="font-medium truncate">{service.name_ar}</p>
                         {service.service_type &&
                         service.service_type in ACADEMIC_PRESETS ? (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-xs hidden sm:inline-flex">
                             {ACADEMIC_PRESETS[
                               service.service_type as keyof typeof ACADEMIC_PRESETS
                             ].name_ar}
@@ -184,13 +184,14 @@ export function ServicesPage() {
                         ) : null}
                       </div>
                       {service.name_en ? (
-                        <p className="text-xs text-muted-foreground">{service.name_en}</p>
+                        <p className="text-xs text-muted-foreground truncate">{service.name_en}</p>
                       ) : null}
+                      <p className="text-xs text-muted-foreground sm:hidden">{t("table.stageCount", { count: service.stageCount })}</p>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-3 sm:px-4 py-3 text-muted-foreground hidden sm:table-cell">
                       {t("table.stageCount", { count: service.stageCount })}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3 hidden md:table-cell">
                       <Link
                         href={{ pathname: "/events", query: { serviceId: service.id } }}
                         className="inline-flex items-center gap-1.5 font-medium text-ministry hover:underline"
@@ -200,19 +201,19 @@ export function ServicesPage() {
                         {t("table.eventCount", { count: service.eventCount })}
                       </Link>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 sm:px-4 py-3">
                       <Badge variant={service.is_active ? "default" : "secondary"}>
                         {service.is_active ? t("status.active") : t("status.inactive")}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{service.sort_order}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1">
+                    <td className="px-3 sm:px-4 py-3 text-muted-foreground hidden lg:table-cell">{service.sort_order}</td>
+                    <td className="px-3 sm:px-4 py-3">
+                      <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                         <PermissionGuard permission="stages.update">
                           {service.is_active ? (
                             <Button
                               variant="ghost"
-                              size="icon"
+                              size="icon-sm"
                               aria-label={t("table.archive")}
                               onClick={() => setArchiveService(service)}
                             >
@@ -221,7 +222,7 @@ export function ServicesPage() {
                           ) : (
                             <Button
                               variant="ghost"
-                              size="icon"
+                              size="icon-sm"
                               aria-label={t("table.restore")}
                               disabled={restoreMutation.isPending}
                               onClick={() => handleRestore(service)}
@@ -231,7 +232,7 @@ export function ServicesPage() {
                           )}
                           <Button
                             variant="ghost"
-                            size="icon"
+                            size="icon-sm"
                             aria-label={t("table.edit")}
                             onClick={() => setEditService(service)}
                           >

@@ -126,14 +126,14 @@ export function ChildListPage() {
         }}
       />
 
-      <SectionCard className="p-4">
+      <SectionCard className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap">
           <Input
             placeholder={t("searchPlaceholder")}
             aria-label={t("search")}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="flex-1 min-w-[200px]"
+            className="flex-1 min-w-0 sm:min-w-[200px]"
           />
 
           <Select
@@ -185,8 +185,6 @@ export function ChildListPage() {
               ))}
             </SelectContent>
           </Select>
-
-
 
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>

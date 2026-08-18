@@ -90,7 +90,7 @@ export function SpiritualJournalPage() {
         title={t("title")}
         description={t("description")}
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {isChurchViewer ? (
               <div className="flex items-center gap-1 rounded-lg border bg-muted p-1">
                 <Button
@@ -101,7 +101,7 @@ export function SpiritualJournalPage() {
                   onClick={() => setView("mine")}
                 >
                   <BookOpen className="size-4" />
-                  {t("viewMine")}
+                  <span className="hidden sm:inline">{t("viewMine")}</span>
                 </Button>
                 <Button
                   type="button"
@@ -111,7 +111,7 @@ export function SpiritualJournalPage() {
                   onClick={() => setView("overview")}
                 >
                   <Users className="size-4" />
-                  {t("viewOverview")}
+                  <span className="hidden sm:inline">{t("viewOverview")}</span>
                 </Button>
               </div>
             ) : null}

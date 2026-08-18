@@ -43,27 +43,27 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "group rounded-card border border-border-whisper bg-surface-elevated p-4 shadow-diffused-sm transition-all duration-200 hover:shadow-diffused-md hover:-translate-y-0.5",
+        "group rounded-card border border-border-whisper bg-surface-elevated p-3 sm:p-4 shadow-diffused-sm transition-shadow duration-200",
         className,
       )}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <div
           className={cn(
-            "rounded-xl p-3 transition-colors duration-200",
+            "rounded-xl p-2.5 sm:p-3 transition-colors duration-200",
             toneIcon[tone],
           )}
         >
-          <Icon className="size-5" />
+          <Icon className="size-4 sm:size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="truncate text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {label}
           </p>
           {isLoading ? (
-            <Skeleton className="mt-1 h-7 w-16" />
+            <Skeleton className="mt-1 h-5 sm:h-7 w-16" />
           ) : (
-            <p className={cn("text-2xl font-bold leading-none tracking-tight tabular-nums", toneValue[tone])}>
+            <p className={cn("text-lg sm:text-2xl font-bold leading-none tracking-tight tabular-nums", toneValue[tone])}>
               {value ?? "\u2014"}
             </p>
           )}

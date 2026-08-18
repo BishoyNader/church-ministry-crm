@@ -12,18 +12,18 @@ export function DashboardHero({ title, description, action, className }: Dashboa
   return (
     <div
       className={cn(
-        "rounded-hero border border-border-whisper bg-surface-elevated p-6 shadow-diffused-md sm:p-8",
+        "rounded-hero border border-border-whisper bg-surface-elevated p-4 shadow-diffused-md sm:p-6 lg:p-8",
         className,
       )}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-balance">{title}</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-balance">{title}</h1>
           {description ? (
             <p className="text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
-        {action ? <div>{action}</div> : null}
+        {action ? <div className="flex-shrink-0">{action}</div> : null}
       </div>
     </div>
   );

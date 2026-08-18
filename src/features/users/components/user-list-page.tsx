@@ -152,9 +152,9 @@ export function UserListPage() {
         <PendingRegistrationsQueue />
       </PermissionGuard>
 
-      <SectionCard className="p-4">
+      <SectionCard className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-w-0">
             <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={t("searchPlaceholder")}
@@ -162,10 +162,10 @@ export function UserListPage() {
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="pl-9"
+              className="ps-9"
             />
           </div>
-          <Button variant="outline" onClick={handleSearch}>
+          <Button variant="outline" onClick={handleSearch} className="sm:flex-shrink-0">
             {t("search")}
           </Button>
           <Select value={roleFilter} onValueChange={(val) => { setRoleFilter(val as string); setPage(1); }}>
@@ -180,28 +180,30 @@ export function UserListPage() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={exportFormat} onValueChange={(val) => setExportFormat(val as "csv" | "xlsx")}>
-            <SelectTrigger className="w-full sm:w-28" aria-label={t("export.formatLabel")}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="csv">CSV</SelectItem>
-              <SelectItem value="xlsx">XLSX</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            onClick={handleExport}
-            disabled={exportMutation.isPending || (isPlatformOwner && scopeChurchId === null)}
-            className="gap-2"
-          >
-            {exportMutation.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Download className="size-4" />
-            )}
-            {t("export.button")}
-          </Button>
+          <div className="flex gap-2">
+            <Select value={exportFormat} onValueChange={(val) => setExportFormat(val as "csv" | "xlsx")}>
+              <SelectTrigger className="w-full sm:w-28" aria-label={t("export.formatLabel")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="csv">CSV</SelectItem>
+                <SelectItem value="xlsx">XLSX</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              disabled={exportMutation.isPending || (isPlatformOwner && scopeChurchId === null)}
+              className="gap-2"
+            >
+              {exportMutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}
+              <span className="hidden sm:inline">{t("export.button")}</span>
+            </Button>
+          </div>
         </div>
         {exportError ? (
           <p className="mt-3 text-sm text-destructive">{exportError}</p>
@@ -216,43 +218,46 @@ export function UserListPage() {
             <caption className="sr-only">{t("table.caption")}</caption>
             <thead>
               <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <th scope="col" className="px-4 py-3">{t("table.name")}</th>
-                <th scope="col" className="px-4 py-3">{t("table.email")}</th>
-                <th scope="col" className="px-4 py-3">{t("table.roles")}</th>
-                <th scope="col" className="px-4 py-3">{t("table.status")}</th>
-                <th scope="col" className="px-4 py-3">{t("table.joined")}</th>
-                <th scope="col" className="px-4 py-3 text-end">{t("table.actions")}</th>
+                <th scope="col" className="px-3 sm:px-4 py-3">{t("table.name")}</th>
+                <th scope="col" className="px-3 sm:px-4 py-3 hidden lg:table-cell">{t("table.email")}</th>
+                <th scope="col" className="px-3 sm:px-4 py-3 hidden sm:table-cell">{t("table.roles")}</th>
+                <th scope="col" className="px-3 sm:px-4 py-3">{t("table.status")}</th>
+                <th scope="col" className="px-3 sm:px-4 py-3 hidden lg:table-cell">{t("table.joined")}</th>
+                <th scope="col" className="px-3 sm:px-4 py-3 text-end">{t("table.actions")}</th>
               </tr>
             </thead>
             <tbody>
               {isLoading
                 ? Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i} className="border-b">
-                      <td className="px-4 py-3"><Skeleton className="h-4 w-32" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-4 w-40" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-5 w-20" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-5 w-16" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
-                      <td className="px-4 py-3"><Skeleton className="h-8 w-8 ms-auto" /></td>
+                      <td className="px-3 sm:px-4 py-3"><Skeleton className="h-4 w-32" /></td>
+                      <td className="px-3 sm:px-4 py-3 hidden lg:table-cell"><Skeleton className="h-4 w-40" /></td>
+                      <td className="px-3 sm:px-4 py-3 hidden sm:table-cell"><Skeleton className="h-5 w-20" /></td>
+                      <td className="px-3 sm:px-4 py-3"><Skeleton className="h-5 w-16" /></td>
+                      <td className="px-3 sm:px-4 py-3 hidden lg:table-cell"><Skeleton className="h-4 w-24" /></td>
+                      <td className="px-3 sm:px-4 py-3"><Skeleton className="h-8 w-8 ms-auto" /></td>
                     </tr>
                   ))
                 : users.map((user) => (
-                    <tr key={user.id} className="border-b transition hover:bg-muted/30">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium">
+                    <tr key={user.id} className="border-b transition-colors hover:bg-muted/30">
+                      <td className="px-3 sm:px-4 py-3">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
                             {(user.full_name_ar ?? user.full_name_en ?? "?")[0]}
                           </div>
-                          <div>
-                            <p className="font-medium">{user.full_name_ar}</p>
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">{user.full_name_ar}</p>
                             {user.full_name_en ? (
-                              <p className="text-xs text-muted-foreground">{user.full_name_en}</p>
+                              <p className="text-xs text-muted-foreground truncate">{user.full_name_en}</p>
                             ) : null}
+                            <p className="text-xs text-muted-foreground truncate lg:hidden">{user.email}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-3 text-muted-foreground hidden lg:table-cell">
+                        <span className="truncate block max-w-[200px]">{user.email}</span>
+                      </td>
+                      <td className="px-3 sm:px-4 py-3 hidden sm:table-cell">
                         <div className="flex flex-wrap gap-1">
                           {user.roles.map((role) => (
                             <Badge key={role.id} variant="secondary" className="text-xs">
@@ -261,16 +266,16 @@ export function UserListPage() {
                           ))}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 sm:px-4 py-3">
                         <Badge variant={user.is_active ? "default" : "destructive"}>
                           {user.is_active ? t("status.active") : t("status.inactive")}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-muted-foreground">
+                      <td className="px-3 sm:px-4 py-3 text-muted-foreground hidden lg:table-cell">
                         {formatLocalizedDate(user.created_at, locale)}
                       </td>
-                      <td className="px-4 py-3 text-end">
-                        <div className="flex items-center justify-end gap-1">
+                      <td className="px-3 sm:px-4 py-3 text-end">
+                        <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                           <Button
                             variant="ghost"
                             size="icon-sm"
