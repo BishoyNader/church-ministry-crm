@@ -163,7 +163,7 @@ export function EventsPage({ presetServiceId }: EventsPageProps) {
             <table className="w-full text-sm">
               <caption className="sr-only">{t("table.caption")}</caption>
               <thead>
-                <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   <th scope="col" className="px-4 py-3">{t("table.title")}</th>
                   <th scope="col" className="px-4 py-3">{t("table.type")}</th>
                   <th scope="col" className="px-4 py-3">{t("table.service")}</th>

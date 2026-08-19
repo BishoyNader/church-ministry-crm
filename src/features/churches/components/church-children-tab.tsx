@@ -204,7 +204,7 @@ export function ChurchChildrenTab({ churchId }: ChurchChildrenTabProps) {
           </div>
         ) : (
           <div className="divide-y">
-            <div className="hidden px-4 py-2 text-xs font-medium uppercase tracking-wider text-muted-foreground sm:flex">
+            <div className="hidden px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground sm:flex">
               <span className="flex-1">{t("table.name")}</span>
               <span className="w-28">{t("table.stage")}</span>
               <span className="w-24">{t("table.status")}</span>

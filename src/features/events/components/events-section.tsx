@@ -44,7 +44,7 @@ export function EventsSection({ serviceId }: EventsSectionProps) {
   return (
     <div className="border-t">
       <div className="flex items-center justify-between gap-3 px-4 py-2.5">
-        <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           <CalendarDays className="size-3.5" />
           {t("title")}
         </h4>

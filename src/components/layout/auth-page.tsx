@@ -16,8 +16,9 @@ export async function AuthPage({
   return (
     <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-surface-dashboard px-4 py-8 sm:px-6 sm:py-12">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute -start-40 top-1/4 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -end-32 bottom-0 h-80 w-80 rounded-full bg-gold/10 blur-3xl" />
+        <div className="absolute -start-40 top-1/4 h-96 w-96 rounded-full bg-primary/15 blur-3xl" />
+        <div className="absolute -end-32 bottom-0 h-80 w-80 rounded-full bg-gold/12 blur-3xl" />
+        <div className="absolute start-1/3 top-0 h-64 w-64 rounded-full bg-ministry/8 blur-3xl" />
       </div>
 
       <div className="absolute end-4 top-4 z-20 sm:end-6 sm:top-6">
@@ -27,7 +28,7 @@ export async function AuthPage({
       <div className="relative grid w-full max-w-6xl items-stretch gap-6 sm:gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-0 lg:overflow-hidden lg:rounded-3xl lg:border lg:border-border-whisper lg:bg-surface-elevated lg:shadow-diffused-lg">
         <aside
           aria-hidden="true"
-          className="relative hidden overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-600 p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between"
+          className="relative hidden overflow-hidden bg-gradient-to-br from-primary-900 via-primary-800 to-primary-700 p-10 text-primary-foreground lg:flex lg:flex-col lg:justify-between"
         >
           <div className="absolute inset-0 opacity-30">
             <CopticPattern className="h-full w-full" />
@@ -47,10 +48,10 @@ export async function AuthPage({
 
           <div className="relative mt-auto max-w-sm pt-16">
             <span className="mb-4 block h-px w-12 bg-gold/70" aria-hidden="true" />
-            <blockquote className="text-xl font-medium leading-9">
+            <blockquote className="text-xl font-medium leading-relaxed tracking-tight">
               {t("quote")}
             </blockquote>
-            <p className="mt-3 text-sm text-primary-foreground/70">{t("quoteRef")}</p>
+            <p className="mt-3 text-sm text-primary-foreground/60">{t("quoteRef")}</p>
           </div>
         </aside>
 

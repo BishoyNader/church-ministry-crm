@@ -57,7 +57,7 @@ export function StatCard({
           <Icon className="size-4 sm:size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="truncate text-[10px] sm:text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {label}
           </p>
           {isLoading ? (

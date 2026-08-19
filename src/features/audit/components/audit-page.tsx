@@ -232,7 +232,7 @@ export function AuditPage() {
             <table className="w-full text-sm">
               <caption className="sr-only">{t("table.caption")}</caption>
               <thead>
-                <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <tr className="border-b bg-muted/50 text-start text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   <th scope="col" className="px-3 sm:px-4 py-3">{t("table.time")}</th>
                   <th scope="col" className="px-3 sm:px-4 py-3">{t("table.action")}</th>
                   <th scope="col" className="px-3 sm:px-4 py-3 hidden sm:table-cell">{t("table.entityType")}</th>
