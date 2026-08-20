@@ -43,6 +43,8 @@
     "importExport": "Import / Export",
     "events": "Events",
     "settings": "Settings",
+    "billing": "Billing & Subscription",
+    "platformBilling": "Platform Billing",
     "comingSoon": "Soon",
     "tagline": "Ministry operations",
     "welcomeBack": "Welcome back to your church dashboard",
@@ -1099,83 +1101,32 @@
     }
   },
   "admin": {
-    "churchRequests": {
-      "title": "Church Requests",
-      "description": "Review church creation requests from the public signup flow.",
-      "tabs": {
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected"
+    "billing": {
+      "title": "Platform Billing",
+      "description": "Manage subscriptions, payments, and billing across all churches.",
+      "paymentMethod": {
+        "title": "Payment Method",
+        "description": "All payments are processed via InstaPay and manually verified.",
+        "accountName": "Account Name",
+        "accountNumber": "Account Number",
+        "configNote": "Update the InstaPay account details in BILLING_CONFIG (src/features/billing/types/billing.types.ts)."
       },
-      "empty": {
-        "title": "No requests",
-        "description": "New church requests will appear here.",
-        "searchTitle": "No matches",
-        "searchDescription": "Try a different search term."
-      },
-      "searchPlaceholder": "Search by church, applicant, or email…",
-      "searchLabel": "Search church requests",
-      "resultsCount": "{count, plural, =0 {No results} =1 {1 result} other {# results}}",
-      "table": {
-        "catechist": "Catechist: {name}",
-        "submitted": "Submitted {date}",
-        "notes": "Notes",
-        "reason": "Reason: {reason}"
-      },
-      "approve": "Approve",
-      "reject": "Reject",
-      "errors": {
-        "general": "Something went wrong. Please try again.",
-        "listFailed": "Failed to load church requests."
-      },
-      "rejectDialog": {
-        "title": "Reject church request",
-        "description": "Are you sure you want to reject {name}? The applicant will not be able to retry with the same church name.",
-        "reasonLabel": "Reason (optional)",
-        "reasonPlaceholder": "Tell the applicant why the request was declined…",
-        "confirm": "Reject request",
-        "cancel": "Cancel",
-        "processing": "Rejecting…"
-      },
-      "approveDialog": {
-        "successTitle": "Request approved",
-        "successDescription": "The church has been created and the applicant's account provisioned.",
-        "errorTitle": "Approval failed",
-        "close": "Done",
-        "closeError": "Close",
-        "inviteLabel": "Invitation link"
-      }
-    },
-    "dashboard": {
-      "title": "Platform Overview",
-      "description": "Monitor churches, users, and activity across the platform.",
-      "kpis": {
+      "stats": {
         "totalChurches": "Total Churches",
-        "activeChurches": "Active Churches",
+        "totalRevenue": "Total Revenue (EGP)",
         "pendingRequests": "Pending Requests",
-        "approvalRate": "Approval Rate",
-        "totalUsers": "Total Users",
-        "totalServants": "Total Servants",
-        "totalBeneficiaries": "Total Beneficiaries"
+        "monthlySubscriptions": "Monthly Plans",
+        "yearlySubscriptions": "Yearly Plans",
+        "expiringSubscriptions": "Expiring Soon",
+        "gracePeriodChurches": "Grace Period"
       },
-      "pendingRequests": {
-        "title": "Pending Church Requests",
-        "empty": "No pending requests",
-        "submitted": "Submitted {date}",
-        "reviewAll": "Review all requests"
-      },
-      "churches": {
-        "title": "Recent Churches",
-        "viewAll": "View all",
-        "empty": "No churches yet"
-      },
-      "recentAudit": {
-        "title": "Recent Activity",
-        "viewAll": "View all",
-        "empty": "No activity yet"
-      },
-      "errors": {
-        "statsFailed": "Failed to load platform overview."
+      "upcoming": {
+        "title": "Coming Soon",
+        "description": "The following management features are being built:",
+        "paymentReview": "Payment request review and approval",
+        "refundManagement": "Refund request management",
+        "subscriptionDashboard": "Subscription status dashboard",
+        "invoiceManagement": "Invoice viewing and management"
       }
     }
   },
@@ -2076,5 +2027,348 @@
     "loadError": "Failed to load servant attendance.",
     "accessDeniedTitle": "Access restricted",
     "accessDeniedDescription": "Only the Church Manager and Stage Managers can record servant attendance."
+  },
+  "billing": {
+    "plans": {
+      "free": "Free",
+      "trial": "Free Trial",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "subscription": {
+      "currentPlan": "Current Plan",
+      "trialRemaining": "{days} days remaining in your free trial",
+      "trialExplanation": "Your free trial gives you access to all features. After the trial ends, you will automatically move to the Free plan unless you subscribe.",
+      "validUntil": "Valid until {date}",
+      "freePlanDescription": "You are on the Free plan. Upgrade to unlock all features.",
+      "trialAlreadyUsed": "You have already used your free trial.",
+      "gracePeriod": "Grace Period",
+      "plans": {
+        "free": "Free",
+        "trial": "Free Trial",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      }
+    },
+    "selectPlan": {
+      "title": "Choose Your Plan",
+      "description": "Select the plan that best fits your church's needs."
+    },
+    "pricing": {
+      "recommended": "Recommended",
+      "planName": {
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "planDescription": {
+        "monthly": "Full access, billed monthly.",
+        "yearly": "Full access, billed annually. Best value."
+      },
+      "pricePeriod": {
+        "monthly": "per month",
+        "yearly": "per year"
+      },
+      "yearlySavings": "Save {amount} EGP / year ({percent}% off)",
+      "yearlyComparison": "Monthly equivalent: {monthly} EGP · Yearly: {yearly} EGP",
+      "currentPlan": "Current Plan",
+      "selectPlan": "Select Plan",
+      "features": {
+        "unlimitedServices": "Unlimited services",
+        "unlimitedStages": "Unlimited stages",
+        "unlimitedServants": "Unlimited servants",
+        "unlimitedBeneficiaries": "Unlimited beneficiaries",
+        "unlimitedEvents": "Unlimited events",
+        "advancedReports": "Advanced reports & analytics",
+        "advancedAnalytics": "Advanced analytics dashboard",
+        "aiAssistant": "AI Assistant",
+        "bulkImport": "Bulk import / export",
+        "advancedExport": "Advanced data export",
+        "advancedCrm": "Advanced CRM features",
+        "notifications": "Full notification system",
+        "spiritualJournal": "Full spiritual journal"
+      }
+    },
+    "payment": {
+      "title": "Payment Instructions",
+      "description": "Please follow these steps to complete your payment via InstaPay.",
+      "amountDue": "Amount Due",
+      "instapayAccount": "InstaPay Account Details",
+      "accountName": "Account Name",
+      "accountNumber": "Account Number",
+      "stepsTitle": "Steps",
+      "step1": {
+        "title": "Select your plan",
+        "description": "Choose the plan you want to subscribe to."
+      },
+      "step2": {
+        "title": "View account details",
+        "description": "Note the InstaPay account information shown above."
+      },
+      "step3": {
+        "title": "Transfer the exact amount",
+        "description": "Open your banking app and transfer the exact amount to the account above."
+      },
+      "step4": {
+        "title": "Keep your reference",
+        "description": "Save the transfer reference or take a screenshot for verification."
+      },
+      "step5": {
+        "title": "Submit payment request",
+        "description": "Return here and submit your payment request with the transfer details."
+      },
+      "importantNotes": "Important Notes",
+      "notes": {
+        "exactAmount": "Transfer the exact amount shown. Partial payments cannot be processed.",
+        "keepReference": "Keep your transfer reference — you will need it for verification.",
+        "manualVerification": "Payments are manually verified by our team. Activation may take up to 24 hours.",
+        "activationTime": "You will be notified once your subscription is activated."
+      },
+      "questions": "Questions? Contact us at",
+      "back": "Back to Plan Selection",
+      "proceedToPayment": "I have made the transfer — Proceed to Submit",
+      "planPeriod": {
+        "monthly": "Monthly (499 EGP)",
+        "yearly": "Yearly (3,999 EGP)"
+      }
+    },
+    "form": {
+      "title": "Submit Payment Request",
+      "description": "Provide your payment details for verification.",
+      "plan": "Plan",
+      "transferDate": "Transfer Date",
+      "paymentReference": "Transfer Reference",
+      "referencePlaceholder": "e.g. TXN123456789",
+      "note": "Note (optional)",
+      "notePlaceholder": "Any additional information about your payment...",
+      "submitting": "Submitting...",
+      "submit": "Submit Payment Request",
+      "cancel": "Cancel",
+      "afterSubmission": "After submission, our team will verify your payment and activate your subscription within 24 hours.",
+      "plans": {
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      }
+    },
+    "success": {
+      "title": "Payment Request Submitted",
+      "description": "Your payment request has been received and is pending review.",
+      "nextSteps": "What happens next:",
+      "step1": "Our team will verify your payment",
+      "step2": "You will be notified once approved",
+      "step3": "Your subscription will be activated immediately after approval",
+      "backToBilling": "Back to Billing"
+    },
+    "upgrade": {
+      "title": "Upgrade Your Plan",
+      "description": "Unlock all features for your church ministry.",
+      "cta": "View Plans"
+    },
+    "featureLock": {
+      "description": "This feature is available with Monthly and Yearly plans.",
+      "viewPlans": "View Plans"
+    },
+    "trial": {
+      "daysRemaining": "{days} day(s) left in trial",
+      "upgrade": "Upgrade"
+    },
+    "paymentInstructions": {
+      "title": "Payment Instructions",
+      "proceedToPayment": "I've made the transfer — continue"
+    },
+    "currentPlan": {
+      "title": "Current Plan",
+      "validUntil": "Valid until {date}",
+      "changePlan": "Change Plan"
+    }
+  },
+  "public": {
+    "pricing": {
+      "backToHome": "Back to Home",
+      "title": "Plans & Pricing",
+      "description": "Choose the plan that best serves your church ministry. Start with a free trial — no credit card required.",
+      "plans": {
+        "free": "Free",
+        "freeDescription": "For small churches getting started.",
+        "freePeriod": "forever",
+        "trial": "Free Trial",
+        "trialDescription": "Full access for 30 days.",
+        "trialPeriod": "30 days",
+        "monthly": "Monthly",
+        "monthlyDescription": "Full access, billed monthly.",
+        "monthlyPeriod": "per month (499 EGP)",
+        "yearly": "Yearly",
+        "yearlyDescription": "Full access, billed annually. Best value.",
+        "yearlyPeriod": "per year (3,999 EGP)",
+        "yearlySavings": "Save 1,989 EGP/year (33% off)",
+        "recommended": "Best Value"
+      },
+      "features": {
+        "oneService": "1 service",
+        "tenServants": "Up to 10 servants",
+        "thirtyBeneficiaries": "Up to 30 beneficiaries",
+        "allFeatures": "All features included",
+        "thirtyDays": "30-day free trial",
+        "noCreditCard": "No credit card required",
+        "saveYearly": "Save 33% with annual billing",
+        "prioritySupport": "Priority support"
+      },
+      "cta": {
+        "title": "Ready to get started?",
+        "description": "Join churches that are already using Church CRM to manage their ministry.",
+        "getStarted": "Create Your Account",
+        "contactUs": "Contact Us",
+        "startTrial": "Start Free Trial",
+        "subscribe": "Subscribe Now"
+      },
+      "comparison": {
+        "title": "Feature Comparison",
+        "feature": "Feature",
+        "features": {
+          "services": "Services",
+          "stages": "Stages",
+          "servants": "Servants",
+          "beneficiaries": "Beneficiaries",
+          "events": "Active Events",
+          "advancedReports": "Advanced Reports",
+          "analytics": "Analytics Dashboard",
+          "ai": "AI Assistant",
+          "bulkImport": "Bulk Import",
+          "export": "Advanced Export"
+        },
+        "limits": {
+          "free": {
+            "services": "1",
+            "stages": "2",
+            "servants": "10",
+            "beneficiaries": "30",
+            "events": "3",
+            "advancedReports": "-",
+            "analytics": "-",
+            "ai": "-",
+            "bulkImport": "-",
+            "export": "-"
+          },
+          "paid": {
+            "services": "Unlimited",
+            "stages": "Unlimited",
+            "servants": "Unlimited",
+            "beneficiaries": "Unlimited",
+            "events": "Unlimited",
+            "advancedReports": "Included",
+            "analytics": "Included",
+            "ai": "Included",
+            "bulkImport": "Included",
+            "export": "Included"
+          }
+        }
+      },
+      "trialInfo": {
+        "title": "About the Free Trial",
+        "howItWorks": "Here's how the free trial works:",
+        "point1": "Every new church automatically gets a 30-day free trial.",
+        "point2": "During the trial, all features are available without restriction.",
+        "point3": "If you do not subscribe before the trial ends, your church will automatically move to the Free plan.",
+        "point4": "Your data is never deleted. You can upgrade at any time to restore full access."
+      },
+      "paymentMethod": {
+        "title": "Payment Method",
+        "description": "We accept manual payments through InstaPay. Here's how it works:",
+        "step1": "Select your preferred plan.",
+        "step2": "Transfer the exact amount through InstaPay.",
+        "step3": "Submit a payment request with your transfer reference.",
+        "step4": "Our team manually verifies your payment.",
+        "step5": "Your subscription is activated within 24 hours."
+      },
+      "faq": {
+        "title": "Frequently Asked Questions",
+        "paymentProcess": {
+          "question": "How does payment work?",
+          "answer": "Payments are made manually through InstaPay. After transferring the amount, you submit a payment request with your transfer details. Our team verifies the payment and activates your subscription."
+        },
+        "activationTime": {
+          "question": "How long does activation take?",
+          "answer": "Once you submit a payment request, our team typically verifies and activates your subscription within 24 hours. You will receive a notification once it is activated."
+        },
+        "dataAfterExpiry": {
+          "question": "What happens to my data if I don't renew?",
+          "answer": "Your data is never deleted. If your subscription expires, you move to the Free plan with its limits. Your existing data remains safe and accessible. You can upgrade at any time to restore full access."
+        },
+        "refundPolicy": {
+          "question": "What is the refund policy?",
+          "answer": "If you need a refund, you can request one from your billing page. Refunds are reviewed and processed manually. Approved refunds are returned through InstaPay."
+        },
+        "contactSupport": {
+          "question": "How can I contact support?",
+          "answer": "You can reach us through the Contact Us page or by emailing our support team. We are here to help with any billing or account questions."
+        }
+      },
+      "footer": "Church CRM — Built for church ministry teams."
+    },
+    "about": {
+      "backToHome": "Back to Home",
+      "title": "About Church CRM",
+      "description": "Church CRM is a comprehensive ministry management platform designed to help churches organize, track, and grow their community.",
+      "purpose": {
+        "title": "Our Purpose",
+        "description": "We believe technology should serve the church, not the other way around. Church CRM was built to reduce administrative burden so ministry leaders can focus on what matters most — their community and their calling."
+      },
+      "capabilities": {
+        "title": "Platform Capabilities",
+        "volunteerManagement": {
+          "title": "Volunteer Coordination",
+          "description": "Organize servants, manage assignments, and track service history across your ministry."
+        },
+        "memberEngagement": {
+          "title": "Member Engagement",
+          "description": "Track beneficiaries, manage follow-ups, and maintain meaningful connections with your community."
+        },
+        "reporting": {
+          "title": "Reporting & Analytics",
+          "description": "Generate insights about attendance, engagement, and ministry health with built-in reporting tools."
+        },
+        "churchOperations": {
+          "title": "Church Operations",
+          "description": "Manage services, stages, events, and classes from a single, organized dashboard."
+        }
+      },
+      "serves": {
+        "title": "Who We Serve",
+        "description": "Church CRM serves Coptic Orthodox churches and ministry teams of all sizes. Whether you are a small parish or a large diocese, our platform adapts to your needs."
+      },
+      "contact": {
+        "title": "Get in Touch",
+        "description": "Have questions? We would love to hear from you.",
+        "email": "Email",
+        "phone": "Phone",
+        "cta": "Contact Us"
+      },
+      "footer": "Church CRM — Built for church ministry teams."
+    },
+    "contact": {
+      "backToHome": "Back to Home",
+      "title": "Contact Us",
+      "description": "We are here to help. Reach out to us through any of the channels below.",
+      "email": {
+        "title": "Email Support",
+        "description": "For general inquiries and support.",
+        "cta": "Send Email"
+      },
+      "phone": {
+        "title": "Phone Support",
+        "description": "Available during business hours."
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "description": "Quick support via WhatsApp."
+      },
+      "supportInfo": {
+        "title": "Support Information",
+        "description": "Our support team is available to help with:",
+        "point1": "Account setup and configuration",
+        "point2": "Billing and subscription questions",
+        "point3": "Technical support and troubleshooting"
+      },
+      "footer": "Church CRM — Built for church ministry teams."
+    }
   }
 }

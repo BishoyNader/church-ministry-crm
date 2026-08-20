@@ -12,6 +12,7 @@ import {
   updateStageSchema,
   assignUsersToStageSchema,
 } from "../schemas/stage.schema";
+import { checkEntitlementLimit } from "@/features/billing/lib/entitlement-guard";
 import type {
   CreateMinistryFormValues,
   UpdateMinistryFormValues,
@@ -149,6 +150,20 @@ export async function createMinistryAction(
 
   if (!(await hasPermission(PERMISSION_CODES.STAGES_CREATE))) {
     return { success: false, message: "You do not have permission to create ministries." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const entitlement = await checkEntitlementLimit(supabase, profile.church_id, "maxStages");
+  if (!entitlement.allowed) {
+    return { success: false, message: entitlement.reason };
   }
 
   const result = await stageService.createMinistry(supabase, {
@@ -346,6 +361,20 @@ export async function createStageAction(
 
   if (!(await hasPermission(PERMISSION_CODES.STAGES_CREATE))) {
     return { success: false, message: "You do not have permission to create stages." };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+  if (!profile) {
+    return { success: false, message: "User profile not found." };
+  }
+
+  const entitlement = await checkEntitlementLimit(supabase, profile.church_id, "maxStages");
+  if (!entitlement.allowed) {
+    return { success: false, message: entitlement.reason };
   }
 
   const result = await stageService.createStage(supabase, {

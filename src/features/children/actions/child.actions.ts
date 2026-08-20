@@ -36,6 +36,7 @@ import type {
   PaginationInput,
   PaginatedResult,
 } from "../types/child.types";
+import { checkEntitlementLimit } from "@/features/billing/lib/entitlement-guard";
 import * as childService from "../services/child.service";
 import { sendNotification } from "@/features/notifications/services/notification.service";
 import { ZodError } from "zod";
@@ -253,6 +254,11 @@ export async function createChildAction(
 
   if (!isStageInScope(scope, values.stage_id)) {
     return { success: false, message: await translateChildErrorKey("createStageDenied") };
+  }
+
+  const entitlement = await checkEntitlementLimit(supabase, profile.church_id, "maxBeneficiaries");
+  if (!entitlement.allowed) {
+    return { success: false, message: entitlement.reason };
   }
 
   const result = await childService.createChild(supabase, {

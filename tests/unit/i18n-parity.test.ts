@@ -57,6 +57,16 @@ describe("translation parity (en ↔ ar)", () => {
       "churches.form.placeholderTier",
       "churches.form.placeholderStatus",
       "churches.form.placeholderLocale",
+      "public.pricing.comparison.limits.free.services",
+      "public.pricing.comparison.limits.free.stages",
+      "public.pricing.comparison.limits.free.servants",
+      "public.pricing.comparison.limits.free.beneficiaries",
+      "public.pricing.comparison.limits.free.events",
+      "public.pricing.comparison.limits.free.advancedReports",
+      "public.pricing.comparison.limits.free.analytics",
+      "public.pricing.comparison.limits.free.ai",
+      "public.pricing.comparison.limits.free.bulkImport",
+      "public.pricing.comparison.limits.free.export",
     ]);
 
     const untranslated = entries.filter(({ key, value }) => {

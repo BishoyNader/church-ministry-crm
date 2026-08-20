@@ -489,9 +489,11 @@ export type Database = {
           settings: Json
           slug: string
           status: string
+          subscription_expires_at: string | null
           subscription_status: string
           subscription_tier: string
           trial_ends_at: string | null
+          trial_used: boolean
           updated_at: string
         }
         Insert: {
@@ -510,9 +512,11 @@ export type Database = {
           settings?: Json
           slug: string
           status?: string
+          subscription_expires_at?: string | null
           subscription_status?: string
           subscription_tier?: string
           trial_ends_at?: string | null
+          trial_used?: boolean
           updated_at?: string
         }
         Update: {
@@ -531,12 +535,246 @@ export type Database = {
           settings?: Json
           slug?: string
           status?: string
+          subscription_expires_at?: string | null
           subscription_status?: string
           subscription_tier?: string
           trial_ends_at?: string | null
+          trial_used?: boolean
           updated_at?: string
         }
         Relationships: []
+      }
+      payment_requests: {
+        Row: {
+          amount: number
+          church_id: string
+          created_at: string
+          currency: string
+          id: string
+          note: string | null
+          payment_method: string
+          payment_proof_path: string | null
+          payment_reference: string | null
+          plan: string
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          transfer_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          church_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          note?: string | null
+          payment_method?: string
+          payment_proof_path?: string | null
+          payment_reference?: string | null
+          plan: string
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          transfer_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          church_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          note?: string | null
+          payment_method?: string
+          payment_proof_path?: string | null
+          payment_reference?: string | null
+          plan?: string
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          transfer_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_requests_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number
+          church_id: string
+          created_at: string
+          currency: string
+          id: string
+          invoice_number: string
+          paid_at: string
+          payment_method: string
+          payment_request_id: string | null
+          plan: string
+          status: string
+          subscription_end: string
+          subscription_start: string
+        }
+        Insert: {
+          amount: number
+          church_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          invoice_number: string
+          paid_at?: string
+          payment_method?: string
+          payment_request_id?: string | null
+          plan: string
+          status?: string
+          subscription_end: string
+          subscription_start: string
+        }
+        Update: {
+          amount?: number
+          church_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          invoice_number?: string
+          paid_at?: string
+          payment_method?: string
+          payment_request_id?: string | null
+          plan?: string
+          status?: string
+          subscription_end?: string
+          subscription_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refunds: {
+        Row: {
+          church_id: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          invoice_id: string | null
+          payment_request_id: string
+          reason: string
+          refund_reference: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          church_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          payment_request_id: string
+          reason: string
+          refund_reference?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          church_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          payment_request_id?: string
+          reason?: string
+          refund_reference?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_church_id_fkey"
+            columns: ["church_id"]
+            isOneToOne: false
+            referencedRelation: "churches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_payment_request_id_fkey"
+            columns: ["payment_request_id"]
+            isOneToOne: false
+            referencedRelation: "payment_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       classes: {
         Row: {
@@ -1700,6 +1938,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_invoice_number: { Args: never; Returns: string }
       change_church_manager: {
         Args: { p_church_id: string; p_new_user_id: string }
         Returns: string
