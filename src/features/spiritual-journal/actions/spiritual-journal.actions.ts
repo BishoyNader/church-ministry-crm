@@ -20,6 +20,7 @@ import type {
   SpiritualJournalListParams,
   SpiritualJournalListResult,
 } from "../types/spiritual-journal.types";
+import { checkFeatureEntitlement } from "@/features/billing/lib/entitlement-guard";
 import * as spiritualJournalService from "../services/spiritual-journal.service";
 import { ZodError } from "zod";
 
@@ -282,6 +283,19 @@ export async function createSpiritualJournalEntryAction(
   if (!(await hasPermission(PERMISSION_CODES.SPIRITUAL_CREATE))) {
     return { success: false, message: "You do not have permission to create spiritual journal entries." };
   }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+  if (profile) {
+    const featureCheck = await checkFeatureEntitlement(supabase, profile.church_id, "canSpiritualJournal");
+    if (!featureCheck.allowed) {
+      return { success: false, message: featureCheck.reason };
+    }
+  }
+
   const result = await spiritualJournalService.createSpiritualJournalEntry(supabase, user.id, {
     entryDate: values.entryDate,
     prayerCompleted: values.prayerCompleted,

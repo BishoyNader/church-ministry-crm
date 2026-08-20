@@ -6,6 +6,7 @@ import { hasPermission } from "@/features/rbac/utils/permission-check";
 import { getActorStageScope } from "@/features/rbac/utils/stage-scope";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import { getTranslations } from "next-intl/server";
+import { checkEntitlementLimit } from "@/features/billing/lib/entitlement-guard";
 import { ZodError } from "zod";
 import { createEventSchema, updateEventSchema } from "../schemas/events.schema";
 import type {
@@ -125,6 +126,17 @@ export async function createEventAction(
   if (!(await hasPermission(PERMISSION_CODES.EVENTS_CREATE))) {
     const t = await getTranslations({ locale, namespace: "events" });
     return { success: false, message: t("errors.createDenied") };
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("church_id").eq("id", user.id).single();
+  if (!profile) {
+    return { success: false, message: "Profile not found." };
+  }
+
+  const entitlement = await checkEntitlementLimit(supabase, profile.church_id, "maxActiveEvents");
+  if (!entitlement.allowed) {
+    const t = await getTranslations({ locale, namespace: "events" });
+    return { success: false, message: entitlement.reason };
   }
 
   const result = await eventsService.createEvent(supabase, {

@@ -6,6 +6,7 @@ import { hasPermission } from "@/features/rbac/utils/permission-check";
 import { getActorStageScope } from "@/features/rbac/utils/stage-scope";
 import { PERMISSION_CODES } from "@/features/rbac/constants/permissions";
 import { getTranslations } from "next-intl/server";
+import { checkEntitlementLimit } from "@/features/billing/lib/entitlement-guard";
 import { ZodError } from "zod";
 import {
   createServiceSchema,
@@ -104,6 +105,20 @@ export async function createServiceAction(
     return { success: false, message: t("errors.createDenied") };
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("church_id")
+    .eq("id", user.id)
+    .single();
+  if (!profile) {
+    return { success: false, message: "Profile not found." };
+  }
+
+  const entitlement = await checkEntitlementLimit(supabase, profile.church_id, "maxServices");
+  if (!entitlement.allowed) {
+    return { success: false, message: entitlement.reason };
+  }
+
   const result = await servicesService.createService(supabase, {
     name_ar: values.name_ar,
     name_en: values.name_en,
@@ -173,6 +188,11 @@ export async function createServiceWithStagesAction(
     .single();
   if (!profile) {
     return { success: false, message: "Profile not found." };
+  }
+
+  const entitlement = await checkEntitlementLimit(supabase, profile.church_id, "maxServices");
+  if (!entitlement.allowed) {
+    return { success: false, message: entitlement.reason };
   }
 
   const serviceResult = await servicesService.createService(supabase, {

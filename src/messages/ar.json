@@ -24,47 +24,49 @@
     }
   },
   "nav": {
-    "dashboard": "لوحة المعلومات",
-    "adminDashboard": "لوحة المنصة",
+    "dashboard": "لوحة التحكم",
+    "adminDashboard": "نظرة عامة على المنصة",
     "churches": "إدارة الكنائس",
     "churchRequests": "طلبات الكنائس",
     "reports": "التقارير",
-    "children": "المخدومون",
-    "attendance": "حضور المخدومين",
-    "followups": "المتابعات",
+    "children": "الم IService",
+    "attendance": "حضور الم IService",
+    "followups": "المتابعة",
     "services": "الخدمات",
-    "classes": "الفصول",
+    "classes": "الأقسام",
     "stages": "المراحل",
     "users": "المستخدمين",
     "servants": "الخدام",
     "servantRecords": "سجلات الخدام",
-    "spiritualJournal": "اليوميات الروحية",
+    "spiritualJournal": "السجل الروحي",
     "notifications": "الإشعارات",
     "importExport": "استيراد / تصدير",
     "events": "الأحداث",
     "settings": "الإعدادات",
+    "billing": "الفواتير والاشتراك",
+    "platformBilling": "فواتير المنصة",
     "comingSoon": "قريباً",
     "tagline": "عمليات الخدمة",
-    "welcomeBack": "مرحبًا بعودتك إلى لوحة معلومات كنيستك",
+    "welcomeBack": "مرحباً بعودتك إلى لوحة تحكم كنيستك",
     "footerTitle": "جاهز للخدمة",
-    "footerDescription": "تابع الأعضاء والأحداث والمتابعات من مكان واحد.",
-    "mainNavigation": "القائمة الرئيسية",
-    "toggleMenu": "فتح/إغلاق القائمة",
+    "footerDescription": "تتبع الأعضاء والأحداث والمتابعة من مكان واحد.",
+    "mainNavigation": "التنقل الرئيسي",
+    "toggleMenu": "تبديل قائمة التنقل",
     "toggleTheme": "تبديل السمة",
     "signOut": "تسجيل الخروج",
-    "skipToContent": "تخطي إلى المحتوى الرئيسي",
-    "promotions": "الترقية السنوية",
+    "skipToContent": "انتقل إلى المحتوى الرئيسي",
+    "promotions": "الترقي السنوي",
     "servantAttendance": "حضور الخدام",
     "approvals": "مركز الموافقات",
-    "audit": "سجل المراجعة",
+    "audit": "سجل التدقيق",
     "sectionOverview": "نظرة عامة",
     "sectionMinistry": "الخدمة",
     "sectionPeople": "الأشخاص",
     "sectionOperations": "العمليات",
-    "sectionSpiritual": "روحي",
+    "sectionSpiritual": "الروحي",
     "sectionAdministration": "الإدارة",
     "roleBadge": "الدور",
-    "toggleLanguage": "تغيير اللغة",
+    "toggleLanguage": "تبديل اللغة",
     "greetingMorning": "صباح الخير",
     "greetingAfternoon": "مساء الخير",
     "greetingEvening": "مساء الخير"
@@ -1099,83 +1101,32 @@
     }
   },
   "admin": {
-    "churchRequests": {
-      "title": "طلبات الكنائس",
-      "description": "مراجعة طلبات إنشاء الكنائس القادمة من صفحة إنشاء الحساب.",
-      "tabs": {
-        "pending": "قيد الانتظار",
-        "approved": "تمت الموافقة",
-        "rejected": "مرفوضة"
+    "billing": {
+      "title": "فواتير المنصة",
+      "description": "إدارة الاشتراكات والمدفوعات والفواتير لجميع الكنائس.",
+      "paymentMethod": {
+        "title": "طريقة الدفع",
+        "description": "جميع المدفوعات تتم عبر InstaPy وتتم مراجعتها يدوياً.",
+        "accountName": "اسم الحساب",
+        "accountNumber": "رقم الحساب",
+        "configNote": "قم بتحديث بيانات حساب InstaPay في BILLING_CONFIG (src/features/billing/types/billing.types.ts)."
       },
-      "empty": {
-        "title": "لا توجد طلبات",
-        "description": "ستظهر طلبات الكنائس الجديدة هنا.",
-        "searchTitle": "لا توجد نتائج",
-        "searchDescription": "جرّب كلمة بحث مختلفة."
-      },
-      "searchPlaceholder": "ابحث بالكنيسة أو مقدم الطلب أو البريد الإلكتروني…",
-      "searchLabel": "البحث في طلبات الكنائس",
-      "resultsCount": "{count, plural, =0 {لا توجد نتائج} =1 {نتيجة واحدة} other {# نتائج}}",
-      "table": {
-        "catechist": "الكاهن: {name}",
-        "submitted": "أُرسل في {date}",
-        "notes": "ملاحظات",
-        "reason": "السبب: {reason}"
-      },
-      "approve": "اعتماد",
-      "reject": "رفض",
-      "errors": {
-        "general": "حدث خطأ. الرجاء المحاولة مرة أخرى.",
-        "listFailed": "تعذّر تحميل طلبات الكنائس."
-      },
-      "rejectDialog": {
-        "title": "رفض طلب الكنيسة",
-        "description": "هل أنت متأكد من رفض {name}؟ لن يتمكن مقدم الطلب من إعادة المحاولة بنفس اسم الكنيسة.",
-        "reasonLabel": "السبب (اختياري)",
-        "reasonPlaceholder": "أخبر مقدم الطلب بسبب رفض الطلب…",
-        "confirm": "رفض الطلب",
-        "cancel": "إلغاء",
-        "processing": "جارٍ الرفض…"
-      },
-      "approveDialog": {
-        "successTitle": "تم اعتماد الطلب",
-        "successDescription": "تم إنشاء الكنيسة وتجهيز حساب مقدم الطلب.",
-        "errorTitle": "فشل الاعتماد",
-        "close": "تم",
-        "closeError": "إغلاق",
-        "inviteLabel": "رابط الدعوة"
-      }
-    },
-    "dashboard": {
-      "title": "نظرة عامة على المنصة",
-      "description": "تابع الكنائس والمستخدمين والنشاط عبر المنصة.",
-      "kpis": {
+      "stats": {
         "totalChurches": "إجمالي الكنائس",
-        "activeChurches": "الكنائس النشطة",
-        "pendingRequests": "طلبات معلقة",
-        "approvalRate": "نسبة القبول",
-        "totalUsers": "إجمالي المستخدمين",
-        "totalServants": "إجمالي الخدام",
-        "totalBeneficiaries": "إجمالي المخدومين"
+        "totalRevenue": "إجمالي الإيرادات (ج.م)",
+        "pendingRequests": "الطلبات المعلقة",
+        "monthlySubscriptions": "الاشتراكات الشهرية",
+        "yearlySubscriptions": "الاشتراكات السنوية",
+        "expiringSubscriptions": "تنتهي قريباً",
+        "gracePeriodChurches": "فترة السماح"
       },
-      "pendingRequests": {
-        "title": "طلبات إنشاء الكنائس المعلقة",
-        "empty": "لا توجد طلبات معلقة",
-        "submitted": "أُرسل في {date}",
-        "reviewAll": "مراجعة جميع الطلبات"
-      },
-      "churches": {
-        "title": "أحدث الكنائس",
-        "viewAll": "عرض الكل",
-        "empty": "لا توجد كنائس بعد"
-      },
-      "recentAudit": {
-        "title": "آخر النشاطات",
-        "viewAll": "عرض الكل",
-        "empty": "لا يوجد نشاط بعد"
-      },
-      "errors": {
-        "statsFailed": "تعذّر تحميل النظرة العامة على المنصة."
+      "upcoming": {
+        "title": "قريباً",
+        "description": "ميزات الإدارة التالية قيد الإنشاء:",
+        "paymentReview": "مراجعة وموافقة طلبات الدفع",
+        "refundManagement": "إدارة طلبات الاسترداد",
+        "subscriptionDashboard": "لوحة حالة الاشتراكات",
+        "invoiceManagement": "عرض وإدارة الفواتير"
       }
     }
   },
@@ -2076,5 +2027,348 @@
     "loadError": "فشل تحميل حضور الخدام.",
     "accessDeniedTitle": "الوصول مقيد",
     "accessDeniedDescription": "فقط مدير الكنيسة وأمناء المراحل يمكنهم تسجيل حضور الخدام."
+  },
+  "billing": {
+    "plans": {
+      "free": "مجاني",
+      "trial": "تجريبي مجاني",
+      "monthly": "شهري",
+      "yearly": "سنوي"
+    },
+    "subscription": {
+      "currentPlan": "الباقة الحالية",
+      "trialRemaining": "متبقي {days} يوم في الفترة التجريبية",
+      "trialExplanation": "الفترة التجريبية المجانية تمنحك الوصول إلى جميع الميزات. بعد انتهاء الفترة، ستمتلك تلقائياً الباقة المجانية ما لم تشترك.",
+      "validUntil": "صالح حتى {date}",
+      "freePlanDescription": "أنت على الباقة المجانية. اشترك للحصول على جميع الميزات.",
+      "trialAlreadyUsed": "لقد استخدمت الفترة التجريبية المجانية بالفعل.",
+      "gracePeriod": "فترة السماح",
+      "plans": {
+        "free": "مجاني",
+        "trial": "تجريبي مجاني",
+        "monthly": "شهري",
+        "yearly": "سنوي"
+      }
+    },
+    "selectPlan": {
+      "title": "اختر باقتك",
+      "description": "اختر الباقة الأنسب لاحتياجات كنيستك."
+    },
+    "pricing": {
+      "recommended": "الأفضل قيمة",
+      "planName": {
+        "monthly": "شهري",
+        "yearly": "سنوي"
+      },
+      "planDescription": {
+        "monthly": "وصول كامل، يُدفع شهرياً.",
+        "yearly": "وصول كامل، يُدفع سنوياً. أفضل قيمة."
+      },
+      "pricePeriod": {
+        "monthly": "شهرياً",
+        "yearly": "سنوياً"
+      },
+      "yearlySavings": "وفّر {amount} ج.م / سنة ({percent}% خصم)",
+      "yearlyComparison": "المقابل الشهري: {monthly} ج.م · السنوي: {yearly} ج.م",
+      "currentPlan": "الباقة الحالية",
+      "selectPlan": "اختر الباقة",
+      "features": {
+        "unlimitedServices": "خدمات غير محدودة",
+        "unlimitedStages": "مراحل غير محدودة",
+        "unlimitedServants": "خدام غير محدودون",
+        "unlimitedBeneficiaries": "مستفيدون غير محدودون",
+        "unlimitedEvents": "أحداث غير محدودة",
+        "advancedReports": "تقارير وتحليلات متقدمة",
+        "advancedAnalytics": "لوحة تحليلات متقدمة",
+        "aiAssistant": "مساعد ذكاء اصطناعي",
+        "bulkImport": "استيراد / تصدير مجمّع",
+        "advancedExport": "تصدير بيانات متقدم",
+        "advancedCrm": "ميزات CRM متقدمة",
+        "notifications": "نظام إشعارات كامل",
+        "spiritualJournal": "سجل روحي كامل"
+      }
+    },
+    "payment": {
+      "title": "تعليمات الدفع",
+      "description": "يرجى اتباع هذه الخطوات لإتمام الدفع عبر InstaPay.",
+      "amountDue": "المبلغ المستحق",
+      "instapayAccount": "بيانات حساب InstaPay",
+      "accountName": "اسم الحساب",
+      "accountNumber": "رقم الحساب",
+      "stepsTitle": "الخطوات",
+      "step1": {
+        "title": "اختر باقتك",
+        "description": "اختر الباقة التي تريد الاشتراك فيها."
+      },
+      "step2": {
+        "title": "اطلع على بيانات الحساب",
+        "description": "دوّن معلومات حساب InstaPay المعروضة أعلاه."
+      },
+      "step3": {
+        "title": "قم بالتحويل للمبلغ الصحيح",
+        "description": "افتح تطبيق البنك وقم بتحويل المبلغ المطلوب إلى الحساب أعلاه."
+      },
+      "step4": {
+        "title": "احفظ المرجع",
+        "description": "احفظ مرجع التحويل أو خذ لقطة شاشة للتحقق."
+      },
+      "step5": {
+        "title": "أرسل طلب الدفع",
+        "description": "عد هنا وأرسل طلب الدفع ببيانات التحويل."
+      },
+      "importantNotes": "ملاحظات هامة",
+      "notes": {
+        "exactAmount": "قم بتحويل المبلغ الصحيح. لا يمكن معالجة المدفوعات الجزئية.",
+        "keepReference": "احفظ مرجع التحويل — ستحتاجه للتحقق.",
+        "manualVerification": "يتم التحقق يدوياً من فريقنا. قد يستغرق التفعيل حتى 24 ساعة.",
+        "activationTime": "ستتلقى إشعاراً بمجرد تفعيل اشتراكك."
+      },
+      "questions": "هل لديك أسئلة؟ تواصل معنا عبر",
+      "back": "العودة لاختيار الباقة",
+      "proceedToPayment": "قمت بالتحويل — المتابعة لإرسال الطلب",
+      "planPeriod": {
+        "monthly": "شهرياً (499 ج.م)",
+        "yearly": "سنوياً (3,999 ج.م)"
+      }
+    },
+    "form": {
+      "title": "إرسال طلب الدفع",
+      "description": "أدخل بيانات الدفع الخاصة بك للتحقق.",
+      "plan": "الباقة",
+      "transferDate": "تاريخ التحويل",
+      "paymentReference": "مرجع التحويل",
+      "referencePlaceholder": "مثال: TXN123456789",
+      "note": "ملاحظة (اختياري)",
+      "notePlaceholder": "أي معلومات إضافية حول الدفع...",
+      "submitting": "جارٍ الإرسال...",
+      "submit": "إرسال طلب الدفع",
+      "cancel": "إلغاء",
+      "afterSubmission": "بعد الإرسال، سيتحقق فريقنا من الدفع ويُفعّل اشتراكك خلال 24 ساعة.",
+      "plans": {
+        "monthly": "شهري",
+        "yearly": "سنوي"
+      }
+    },
+    "success": {
+      "title": "تم إرسال طلب الدفع",
+      "description": "تم استلام طلب الدفع وهو قيد المراجعة.",
+      "nextSteps": "ماذا يحدث بعد ذلك:",
+      "step1": "سيتحقق فريقنا من الدفع",
+      "step2": "ستتلقى إشعاراً عند الموافقة",
+      "step3": "سيتم تفعيل اشتراكك فوراً بعد الموافقة",
+      "backToBilling": "العودة للفواتير"
+    },
+    "upgrade": {
+      "title": "ترقية باقتك",
+      "description": "احصل على جميع الميزات لكنيستك.",
+      "cta": "عرض الباقات"
+    },
+    "featureLock": {
+      "description": "هذه الميزة متاحة مع الباقات الشهرية والسنوية.",
+      "viewPlans": "عرض الباقات"
+    },
+    "trial": {
+      "daysRemaining": "متبقي {days} يوم في الفترة التجريبية",
+      "upgrade": "ترقية"
+    },
+    "paymentInstructions": {
+      "title": "تعليمات الدفع",
+      "proceedToPayment": "قمت بالتحويل — المتابعة"
+    },
+    "currentPlan": {
+      "title": "الباقة الحالية",
+      "validUntil": "صالح حتى {date}",
+      "changePlan": "تغيير الباقة"
+    }
+  },
+  "public": {
+    "pricing": {
+      "backToHome": "العودة للرئيسية",
+      "title": "الباقات والأسعار",
+      "description": "اختر الباقة التي تخدم كنيستك بشكل أفضل. ابدأ بفترة تجريبية مجانية — لا حاجة لبطاقة ائتمان.",
+      "plans": {
+        "free": "مجاني",
+        "freeDescription": "للكنائس الصغيرة التي تبدأ.",
+        "freePeriod": "إلى الأبد",
+        "trial": "فترة تجريبية",
+        "trialDescription": "وصول كامل لمدة 30 يوم.",
+        "trialPeriod": "30 يوم",
+        "monthly": "شهري",
+        "monthlyDescription": "وصول كامل، يُدفع شهرياً.",
+        "monthlyPeriod": "شهرياً (499 ج.م)",
+        "yearly": "سنوي",
+        "yearlyDescription": "وصول كامل، يُدفع سنوياً. أفضل قيمة.",
+        "yearlyPeriod": "سنوياً (3,999 ج.م)",
+        "yearlySavings": "وفّر 1,989 ج.م/سنة (خصم 33%)",
+        "recommended": "الأفضل قيمة"
+      },
+      "features": {
+        "oneService": "خدمة واحدة",
+        "tenServants": "حتى 10 خدام",
+        "thirtyBeneficiaries": "حتى 30 مستفيد",
+        "allFeatures": "جميع الميزات مشمولة",
+        "thirtyDays": "فترة تجريبية 30 يوم",
+        "noCreditCard": "لا حاجة لبطاقة ائتمان",
+        "saveYearly": "وفّر 33% بالفوترة السنوية",
+        "prioritySupport": "دعم ذو أولوية"
+      },
+      "cta": {
+        "title": "مستعد للبدء؟",
+        "description": "انضم إلى الكنائس التي تستخدم Church CRM لإدارة خدمتها.",
+        "getStarted": "إنشاء حسابك",
+        "contactUs": "اتصل بنا",
+        "startTrial": "ابدأ الفترة التجريبية",
+        "subscribe": "اشترك الآن"
+      },
+      "comparison": {
+        "title": "مقارنة الميزات",
+        "feature": "الميزة",
+        "features": {
+          "services": "الخدمات",
+          "stages": "المراحل",
+          "servants": "الخدام",
+          "beneficiaries": "الم IService",
+          "events": "الأحداث النشطة",
+          "advancedReports": "التقارير المتقدمة",
+          "analytics": "لوحة التحليلات",
+          "ai": "مساعد الذكاء الاصطناعي",
+          "bulkImport": "الاستيراد المجمّع",
+          "export": "التصدير المتقدم"
+        },
+        "limits": {
+          "free": {
+            "services": "1",
+            "stages": "2",
+            "servants": "10",
+            "beneficiaries": "30",
+            "events": "3",
+            "advancedReports": "-",
+            "analytics": "-",
+            "ai": "-",
+            "bulkImport": "-",
+            "export": "-"
+          },
+          "paid": {
+            "services": "غير محدود",
+            "stages": "غير محدود",
+            "servants": "غير محدود",
+            "beneficiaries": "غير محدود",
+            "events": "غير محدود",
+            "advancedReports": "مشمول",
+            "analytics": "مشمول",
+            "ai": "مشمول",
+            "bulkImport": "مشمول",
+            "export": "مشمول"
+          }
+        }
+      },
+      "trialInfo": {
+        "title": "عن الفترة التجريبية",
+        "howItWorks": "هكذا تعمل الفترة التجريبية:",
+        "point1": "كل كنيسة جديدة تحصل تلقائياً على فترة تجريبية 30 يوم.",
+        "point2": "أثناء الفترة التجريبية، جميع الميزات متاحة بدون قيود.",
+        "point3": "إذا لم تشترك قبل انتهاء الفترة، ستمتلك كنيستك تلقائياً الباقة المجانية.",
+        "point4": "بياناتك لا تُحذف أبداً. يمكنك الترقية في أي وقت لاستعادة الوصول الكامل."
+      },
+      "paymentMethod": {
+        "title": "طريقة الدفع",
+        "description": "نقبل المدفوعات اليدوية عبر InstaPay. هكذا يعمل:",
+        "step1": "اختر الباقة المفضلة.",
+        "step2": "قم بتحويل المبلغ الصحيح عبر InstaPay.",
+        "step3": "أرسل طلب الدفع بمرجع التحويل.",
+        "step4": "فريقنا يتحقق يدوياً من الدفع.",
+        "step5": "يتم تفعيل اشتراكك خلال 24 ساعة."
+      },
+      "faq": {
+        "title": "الأسئلة الشائعة",
+        "paymentProcess": {
+          "question": "كيف يعمل الدفع؟",
+          "answer": "المدفوعات تتم يدوياً عبر InstaPay. بعد تحويل المبلغ، أرسل طلب الدفع ببيانات التحويل. فريقنا يتحقق من الدفع ويُفعّل اشتراكك."
+        },
+        "activationTime": {
+          "question": "كم يستغرق التفعيل؟",
+          "answer": "بمجرد إرسال طلب الدفع، عادة يتحقق فريقنا ويُفعّل اشتراكك خلال 24 ساعة. ستتلقى إشعاراً عند التفعيل."
+        },
+        "dataAfterExpiry": {
+          "question": "ماذا يحدث لبياناتي إذا لم أُجدد؟",
+          "answer": "بياناتك لا تُحذف أبداً. إذا انتهى اشتراكك، تنتقل للباقة المجانية مع حدودها. بياناتك تبقى آمنة ومتاحة. يمكنك الترقية في أي وقت لاستعادة الوصول الكامل."
+        },
+        "refundPolicy": {
+          "question": "ما هي سياسة الاسترداد؟",
+          "answer": "إذا احتجت استرداداً، يمكنك طلبه من صفحة الفواتير. يتم مراجعة ومعالجة الاستردادات يدوياً. الاستردادات المعتمدة تُرجع عبر InstaPay."
+        },
+        "contactSupport": {
+          "question": "كيف أتواصل مع الدعم؟",
+          "answer": "يمكنك التواصل معنا عبر صفحة اتصل بنا أو بالبريد الإلكتروني لفريق الدعم. نحن هنا للمساعدة في أي أسئلة حول الفواتير أو الحساب."
+        }
+      },
+      "footer": "Church CRM — صُمم لفرق خدمة الكنائس."
+    },
+    "about": {
+      "backToHome": "العودة للرئيسية",
+      "title": "عن Church CRM",
+      "description": "Church CRM هو منصة شاملة لإدارة الخدمة ECCLESIASTICAL مصممة لمساعدة الكنائس على تنظيم وتتبع ونمو مجتمعها.",
+      "purpose": {
+        "title": "غرضنا",
+        "description": "نؤمن بأن التكنولوجيا يجب أن تخدم الكنيسة، لا العكس. صُمم Church CRM لتقليل العبء الإداري حتى يتمكن قادة الخدمة من التركيز على ما يهم أكثر — مجتمعهم ودعوتهم."
+      },
+      "capabilities": {
+        "title": "قدرات المنصة",
+        "volunteerManagement": {
+          "title": "تنسيق المتطوعين",
+          "description": "نظم الخدام، أدر التعيينات، وتتبع سجل الخدمة في جميع أنحاء خدمتك."
+        },
+        "memberEngagement": {
+          "title": "تفاعل الأعضاء",
+          "description": "تتبع الم IService، أدر المتابعة، وحافظ على اتصالات ذات معنى مع مجتمعك."
+        },
+        "reporting": {
+          "title": "التقارير والتحليلات",
+          "description": "أنشئ رؤى حول الحضور والتفاعل وصحة الخدمة مع أدوات التقارير المدمجة."
+        },
+        "churchOperations": {
+          "title": "عمليات الكنيسة",
+          "description": "أدر الخدمات والمراحل والأحداث والأقسام من لوحة تحكم واحدة منظمة."
+        }
+      },
+      "serves": {
+        "title": "من نخدم",
+        "description": "يخدم Church CRM الكنائس الأرثوذكسية القبطية وفرق الخدمة بجميع الأحجام. سواء كنت أبرشية صغيرة أو أبرشية كبيرة، منصتنا تتكيّف مع احتياجاتك."
+      },
+      "contact": {
+        "title": "تواصل معنا",
+        "description": "هل لديك أسئلة؟ نحب أن نسمع منك.",
+        "email": "البريد الإلكتروني",
+        "phone": "الهاتف",
+        "cta": "اتصل بنا"
+      },
+      "footer": "Church CRM — صُمم لفرق خدمة الكنائس."
+    },
+    "contact": {
+      "backToHome": "العودة للرئيسية",
+      "title": "اتصل بنا",
+      "description": "نحن هنا للمساعدة. تواصل معنا عبر أي من القنوات أدناه.",
+      "email": {
+        "title": "دعم البريد الإلكتروني",
+        "description": "للاستفسارات العامة والدعم الفني.",
+        "cta": "إرسال بريد"
+      },
+      "phone": {
+        "title": "دعم الهاتف",
+        "description": "متاح خلال ساعات العمل."
+      },
+      "whatsapp": {
+        "title": "واتساب",
+        "description": "دعم سريع عبر واتساب."
+      },
+      "supportInfo": {
+        "title": "معلومات الدعم",
+        "description": "فريق الدعم متاح للمساعدة في:",
+        "point1": "إعداد وتكوين الحساب",
+        "point2": "أسئلة الفواتير والاشتراك",
+        "point3": "الدعم الفني وحل المشاكل"
+      },
+      "footer": "Church CRM — صُمم لفرق خدمة الكنائس."
+    }
   }
 }

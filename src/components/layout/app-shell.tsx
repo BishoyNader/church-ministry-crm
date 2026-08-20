@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Menu, Moon, Sun, Users, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard, ArrowUpRight, Layers, type LucideIcon } from "lucide-react";
+import { Menu, Moon, Sun, Users, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard, ArrowUpRight, Layers, CreditCard, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -74,6 +74,8 @@ const navItems: NavItem[] = [
   { labelKey: "audit", href: "/audit", icon: ScrollText, section: "administration", permission: PERMISSION_CODES.AUDIT_READ },
   { labelKey: "notifications", href: "/notifications", icon: Bell, section: "administration", permission: PERMISSION_CODES.NOTIFICATIONS_READ },
   { labelKey: "settings", href: "/settings", icon: Settings, section: "administration", permission: PERMISSION_CODES.SETTINGS_READ },
+  { labelKey: "billing", href: "/billing", icon: CreditCard, section: "administration", permission: PERMISSION_CODES.BILLING_READ },
+  { labelKey: "platformBilling", href: "/admin/billing", icon: CreditCard, section: "administration", permission: PERMISSION_CODES.SUBSCRIPTIONS_MANAGE },
 ];
 
 function getActivePath(pathname: string): string {

@@ -22,6 +22,7 @@ import type {
   ServantListResult,
   ServantStage,
 } from "../types/servant.types";
+import { checkEntitlementLimit } from "@/features/billing/lib/entitlement-guard";
 import * as servantService from "../services/servant.service";
 import { createUser } from "@/features/users/services/user.service";
 import { ZodError } from "zod";
@@ -452,6 +453,11 @@ export async function createServantAction(
 
   if (!(await isActorSuperAdmin(ctx.supabase, ctx.userId, ctx.churchId))) {
     return { success: false, message: "Only a super admin can create servants." };
+  }
+
+  const entitlement = await checkEntitlementLimit(ctx.supabase, ctx.churchId, "maxServants");
+  if (!entitlement.allowed) {
+    return { success: false, message: entitlement.reason };
   }
 
   const { data: role } = await ctx.supabase
