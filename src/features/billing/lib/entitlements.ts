@@ -42,6 +42,19 @@ const PLAN_ENTITLEMENTS: Record<SubscriptionPlan, Entitlements> = {
 };
 
 /**
+ * Entitlements for the Platform Owner. The Platform Owner is the SaaS
+ * administrator and sits OUTSIDE the church subscription model — they are
+ * never resolved to a church plan (free/trial/monthly/yearly) and are never
+ * restricted by church-level entitlement limits.
+ */
+export const PLATFORM_OWNER_ENTITLEMENTS: Entitlements = {
+  ...FULL_ENTITLEMENTS,
+};
+
+/** Pseudo-plan label used in guard results for the Platform Owner. */
+export const PLATFORM_OWNER_PLAN = "platform";
+
+/**
  * Returns entitlements for a given subscription plan.
  */
 export function getEntitlements(plan: SubscriptionPlan): Entitlements {

@@ -1,6 +1,13 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
-import { getEffectivePlan, getEntitlements, isWithinLimit, isFeatureEnabled } from "./entitlements";
+import {
+  getEffectivePlan,
+  getEntitlements,
+  isWithinLimit,
+  isFeatureEnabled,
+  PLATFORM_OWNER_ENTITLEMENTS,
+  PLATFORM_OWNER_PLAN,
+} from "./entitlements";
 import type { Entitlements } from "../types/billing.types";
 
 // ============================================================================
@@ -134,6 +141,32 @@ async function resolveChurchPlan(
 }
 
 /**
+ * The Platform Owner (a church-less user) sits OUTSIDE the church
+ * subscription model: no church subscription is resolved for them and they
+ * must never be evaluated against a church plan's limits (e.g. the Free-plan
+ * caps). When the acting user has no church context and is the platform
+ * owner, entitlement checks pass unrestricted instead of resolving a plan.
+ *
+ * Returns null when the caller is NOT an exempt platform owner.
+ */
+async function resolvePlatformOwnerBypass(
+  supabase: SupabaseClient<Database>,
+  churchId: string | null | undefined,
+): Promise<{ plan: string; entitlements: Entitlements } | null> {
+  if (churchId) return null;
+
+  // `user_is_platform_owner` exists in the database but is missing from the
+  // generated Database["Functions"] types, so cast to a minimal signature.
+  const rpc = supabase.rpc as unknown as (
+    fn: "user_is_platform_owner",
+  ) => Promise<{ data: boolean | null }>;
+  const { data: isOwner } = await rpc("user_is_platform_owner");
+  if (!isOwner) return null;
+
+  return { plan: PLATFORM_OWNER_PLAN, entitlements: PLATFORM_OWNER_ENTITLEMENTS };
+}
+
+/**
  * Server-side entitlement guard: checks whether a church is within its plan's
  * resource limit before allowing a create action.
  *
@@ -145,6 +178,17 @@ export async function checkEntitlementLimit(
   churchId: string,
   limitKey: EntitlementLimitKey,
 ): Promise<EntitlementCheckResult> {
+  const ownerBypass = await resolvePlatformOwnerBypass(supabase, churchId);
+  if (ownerBypass) {
+    return {
+      allowed: true,
+      currentCount: 0,
+      limit: Number.MAX_SAFE_INTEGER,
+      plan: ownerBypass.plan,
+      entitlements: ownerBypass.entitlements,
+    };
+  }
+
   const resolved = await resolveChurchPlan(supabase, churchId);
   if ("error" in resolved) {
     return {
@@ -191,6 +235,11 @@ export async function checkFeatureEntitlement(
   churchId: string,
   feature: keyof Entitlements,
 ): Promise<FeatureCheckResult> {
+  const ownerBypass = await resolvePlatformOwnerBypass(supabase, churchId);
+  if (ownerBypass) {
+    return { allowed: true, plan: ownerBypass.plan, entitlements: ownerBypass.entitlements };
+  }
+
   const resolved = await resolveChurchPlan(supabase, churchId);
   if ("error" in resolved) {
     return {

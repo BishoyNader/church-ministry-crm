@@ -1120,6 +1120,22 @@
         "expiringSubscriptions": "Expiring Soon",
         "gracePeriodChurches": "Grace Period"
       },
+      "plans": {
+        "title": "Subscription Plans",
+        "description": "Platform plan configuration. These plans apply to customer churches — the platform itself is not on a subscription plan.",
+        "plan": "Plan",
+        "price": "Price",
+        "churchesUsing": "Churches using this plan",
+        "status": "Status",
+        "statusActive": "Active",
+        "free": "FREE",
+        "trial": "TRIAL",
+        "monthly": "MONTHLY",
+        "yearly": "YEARLY",
+        "trialPrice": "{days}-day free trial",
+        "monthlyPeriod": "/ month",
+        "yearlyPeriod": "/ year"
+      },
       "upcoming": {
         "title": "Coming Soon",
         "description": "The following management features are being built:",
