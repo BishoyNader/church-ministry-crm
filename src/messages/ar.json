@@ -1120,6 +1120,22 @@
         "expiringSubscriptions": "تنتهي قريباً",
         "gracePeriodChurches": "فترة السماح"
       },
+      "plans": {
+        "title": "خطط الاشتراك",
+        "description": "إعدادات خطط المنصة. تُطبق هذه الخطط على الكنائس المشتركة — المنصة نفسها ليست مشتركة في أي خطة.",
+        "plan": "الخطة",
+        "price": "السعر",
+        "churchesUsing": "الكنائس المستخدمة لهذه الخطة",
+        "status": "الحالة",
+        "statusActive": "مفعّلة",
+        "free": "المجانية",
+        "trial": "التجريبية",
+        "monthly": "الشهرية",
+        "yearly": "السنوية",
+        "trialPrice": "تجربة مجانية لمدة {days} يوم",
+        "monthlyPeriod": "/ شهرياً",
+        "yearlyPeriod": "/ سنوياً"
+      },
       "upcoming": {
         "title": "قريباً",
         "description": "ميزات الإدارة التالية قيد الإنشاء:",

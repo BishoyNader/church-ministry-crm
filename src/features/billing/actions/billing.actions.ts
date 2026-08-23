@@ -17,12 +17,34 @@ import {
 // Church Manager Actions
 // ============================================================================
 
+/**
+ * Platform owners sit OUTSIDE the church subscription model: they administer
+ * billing for churches but are never a subscribing customer themselves.
+ * Customer actions must reject them server-side (not just hide the UI).
+ */
+async function rejectIfPlatformOwner(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<{ success: false; message: string } | null> {
+  const { data: isOwner } = await supabase.rpc("user_is_platform_owner");
+  if (isOwner) {
+    return {
+      success: false,
+      message:
+        "Platform owners do not have a church subscription and cannot use customer billing actions.",
+    };
+  }
+  return null;
+}
+
 export async function getBillingSummaryAction(): Promise<BillingActionResult<
   Awaited<ReturnType<typeof getChurchBillingSummary>>["data"]
 >> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, message: "Not authenticated." };
+
+  const ownerRejection = await rejectIfPlatformOwner(supabase);
+  if (ownerRejection) return ownerRejection;
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -45,6 +67,9 @@ export async function submitPaymentRequestAction(input: {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, message: "Not authenticated." };
+
+  const ownerRejection = await rejectIfPlatformOwner(supabase);
+  if (ownerRejection) return ownerRejection;
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -106,6 +131,9 @@ export async function cancelPaymentRequestAction(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, message: "Not authenticated." };
 
+  const ownerRejection = await rejectIfPlatformOwner(supabase);
+  if (ownerRejection) return ownerRejection;
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("church_id")
@@ -144,6 +172,9 @@ export async function requestRefundAction(input: {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { success: false, message: "Not authenticated." };
+
+  const ownerRejection = await rejectIfPlatformOwner(supabase);
+  if (ownerRejection) return ownerRejection;
 
   const { data: profile } = await supabase
     .from("profiles")

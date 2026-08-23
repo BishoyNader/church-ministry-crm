@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { Check, Star, ArrowLeft } from "lucide-react";
@@ -20,6 +21,16 @@ export default async function PricingPage({
   }
 
   setRequestLocale(locale);
+
+  // Server-side separation (not just UI): the Platform Owner is the SaaS
+  // administrator, not a subscriber. Never show them customer pricing /
+  // purchase CTAs — route them to platform billing management instead.
+  const supabase = await createClient();
+  const { data: isPlatformOwner } = await supabase.rpc("user_is_platform_owner");
+  if (isPlatformOwner) {
+    redirect(`/${locale}/admin/billing`);
+  }
+
   const t = await getTranslations("public.pricing");
 
   return (

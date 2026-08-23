@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Menu, Moon, Sun, Users, UserRound, CalendarDays, BarChart3, Settings, LogOut, ClipboardCheck, ClipboardList, Phone, HandHeart, BadgeCheck, Bell, BookOpen, ArrowLeftRight, ScrollText, Building2, School, LayoutDashboard, ArrowUpRight, Layers, CreditCard, type LucideIcon } from "lucide-react";
+import { Menu, Moon, Sun, LogOut, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,72 +11,18 @@ import { useTheme } from "next-themes";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { logoutAction } from "@/features/auth/actions/auth.actions";
-import { useAccessState, PERMISSION_CODES, type PermissionCode } from "@/features/rbac";
+import { useAccessState, PERMISSION_CODES } from "@/features/rbac";
 import { useNotificationSummary } from "@/features/notifications/hooks/use-notifications";
+import {
+  NAV_SECTIONS,
+  SECTION_TITLE_KEYS,
+  navItems,
+  visibleNavItems,
+  type NavItem,
+  type NavSection,
+} from "./nav-config";
 import { cn } from "@/lib/utils";
 import { useDirection } from "@/lib/direction";
-
-type NavSection = "overview" | "ministry" | "people" | "operations" | "spiritual" | "administration";
-
-type NavItem = {
-  labelKey: string;
-  href: string;
-  icon: LucideIcon;
-  section: NavSection;
-  permission?: PermissionCode;
-  /** Optional role whitelist (role_type values). When present, the item is
-   * hidden from every other role even if the permission is held — e.g.
-   * servant attendance is restricted to Church Manager / sector admin / stage
-   * manager, so plain servants never see a dead link. */
-  roles?: string[];
-};
-
-const NAV_SECTIONS: NavSection[] = [
-  "overview",
-  "ministry",
-  "people",
-  "operations",
-  "spiritual",
-  "administration",
-];
-
-// Static label keys per section so the i18n checker can resolve them and
-// the section headers stay type-safe.
-const SECTION_TITLE_KEYS: Record<NavSection, string> = {
-  overview: "sectionOverview",
-  ministry: "sectionMinistry",
-  people: "sectionPeople",
-  operations: "sectionOperations",
-  spiritual: "sectionSpiritual",
-  administration: "sectionAdministration",
-};
-
-const navItems: NavItem[] = [
-  { labelKey: "dashboard", href: "/dashboard", icon: BarChart3, section: "overview", permission: PERMISSION_CODES.REPORTS_READ },
-  { labelKey: "reports", href: "/reports", icon: BarChart3, section: "overview", permission: PERMISSION_CODES.REPORTS_READ },
-  { labelKey: "adminDashboard", href: "/admin/dashboard", icon: LayoutDashboard, section: "overview", permission: PERMISSION_CODES.TENANTS_READ },
-  { labelKey: "services", href: "/services", icon: Building2, section: "ministry", permission: PERMISSION_CODES.SERVICES_READ },
-  { labelKey: "stages", href: "/stages", icon: Layers, section: "ministry", permission: PERMISSION_CODES.SERVICES_READ },
-  { labelKey: "classes", href: "/classes", icon: School, section: "ministry", permission: PERMISSION_CODES.CLASSES_READ },
-  { labelKey: "events", href: "/events", icon: CalendarDays, section: "ministry", permission: PERMISSION_CODES.EVENTS_READ },
-  { labelKey: "children", href: "/children", icon: UserRound, section: "people", permission: PERMISSION_CODES.BENEFICIARIES_READ },
-  { labelKey: "followups", href: "/followups", icon: Phone, section: "people", permission: PERMISSION_CODES.FOLLOWUPS_READ },
-  { labelKey: "servantRecords", href: "/servants", icon: HandHeart, section: "people", permission: PERMISSION_CODES.SERVANTS_READ },
-  { labelKey: "users", href: "/users", icon: Users, section: "people", permission: PERMISSION_CODES.USERS_READ },
-  { labelKey: "attendance", href: "/attendance", icon: ClipboardCheck, section: "operations", permission: PERMISSION_CODES.ATTENDANCE_READ },
-  { labelKey: "servantAttendance", href: "/servant-attendance", icon: ClipboardList, section: "operations", permission: PERMISSION_CODES.ATTENDANCE_READ, roles: ["super_admin", "admin", "stage_manager"] },
-  { labelKey: "approvals", href: "/approvals", icon: BadgeCheck, section: "operations", permission: PERMISSION_CODES.SERVANTS_APPROVE },
-  { labelKey: "promotions", href: "/promotions", icon: ArrowUpRight, section: "operations", permission: PERMISSION_CODES.SETTINGS_UPDATE },
-  { labelKey: "spiritualJournal", href: "/spiritual-journal", icon: BookOpen, section: "spiritual", permission: PERMISSION_CODES.SPIRITUAL_READ },
-  { labelKey: "churches", href: "/admin/churches", icon: Building2, section: "administration", permission: PERMISSION_CODES.TENANTS_READ },
-  { labelKey: "churchRequests", href: "/admin/church-requests", icon: ClipboardList, section: "administration", permission: PERMISSION_CODES.TENANTS_READ },
-  { labelKey: "importExport", href: "/import-export", icon: ArrowLeftRight, section: "administration", permission: PERMISSION_CODES.IMPORT_EXECUTE },
-  { labelKey: "audit", href: "/audit", icon: ScrollText, section: "administration", permission: PERMISSION_CODES.AUDIT_READ },
-  { labelKey: "notifications", href: "/notifications", icon: Bell, section: "administration", permission: PERMISSION_CODES.NOTIFICATIONS_READ },
-  { labelKey: "settings", href: "/settings", icon: Settings, section: "administration", permission: PERMISSION_CODES.SETTINGS_READ },
-  { labelKey: "billing", href: "/billing", icon: CreditCard, section: "administration", permission: PERMISSION_CODES.BILLING_READ },
-  { labelKey: "platformBilling", href: "/admin/billing", icon: CreditCard, section: "administration", permission: PERMISSION_CODES.SUBSCRIPTIONS_MANAGE },
-];
 
 function getActivePath(pathname: string): string {
   const parts = pathname.split("/").filter(Boolean);
@@ -116,15 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const groupedNav = useMemo(() => {
     const roleTypes = new Set((accessState?.roles ?? []).map((role) => role.role_type));
-    const visible = navItems.filter((item) => {
-      if (item.permission && !permissionSet.has(item.permission)) {
-        return false;
-      }
-      if (item.roles && !item.roles.some((role) => roleTypes.has(role))) {
-        return false;
-      }
-      return true;
-    });
+    const visible = visibleNavItems(navItems, permissionSet, roleTypes);
     return NAV_SECTIONS.map((section) => ({
       section,
       items: visible.filter((item) => item.section === section),

@@ -15,7 +15,12 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { SectionCard } from "@/components/layout/section-card";
 import { PageTransition } from "@/components/motion/motion-primitives";
-import { BILLING_CONFIG, type PlatformBillingStats } from "../types/billing.types";
+import { Badge } from "@/components/ui/badge";
+import {
+  BILLING_CONFIG,
+  PLAN_PRICES,
+  type PlatformBillingStats,
+} from "../types/billing.types";
 import { getPlatformBillingStatsAction } from "../actions/billing.actions";
 
 export function PlatformBillingPage() {
@@ -125,6 +130,55 @@ export function PlatformBillingPage() {
           </div>
         </SectionCard>
       </div>
+
+      {/* Administrative plan configuration — NOT a customer pricing page.
+          The Platform Owner views the configured plans and their adoption;
+          there are intentionally no Subscribe/Upgrade/Pay CTAs here. */}
+      <SectionCard>
+        <div className="p-6">
+          <h3 className="font-semibold tracking-tight">{t("plans.title")}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{t("plans.description")}</p>
+
+          <div className="mt-4 overflow-x-auto rounded-xl border border-border-whisper">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border-whisper bg-muted/40">
+                  <th className="p-3 text-start font-medium text-muted-foreground">{t("plans.plan")}</th>
+                  <th className="p-3 text-start font-medium text-muted-foreground">{t("plans.price")}</th>
+                  <th className="p-3 text-start font-medium text-muted-foreground">{t("plans.churchesUsing")}</th>
+                  <th className="p-3 text-start font-medium text-muted-foreground">{t("plans.status")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-border-whisper last:border-b-0">
+                  <td className="p-3 font-medium">{t("plans.free")}</td>
+                  <td className="p-3">0 EGP</td>
+                  <td className="p-3">{loading ? "--" : fmt(stats?.freeChurches ?? 0)}</td>
+                  <td className="p-3"><Badge variant="outline">{t("plans.statusActive")}</Badge></td>
+                </tr>
+                <tr className="border-b border-border-whisper last:border-b-0">
+                  <td className="p-3 font-medium">{t("plans.trial")}</td>
+                  <td className="p-3">{t("plans.trialPrice", { days: BILLING_CONFIG.trialDurationDays })}</td>
+                  <td className="p-3">{loading ? "--" : fmt(stats?.trialChurches ?? 0)}</td>
+                  <td className="p-3"><Badge variant="outline">{t("plans.statusActive")}</Badge></td>
+                </tr>
+                <tr className="border-b border-border-whisper last:border-b-0">
+                  <td className="p-3 font-medium">{t("plans.monthly")}</td>
+                  <td className="p-3">{fmt(PLAN_PRICES.monthly.amount)} EGP {t("plans.monthlyPeriod")}</td>
+                  <td className="p-3">{loading ? "--" : fmt(stats?.monthlySubscriptions ?? 0)}</td>
+                  <td className="p-3"><Badge variant="outline">{t("plans.statusActive")}</Badge></td>
+                </tr>
+                <tr className="border-b border-border-whisper last:border-b-0">
+                  <td className="p-3 font-medium">{t("plans.yearly")}</td>
+                  <td className="p-3">{fmt(PLAN_PRICES.yearly.amount)} EGP {t("plans.yearlyPeriod")}</td>
+                  <td className="p-3">{loading ? "--" : fmt(stats?.yearlySubscriptions ?? 0)}</td>
+                  <td className="p-3"><Badge variant="outline">{t("plans.statusActive")}</Badge></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </SectionCard>
 
       <SectionCard>
         <div className="p-6">
